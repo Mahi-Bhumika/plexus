@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ActivityFeed } from "@/components/ActivityFeed";
+import CommandPalette from "@/components/command-palette";
 import {
   FileText,
   ListTodo,
@@ -30,11 +31,12 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-screen overflow-x-hidden overflow-y-hidden bg-[#0F172A] text-slate-100 font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0F172A] border-r border-slate-800/80 flex flex-col flex-shrink-0 text-slate-100">
-        <div className="p-4 border-b border-slate-800/80 flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-[#4F46E5]/20 text-[#4F46E5] border border-[#4F46E5]/30">
+    <div className="flex h-screen w-screen overflow-x-hidden overflow-y-hidden bg-[#0B0F19] p-2 gap-2 text-slate-100 font-sans">
+      <CommandPalette />
+      {/* Sidebar - Floating rounded container with smooth edges */}
+      <aside className="w-64 bg-[#090D16] border border-slate-800/80 rounded-2xl shadow-xl flex flex-col flex-shrink-0 text-slate-100 overflow-hidden">
+        <div className="p-4 border-b border-slate-800/80 flex items-center gap-2.5 bg-[#070A12]/60">
+          <div className="p-1.5 rounded-xl bg-[#4F46E5]/20 text-[#4F46E5] border border-[#4F46E5]/30 shadow-inner">
             <Shield className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
@@ -43,7 +45,7 @@ export default function DashboardLayout({
           </div>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
@@ -51,10 +53,10 @@ export default function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-[#4F46E5] text-white font-semibold shadow-sm"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                    ? "bg-[#4F46E5] text-white font-semibold shadow-md shadow-indigo-950/40"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
@@ -64,19 +66,21 @@ export default function DashboardLayout({
           })}
         </nav>
 
-        <div className="p-3 border-t border-slate-800/80 text-[11px] text-slate-400">
+        <div className="p-3.5 border-t border-slate-800/80 text-[11px] text-slate-400 bg-[#070A12]/40">
           <div className="font-medium text-slate-300">Nimbus Labs demo</div>
           <div className="text-[10px] text-slate-500 mt-0.5">HackCBS 9.0 · Meridian Bank</div>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-[#0F172A] overflow-y-auto">
+      {/* Main Content Area - Rounded canvas container */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#0F172A] border border-slate-800/70 rounded-2xl shadow-xl overflow-y-auto">
         {children}
       </main>
 
-      {/* Right Column: Activity Feed */}
-      <ActivityFeed />
+      {/* Right Column: Activity Feed - Smooth floating panel */}
+      <aside className="h-full flex-shrink-0">
+        <ActivityFeed />
+      </aside>
     </div>
   );
 }

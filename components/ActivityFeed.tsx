@@ -103,8 +103,8 @@ export function ActivityFeed() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950 border-l border-zinc-800/80 w-80 lg:w-96 text-zinc-100 flex-shrink-0">
-      <div className="p-4 border-b border-zinc-800/80 flex items-center justify-between">
+    <div className="flex flex-col h-full bg-[#090D16] border border-slate-800/80 rounded-2xl shadow-xl w-80 lg:w-96 text-zinc-100 flex-shrink-0 overflow-hidden">
+      <div className="p-4 border-b border-slate-800/80 flex items-center justify-between bg-[#070A12]/60">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <h2 className="font-semibold text-sm tracking-wide text-zinc-200">Activity Feed</h2>
