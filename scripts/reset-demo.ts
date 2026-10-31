@@ -28,6 +28,7 @@ const CLEAR_TABLES = [
   "audit_events",
   "traces",
   "memories",
+  "email_drafts",
 ];
 
 function clearDb(): void {

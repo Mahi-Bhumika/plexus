@@ -56,10 +56,19 @@ plexus.db-wal
 plexus.db-shm
 fixtures/rfp/*_test_*.json
 
-fixtures/meko/
 fixtures/rfp/*_test_*.json
 fixtures/rfp/*_lt1_*.json
 fixtures/rfp/*_lt2_*.json
 plexus.db*
 
-fixtures/meko/
+
+uploads/
+exports/
+fixtures/meko/addMemory_*
+fixtures/meko/deleteMemory_*
+fixtures/meko/logTurn_*
+fixtures/rfp/*_test_*
+fixtures/rfp/lt_poll_*
+fixtures/rfp/*_lt1_*
+fixtures/rfp/*_lt2_*
+fixtures/actionswarm/extract_test.json

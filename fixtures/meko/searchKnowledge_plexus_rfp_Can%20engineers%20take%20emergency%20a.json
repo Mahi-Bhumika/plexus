@@ -1,0 +1,7 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Access Control Policy > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "ref": "a93ace6c-1790-45f6-beac-1af4a810da7e"
+  }
+]
