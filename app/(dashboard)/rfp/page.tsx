@@ -794,18 +794,22 @@ export default function RfpPage() {
                       </p>
 
                       {q.flagReason && q.status !== "approved" ? (
-                        <div className="mt-2 p-1.5 rounded bg-amber-50/60 border border-amber-200 text-amber-800 font-mono text-[11px] flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[14px] shrink-0 text-amber-600">
-                            report_problem
-                          </span>
-                          <span className="truncate">{q.flagReason}</span>
-                        </div>
-                      ) : (
-                        <div className="mt-2 text-gray-400 font-mono text-[11px] flex items-center justify-between">
-                          <span className="text-gray-600 truncate">{q.summaryNote}</span>
-                          <span className="shrink-0 text-gray-400 ml-2">Synced</span>
-                        </div>
-                      )}
+                          <div
+                            className={`flag-box ${
+                              q.status === "error" ? "flag-box--rose" : "flag-box--amber"
+                            } mt-2 p-1.5 rounded border font-mono text-[11px] flex items-center gap-1.5`}
+                          >
+                            <span className="flag-box__icon material-symbols-outlined text-[14px] shrink-0">
+                              report_problem
+                            </span>
+                            <span className="truncate">{q.flagReason}</span>
+                          </div>
+                        ) : (
+                          <div className="mt-2 text-gray-400 font-mono text-[11px] flex items-center justify-between">
+                            <span className="text-gray-600 truncate">{q.summaryNote}</span>
+                            <span className="shrink-0 text-gray-400 ml-2">Synced</span>
+                          </div>
+                        )}
                     </div>
                   );
                 })}
@@ -886,23 +890,25 @@ export default function RfpPage() {
 
                   {/* Flag Banner */}
                   {currentQ.flagReason && currentQ.status !== "approved" && (
-                    <div className="p-3.5 rounded-lg bg-amber-50/70 border border-amber-200 flex flex-col gap-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold flex items-center gap-1.5 text-amber-800">
-                          <span className="material-symbols-outlined text-[16px] text-amber-600">
-                            find_in_page
-                          </span>
-                          Flagged for Review
-                        </span>
-                        <span className="font-mono text-[10px] text-amber-700 bg-amber-100/70 border border-amber-200 px-1.5 py-0.2 rounded font-medium">
-                          AI Check
-                        </span>
-                      </div>
-                      <p className="text-xs text-amber-900/90 leading-relaxed pt-0.5">
-                        {currentQ.flagReason}
-                      </p>
-                    </div>
-                  )}
+  <div
+    className={`flag-box ${
+      currentQ.status === "error" ? "flag-box--rose" : "flag-box--amber"
+    } p-3.5 rounded-lg border flex flex-col gap-1.5`}
+  >
+    <div className="flex items-center justify-between">
+      <span className="text-xs font-semibold flex items-center gap-1.5">
+        <span className="flag-box__icon material-symbols-outlined text-[16px]">
+          find_in_page
+        </span>
+        {currentQ.status === "error" ? "Missing Answer" : "Flagged for Review"}
+      </span>
+      <span className="font-mono text-[10px] px-1.5 py-0.2 rounded border border-current font-medium">
+        AI Check
+      </span>
+    </div>
+    <p className="text-xs leading-relaxed pt-0.5">{currentQ.flagReason}</p>
+  </div>
+)}
 
                   {/* AI Suggested Answer */}
                   <div className="flex flex-col gap-1.5">
