@@ -30,16 +30,16 @@ export default function DashboardLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-zinc-900 text-zinc-100 font-sans">
+    <div className="flex h-screen w-screen overflow-x-hidden overflow-y-hidden bg-[#0F172A] text-slate-100 font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-zinc-950 border-r border-zinc-800/80 flex flex-col flex-shrink-0">
-        <div className="p-4 border-b border-zinc-800/80 flex items-center gap-2.5">
-          <div className="p-1.5 rounded-lg bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
-            <Shield className="w-5 h-5" />
+      <aside className="w-64 bg-[#0F172A] border-r border-slate-800/80 flex flex-col flex-shrink-0 text-slate-100">
+        <div className="p-4 border-b border-slate-800/80 flex items-center gap-2.5">
+          <div className="p-1.5 rounded-lg bg-[#4F46E5]/20 text-[#4F46E5] border border-[#4F46E5]/30">
+            <Shield className="w-5 h-5 text-indigo-400" />
           </div>
           <div>
             <h1 className="font-bold text-base tracking-tight text-white leading-none">Plexus</h1>
-            <p className="text-[11px] text-zinc-500 mt-1">Multi-Agent Control & Guard</p>
+            <p className="text-[11px] text-slate-400 mt-1">Multi-Agent Control & Guard</p>
           </div>
         </div>
 
@@ -53,25 +53,25 @@ export default function DashboardLayout({
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
                   isActive
-                    ? "bg-zinc-800 text-white font-semibold border border-zinc-700/60"
-                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900"
+                    ? "bg-[#4F46E5] text-white font-semibold shadow-sm"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                 }`}
               >
-                <Icon className="w-4 h-4 text-zinc-400" />
+                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
                 <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-3 border-t border-zinc-800/80 text-[11px] text-zinc-500">
-          <div>Nimbus Labs demo</div>
-          <div className="text-[10px] text-zinc-600 mt-0.5">HackCBS 9.0 · Meridian Bank</div>
+        <div className="p-3 border-t border-slate-800/80 text-[11px] text-slate-400">
+          <div className="font-medium text-slate-300">Nimbus Labs demo</div>
+          <div className="text-[10px] text-slate-500 mt-0.5">HackCBS 9.0 · Meridian Bank</div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 bg-zinc-900 overflow-y-auto">
+      <main className="flex-1 flex flex-col min-w-0 bg-[#0F172A] overflow-y-auto">
         {children}
       </main>
 
