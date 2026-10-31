@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSavedClaims, runExpenses } from "@/agents/expenses";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 // GET  /api/finance/expenses -> { receipts: ExpenseResult[] } from the last run (may be empty)
 // POST /api/finance/expenses -> runs the receipts now and returns the full ExpenseReport
