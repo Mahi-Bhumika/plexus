@@ -1,24 +1,7 @@
 [
   {
-<<<<<<< Updated upstream
     "id": "885a536f-c53f-4850-badb-82a18ce1e8d2",
     "text": "RFP_FIX | Please confirm that all copies of our policyholder data, including disaster recovery replicas, remain inside India. | Customer data is stored in India by default (AWS Mumbai), but disaster recovery copies are held in Singapore. Customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing. | Riya Sharma",
     "score": 0.4845600745298766
-=======
-<<<<<<< HEAD
-    "id": "57a943eb-c948-40ee-981e-22cc36485c68",
-    "text": "RFP_FIX | Will you provide a certificate of deletion when our data is removed? | Nimbus Labs confirms deletion in writing by email within 10 business days of an early-deletion request; a signed deletion confirmation is available on request. | Karan",
-    "score": 0.7585784804534423
-  },
-  {
-    "id": "65b06980-b6b0-4056-9cab-437c84294c92",
-    "text": "RFP_FIX | Can personal (BYOD) devices be used to access customer data? | No. Access is from company-issued, MDM-managed laptops with enforced disk encryption; personal devices are not permitted. | Karan",
-    "score": 0.4173201314624505
-=======
-    "id": "885a536f-c53f-4850-badb-82a18ce1e8d2",
-    "text": "RFP_FIX | Please confirm that all copies of our policyholder data, including disaster recovery replicas, remain inside India. | Customer data is stored in India by default (AWS Mumbai), but disaster recovery copies are held in Singapore. Customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing. | Riya Sharma",
-    "score": 0.4845600745298766
->>>>>>> 16799f539eaa4e8deca745f0a35fb0ed6b825884
->>>>>>> Stashed changes
   }
 ]
