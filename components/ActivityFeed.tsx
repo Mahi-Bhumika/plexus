@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { ActivityEvent, ActivityStatus } from "@/lib/events";
-import { AlertCircle, CheckCircle2, Clock, ShieldAlert, Undo2, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2, Clock, ShieldAlert, Undo2, XCircle, HelpCircle } from "lucide-react";
+
+const CONFIDENCE_THRESHOLD = 0.85;
 
 const STATUS_CONFIG: Record<
   ActivityStatus,
@@ -50,6 +52,14 @@ const STATUS_CONFIG: Record<
     border: "border-red-800/60",
     icon: XCircle,
   },
+};
+
+const UNKNOWN_STATUS_CONFIG = {
+  label: "Unknown",
+  bg: "bg-zinc-900/60",
+  text: "text-zinc-400",
+  border: "border-zinc-700/60",
+  icon: HelpCircle,
 };
 
 export function ActivityFeed() {
@@ -116,13 +126,21 @@ export function ActivityFeed() {
         )}
 
         {events.map((evt) => {
-          const cfg = STATUS_CONFIG[evt.status] || STATUS_CONFIG.done;
+          const cfg = STATUS_CONFIG[evt.status] || UNKNOWN_STATUS_CONFIG;
           const Icon = cfg.icon;
           const time = new Date(evt.timestamp).toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
           });
+
+          const sourcesList = evt.sources ?? [];
+          const firstSource = sourcesList[0];
+          const firstSourceTitle = typeof firstSource === "string" ? firstSource : firstSource?.title;
+          const tooltipSources = sourcesList
+            .map((s) => (typeof s === "string" ? s : s?.title))
+            .filter(Boolean)
+            .join(", ");
 
           return (
             <div
@@ -144,20 +162,20 @@ export function ActivityFeed() {
 
               <div className="text-xs text-zinc-200 font-medium leading-snug">{evt.action}</div>
 
-              {(evt.confidence !== undefined || evt.sources.length > 0) && (
+              {(evt.confidence != null || (evt.sources?.length ?? 0) > 0) && (
                 <div className="mt-2 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[11px] text-zinc-400">
-                  {evt.confidence !== undefined ? (
+                  {evt.confidence != null ? (
                     <span>
                       Confidence:{" "}
-                      <span className={evt.confidence >= 0.85 ? "text-emerald-400" : "text-amber-400"}>
+                      <span className={evt.confidence >= CONFIDENCE_THRESHOLD ? "text-emerald-400" : "text-amber-400"}>
                         {Math.round(evt.confidence * 100)}%
                       </span>
                     </span>
                   ) : <span />}
 
-                  {evt.sources.length > 0 && (
-                    <span className="truncate max-w-[150px] text-zinc-500" title={evt.sources.map((s) => s.title).join(", ")}>
-                      {evt.sources[0]?.title}
+                  {(evt.sources?.length ?? 0) > 0 && (
+                    <span className="truncate max-w-[150px] text-zinc-500" title={tooltipSources}>
+                      {firstSourceTitle}
                     </span>
                   )}
                 </div>
