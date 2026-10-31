@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "data": {
+    "briefing": "Over the past four days, Meridian pilot preparations progressed with sandbox API credentials issued to Vikram Rao's team and the SOC 2 Type II report delivered under a signed NDA. Technical teams resolved sandbox validation errors and mapped optional fields, while ongoing deliverables remain on track for upcoming November deadlines.",
+    "points": [
+      "On Friday 30 October 2026, Karan Malhotra issued sandbox API credentials to Vikram Rao's team one week ahead of schedule, and Riya sent the SOC 2 Type II report.",
+      "Vikram Rao requested written confirmation that Meridian's data will be stored primarily in AWS Mumbai with a disaster recovery replica in Singapore.",
+      "On Thursday 29 October 2026, Meridian legal signed the mutual NDA late in the evening and the first weekly status call was held at 4 PM.",
+      "Meera identified an optional remitter VPA column in Meridian's sample file on 29 October, ensuring ingestion is not blocked.",
+      "On Wednesday 28 October 2026, Sanjay Desai named Pooja Menon and Imran Qureshi as the two UAT analysts ahead of the 13 November date.",
+      "Arjun's first anonymised sample file failed validation on 28 October due to date formats, but Karan pulled sandbox logs so Arjun could fix it."
+    ]
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}

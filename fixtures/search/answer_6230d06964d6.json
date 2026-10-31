@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "data": {
+    "answer": "The salary sheet is a confidential document dated 2026-10-01, visible only to the Founder, detailing fictional monthly gross figures for Riya Sharma (Founder and CEO), Karan Malhotra (Engineering Manager), Meera Iyer (Software Engineer), and Arjun Verma (Engineering Intern).",
+    "sources": [
+      "10_salary_sheet_FOUNDER_ONLY"
+    ]
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}

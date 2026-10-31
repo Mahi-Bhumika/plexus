@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "data": {
+    "briefing": "Over the past four days, progress on the Meridian pilot has included the issuance of sandbox API credentials, the execution of an NDA, and the distribution of the SOC 2 Type II report to Vikram Rao's team. Teams are actively progressing on data mapping, questionnaire completion, and pilot preparation ahead of upcoming November deadlines.",
+    "points": [
+      "On Friday 30 October 2026, Karan Malhotra issued sandbox API credentials to Vikram Rao's team one week ahead of schedule, and Riya sent the SOC 2 Type II report.",
+      "On Thursday 29 October 2026, Meridian legal signed the NDA late in the evening and the first weekly status call was held at 4 PM.",
+      "On Wednesday 28 October 2026, Sanjay Desai named Pooja Menon and Imran Qureshi as the two UAT analysts, and Arjun fixed a date format error in his sample file.",
+      "On Tuesday 27 October 2026, Neha Kapoor's team sent a 50-question security questionnaire due back on Friday 6 November, alongside a request for pilot pricing due on Monday 9 November."
+    ]
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}
