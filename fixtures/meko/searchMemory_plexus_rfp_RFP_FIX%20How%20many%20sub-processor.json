@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "id": "cc3139d8-c8d6-40b6-a831-78909a98f042",
+    "text": "User's 'Batch 4' consists of item numbers 41 through 50 (41, 42, 43, 44, 45, 46, 47, 48, 49, 50).",
+    "score": 0.2300812334697906
+  },
+  {
+    "id": "7c74d136-2ab3-4ede-b9b8-e722f3f545ee",
+    "text": "User's 'Batch 2' consists of item numbers 21 through 30 (21, 22, 23, 24, 25, 26, 27, 28, 29, 30).",
+    "score": 0.21995131996888573
+  },
+  {
+    "id": "ca80e4f4-2704-4d36-845b-d93b690af863",
+    "text": "User's 'Batch 3' consists of item numbers 31 through 40 (31, 32, 33, 34, 35, 36, 37, 38, 39, 40).",
+    "score": 0.21524927092558155
+  },
+  {
+    "id": "3cddd5f5-02f8-4cf3-88f0-f3f464ba1e98",
+    "text": "User's 'Batch 1' consists of item numbers 11 through 20 (11, 12, 13, 14, 15, 16, 17, 18, 19, 20).",
+    "score": 0.21061126469480085
+  },
+  {
+    "id": "5462dd2e-f745-4fae-9a68-261fcf2bcb3d",
+    "text": "User's 'Batch 0' consists of item numbers 1 through 10 (1, 2, 3, 4, 5, 6, 7, 8, 9, 10).",
+    "score": 0.20719350808870307
+  }
+]

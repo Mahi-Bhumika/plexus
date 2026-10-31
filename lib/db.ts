@@ -28,6 +28,8 @@ export function getDb(): Database.Database {
 
 function initSchema(db: Database.Database) {
   db.exec(`
+
+    
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       name TEXT,
@@ -51,6 +53,8 @@ function initSchema(db: Database.Database) {
       confidence REAL,
       status TEXT,
       source_ref TEXT,
+      flag_reason TEXT,
+      coverage TEXT,
       human_answer TEXT,
       reused_from_fix INTEGER DEFAULT 0
     );
@@ -131,7 +135,28 @@ function initSchema(db: Database.Database) {
       reasoning TEXT,
       created_at TEXT
     );
+    
   `);
+  // 1. Ensure the table exists with your base columns
+db.exec(`
+  CREATE TABLE IF NOT EXISTS rfp_questions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    plan TEXT,
+    reasoning TEXT,
+    created_at TEXT
+  );
+`);
+
+// 2. Safely check for and add any missing columns dynamically
+const cols = (
+  db.prepare("PRAGMA table_info(rfp_questions)").all() as { name: string }[]
+).map((c) => c.name);
+
+for (const col of ["flag_reason", "coverage"]) {
+  if (!cols.includes(col)) {
+    db.exec(`ALTER TABLE rfp_questions ADD COLUMN ${col} TEXT`);
+  }
+}
 }
 
 export function seedDatabase(): void {

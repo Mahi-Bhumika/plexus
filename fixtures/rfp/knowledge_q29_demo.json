@@ -1,7 +1,0 @@
-[
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Recovery objectives\n\nRecovery Point Objective (RPO): 1 hour. At most one hour of data can be lost.Recovery Time Objective (RTO): 4 hours. Service is restored within four hours of a declared disaster.",
-    "ref": "27560314-f845-44db-87c1-a93529f1b012"
-  }
-]

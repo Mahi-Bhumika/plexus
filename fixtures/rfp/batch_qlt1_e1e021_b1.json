@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "11",
+      "answer": "Patch deadlines from the date a vulnerability is confirmed: critical within 72 hours, high within 14 days, medium within 60 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    },
+    {
+      "id": "12",
+      "answer": "Nimbus Labs does not sell customer data. Customer data is not used to train machine learning models.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "5914e523-910a-4177-965a-3947429a9719"
+    },
+    {
+      "id": "13",
+      "answer": "Secrets are stored in AWS Secrets Manager and are never committed to source control; a secrets scanner blocks any commit that contains one.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "936a8eaf-7e54-4873-a012-6feb344bee7f"
+    },
+    {
+      "id": "14",
+      "answer": "After a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "5b30de01-e9fe-4807-aebd-8409fd9e0334"
+    },
+    {
+      "id": "15",
+      "answer": "Application and system logs are retained for 400 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "44bc0fe8-d603-431b-b40b-453c570fa3dc"
+    },
+    {
+      "id": "16",
+      "answer": "Database backups are retained for 35 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "aeef6476-2e53-401f-b8b2-a464cc08c3ab"
+    },
+    {
+      "id": "17",
+      "answer": "Security audit logs are retained for 7 years.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "44bc0fe8-d603-431b-b40b-453c570fa3dc"
+    },
+    {
+      "id": "18",
+      "answer": "Access reviews run every quarter. Managers confirm or remove each person's access, and the Engineering Manager signs off the review.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "cd69df84-7a43-488e-beaf-a1114f6414f5"
+    },
+    {
+      "id": "19",
+      "answer": "Passwords must be at least 14 characters.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "c679f90f-b290-45c4-a2bf-9b24ee5f7340"
+    },
+    {
+      "id": "20",
+      "answer": "Production access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Access is granted on a least-privilege basis and tied to a person's role, with every grant having a named approver and being recorded in the audit log. High risk applications, including AWS production, need approval from the Engineering Manager. Interns are not eligible for production access.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "21b0c71e-5407-4dd5-aa35-312895df8f6b"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

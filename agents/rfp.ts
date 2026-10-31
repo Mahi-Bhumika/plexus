@@ -38,7 +38,9 @@ type MemoryFix = {
 };
 
 type Fix = { answer: string; approver: string };
-type Ctx = { chunks: KnowledgeChunk[]; memFix: Fix | null };
+type Candidate = Fix & { question: string };
+// candidates: stored human fixes that might apply; memFix: the one the judge accepted
+type Ctx = { chunks: KnowledgeChunk[]; candidates: Candidate[]; memFix: Fix | null };
 
 export type RowStatus = "filled" | "flagged" | "error";
 export type Coverage = "full" | "partial" | "none";
@@ -156,22 +158,43 @@ function tokens(s: string): Set<string> {
   );
 }
 
-export function sameQuestion(a: string, b: string): boolean {
+export type MatchDetails = {
+  match: boolean;
+  numbersEqual: boolean;
+  ratio: number; // shared words / words in the shorter question
+  shared: string[];
+  onlyA: string[];
+  onlyB: string[];
+};
+
+export function matchDetails(a: string, b: string): MatchDetails {
   const ta = tokens(a);
   const tb = tokens(b);
-  if (ta.size === 0 || tb.size === 0) return false;
+  const shared = [...ta].filter((w) => tb.has(w));
+  const onlyA = [...ta].filter((w) => !tb.has(w));
+  const onlyB = [...tb].filter((w) => !ta.has(w));
 
   const nums = (s: Set<string>) =>
     [...s].filter((w) => /\d/.test(w)).sort().join(",");
-  if (nums(ta) !== nums(tb)) return false;
+  const numbersEqual = nums(ta) === nums(tb);
+  const smaller = Math.min(ta.size, tb.size);
+  const ratio = smaller === 0 ? 0 : shared.length / smaller;
 
-  let inter = 0;
-  for (const w of ta) if (tb.has(w)) inter++;
-  if (inter < 3) return false;
-  return inter / Math.min(ta.size, tb.size) >= 0.5;
+  return {
+    match: numbersEqual && shared.length >= 3 && ratio >= 0.5,
+    numbersEqual,
+    ratio,
+    shared,
+    onlyA,
+    onlyB,
+  };
 }
 
-function parseMemoryFix(text: string, question: string): Fix | null {
+export function sameQuestion(a: string, b: string): boolean {
+  return matchDetails(a, b).match;
+}
+
+function parseFixCandidate(text: string): Candidate | null {
   // Stored as: "RFP_FIX | <question> | <approved answer> | <approver>"
   // Meko may rewrite memories, so look for the marker rather than
   // requiring it at position 0.
@@ -182,10 +205,9 @@ function parseMemoryFix(text: string, question: string): Fix | null {
     .split("|")
     .map((p) => p.trim());
   if (parts.length < 4) return null;
-  const [, fixQuestion, answer, approver] = parts;
-  if (!fixQuestion || !answer || !approver) return null;
-  if (!sameQuestion(question, fixQuestion)) return null;
-  return { answer, approver };
+  const [, question, answer, approver] = parts;
+  if (!question || !answer || !approver) return null;
+  return { question, answer, approver };
 }
 
 async function fetchQuestionContext(
@@ -202,16 +224,82 @@ async function fetchQuestionContext(
     ),
   ]);
 
-  let memFix: Fix | null = null;
+  // Cheap pre-filter only: drop fixes whose numbers differ (AES-256 vs AES-128).
+  // Whether a fix really answers this question is decided by the judge below.
+  const candidates: Candidate[] = [];
+  const seen = new Set<string>();
   for (const mem of memories as MemoryFix[]) {
-    const parsed = parseMemoryFix(mem.text, q.question);
-    if (parsed) {
-      memFix = parsed;
-      break;
-    }
+    const c = parseFixCandidate(mem.text);
+    if (!c) continue;
+    const key = `${c.question}|${c.answer}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    if (!matchDetails(q.question, c.question).numbersEqual) continue;
+    candidates.push(c);
+    if (candidates.length >= 3) break;
   }
 
-  return { chunks: chunks as KnowledgeChunk[], memFix };
+  return { chunks: chunks as KnowledgeChunk[], candidates, memFix: null };
+}
+
+const judgeSchema = z.array(
+  z.object({ id: z.string(), fix_index: z.number().int().nullable() }),
+);
+
+// One Gemini call per batch: for questions that have candidate fixes, decide
+// whether a stored human-approved answer can be reused as-is. Fails closed:
+// on any error nothing is reused and the question goes through normal answering.
+async function judgeFixes(
+  questionnaireId: string,
+  batchIndex: number,
+  batch: QuestionInput[],
+  contexts: Map<string, Ctx>,
+): Promise<void> {
+  const withCandidates = batch.filter(
+    (q) => (contexts.get(q.id)?.candidates.length ?? 0) > 0,
+  );
+  if (withCandidates.length === 0) return;
+
+  const lines: string[] = [
+    "You decide whether a stored, human-approved answer can be reused for a new RFP question.",
+    "Reuse a stored fix only if its question asks for the same thing as the new question: same subject, same scope, same people or systems, and the approved answer fully answers the new question as asked.",
+    "Do NOT reuse when the new question is narrower, broader or about a different detail, for example a deletion timeline versus a certificate of deletion, how data is deleted versus whether proof is given, or employees versus contractors.",
+    "When unsure, do not reuse.",
+    "",
+  ];
+  withCandidates.forEach((q, i) => {
+    lines.push(`[Q${i + 1}] ID: ${q.id}`);
+    lines.push(`New question: "${q.question}"`);
+    contexts.get(q.id)!.candidates.forEach((c, k) => {
+      lines.push(`  Stored fix ${k}: question "${c.question}" | approved answer "${c.answer.slice(0, 400)}"`);
+    });
+    lines.push("");
+  });
+  lines.push(
+    "Return a JSON array with one object per new question: id (string) and fix_index (the number of the stored fix that can be reused, or null).",
+  );
+  const prompt = lines.join("\n");
+
+  try {
+    const res = await withReplay(
+      `rfp/judge_q${questionnaireId}_b${batchIndex}`,
+      () => generateJson(judgeSchema, prompt, { model: "FAST" }),
+    );
+    if (!res.success) {
+      console.warn("rfp fix judge failed; no fixes reused for this batch");
+      return;
+    }
+    for (const d of res.data) {
+      const ctx = contexts.get(d.id);
+      if (!ctx || d.fix_index == null) continue;
+      const c = ctx.candidates[d.fix_index];
+      if (c) ctx.memFix = { answer: c.answer, approver: c.approver };
+    }
+  } catch (err) {
+    console.warn(
+      `rfp fix judge error: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
 }
 
 function buildBatchPrompt(
@@ -321,11 +409,14 @@ async function processBatch(
         console.warn(
           `rfp context failed for q${q.id}: ${err instanceof Error ? err.message : String(err)}`,
         );
-        return [q.id, { chunks: [], memFix: null }];
+        return [q.id, { chunks: [], candidates: [], memFix: null }];
       }
     }),
   );
   const contexts = new Map<string, Ctx>(contextEntries);
+
+  // Decide which stored human fixes can be reused (skips Gemini answering for those)
+  await judgeFixes(questionnaireId, batchIndex, batch, contexts);
 
   // Questions with a reusable human fix skip Gemini entirely
   const needsGemini = batch.filter((q) => !contexts.get(q.id)?.memFix);
@@ -525,10 +616,22 @@ export async function humanFix(
   ).run(clean, `fix:${who}`, existing.id);
 
   const questionText = existing.question.replace(/\|/g, "/").replace(/\s+/g, " ").trim();
-  const mem = await addMemory(
-    "plexus_rfp",
-    `RFP_FIX | ${questionText} | ${clean} | ${who}`,
-  );
+  // The row is already saved. If Meko is unreachable (or Demo Mode has no
+  // recorded fixture for this write), keep going rather than failing the fix.
+  let mem: { success: boolean; memoryId?: string; fallback?: boolean } = {
+    success: false,
+    fallback: true,
+  };
+  try {
+    mem = await addMemory(
+      "plexus_rfp",
+      `RFP_FIX | ${questionText} | ${clean} | ${who}`,
+    );
+  } catch (err) {
+    console.warn(
+      `humanFix: memory not saved: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
 
   emitEvent({
     id: newEventId(),

@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "31",
+      "answer": "Restores are tested every quarter. The most recent restore test was on 12 September 2026 and was completed in 2 hours 40 minutes, within the 4-hour RTO.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "ebd514a5-798d-4cf9-a919-b8c523295f85"
+    },
+    {
+      "id": "32",
+      "answer": "Nimbus Labs uses 9 sub-processors that may process customer data, including AWS and an email delivery provider. The current list is shared with customers on request, and customers receive 30 days' advance notice before a new sub-processor is added.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "2f32f5e5-de7a-4d04-8ba7-a321e95066da"
+    },
+    {
+      "id": "33",
+      "answer": "Tier 1 vendors are reviewed once a year, Tier 2 vendors are reviewed every two years, and any vendor that suffers a security incident is reviewed immediately.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "386582c4-8e6f-4449-82e3-6d3d85b25ed1"
+    },
+    {
+      "id": "34",
+      "answer": "Yes, a background check (identity, employment history and education) is completed before the start date for every employee, intern and contractor.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "96519c2e-4515-406f-a0e5-45fcec5bff35"
+    },
+    {
+      "id": "35",
+      "answer": "All access is revoked within 4 hours of the person's exit time.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "45c81808-35f9-4411-aa34-bbd01f32bc2e"
+    },
+    {
+      "id": "36",
+      "answer": "No. Customer data is stored in India by default (AWS Mumbai), but disaster recovery copies are held in Singapore.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "7ecb9ace-5aea-42e9-aebf-37290b239427"
+    },
+    {
+      "id": "37",
+      "answer": "The provided knowledge chunks only mention the notification commitment for when a breach involving customer data is confirmed (within 72 hours), but do not specify the notification commitment for a suspected, not yet confirmed, security incident.",
+      "coverage": "partial",
+      "confidence": 0.8,
+      "source_ref": "0553c871-ff4b-49ed-91b1-3fd6be055512"
+    },
+    {
+      "id": "38",
+      "answer": "The provided knowledge chunks detail encryption at rest and field-level encryption for sensitive fields, but do not mention encrypting data while it is in use (such as confidential computing).",
+      "coverage": "partial",
+      "confidence": 0.9,
+      "source_ref": "09447b24-3ef4-4313-9d0b-13a5a5e13232"
+    },
+    {
+      "id": "39",
+      "answer": "The provided chunks include incident acknowledgment timeframes by severity level (P1: 15 minutes, P2: 1 hour, P3: 1 business day, P4: 3 business days), but do not explicitly detail general contractual support hours.",
+      "coverage": "partial",
+      "confidence": 0.9,
+      "source_ref": "6949b2fb-b2b3-4372-ab1f-289276f6da44"
+    },
+    {
+      "id": "40",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "11",
+      "answer": "Patch deadlines from the date a vulnerability is confirmed: critical within 72 hours, high within 14 days, medium within 60 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Security Whitepaper > Vulnerability management"
+    },
+    {
+      "id": "12",
+      "answer": "Nimbus Labs does not sell customer data. Customer data is not used to train machine learning models.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Privacy Note > Use of data"
+    },
+    {
+      "id": "13",
+      "answer": "Secrets are stored in AWS Secrets Manager and are never committed to source control; a secrets scanner blocks any commit that contains one.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Security Whitepaper > Secure development"
+    },
+    {
+      "id": "14",
+      "answer": "After a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Data Retention Policy > Deletion after contract end"
+    },
+    {
+      "id": "15",
+      "answer": "Application and system logs are retained for 400 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Data Retention Policy > Retention schedule"
+    },
+    {
+      "id": "16",
+      "answer": "Database backups are retained for 35 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Data Retention Policy > Retention schedule"
+    },
+    {
+      "id": "17",
+      "answer": "Security audit logs are retained for 7 years.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Data Retention Policy > Retention schedule"
+    },
+    {
+      "id": "18",
+      "answer": "Access reviews run every quarter. Managers confirm or remove each person's access, and the Engineering Manager signs off the review.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Access Control Policy > Access reviews"
+    },
+    {
+      "id": "19",
+      "answer": "Passwords must be at least 14 characters.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Access Control Policy > Authentication standards"
+    },
+    {
+      "id": "20",
+      "answer": "Production access is just-in-time, granted on a least-privilege basis and tied to a person's role with a named approver recorded in the audit log. A grant lasts a maximum of 8 hours and then expires automatically. High-risk applications, including AWS production, need approval from the Engineering Manager. In an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval, subject to retrospective approval within 24 hours.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "Nimbus Labs Access Control Policy > Production access"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

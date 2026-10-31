@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "answer": "Yes, Nimbus Labs holds a SOC 2 Type II report covering the Nimbus Ledger Sync platform. The audit period ran from 1 January 2026 to 30 June 2026, and the final report was issued on 14 August 2026.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "eff21748-439d-4d96-8485-14875765ffa9"
+    },
+    {
+      "id": "2",
+      "answer": "The SOC 2 audit was performed by the independent auditor Harlow & Pike LLP.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "eff21748-439d-4d96-8485-14875765ffa9"
+    },
+    {
+      "id": "3",
+      "answer": "The Trust Services Criteria included in the SOC 2 scope were Security (common criteria), Availability, and Confidentiality.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "10ecf3f6-4b3f-429e-b49a-e299f11f6044"
+    },
+    {
+      "id": "4",
+      "answer": "Yes, the auditor noted two exceptions during the period: one quarterly access review was completed 6 days after the due date in Q1 2026, and one terminated contractor retained read-only access to a staging tool for 2 days after their contract ended. Both exceptions were remediated and closed before the report was issued.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "95dd8646-f9af-47e9-8a3f-c79f0c4da25b"
+    },
+    {
+      "id": "5",
+      "answer": "The full report is available to customers and prospects under a signed NDA. Requests can be sent to security@nimbuslabs.example and are answered within 3 business days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "a3f0839a-226e-4130-ac13-9c1133d117ff"
+    },
+    {
+      "id": "6",
+      "answer": "Yes, customer administrators can connect their own SAML 2.0 identity provider to Nimbus Ledger Sync.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "161ce703-5354-4cb1-b88d-360362d10227"
+    },
+    {
+      "id": "7",
+      "answer": "Yes, multi-factor authentication is mandatory for every employee account with no exceptions.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "161ce703-5354-4cb1-b88d-360362d10227"
+    },
+    {
+      "id": "8",
+      "answer": "An external penetration test is performed once a year by CertiNova.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    },
+    {
+      "id": "9",
+      "answer": "The most recent penetration test in March 2026 found no critical issues and two medium issues, both of which were fixed within 21 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    },
+    {
+      "id": "10",
+      "answer": "Authenticated vulnerability scans of production run weekly.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}
