@@ -1,8 +1,6 @@
 import fs from "node:fs";
 import { findTranscriptFile, runActionSwarm } from "@/agents/actionswarm";
 
-export const runtime = "nodejs";
-
 // POST /api/actionswarm
 //   body (optional): { transcript?: string, meetingDate?: "YYYY-MM-DD" }
 //   With no transcript it uses the kickoff transcript file in data/.

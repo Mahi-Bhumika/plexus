@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "data": {
+    "summary": "Meridian Bank and Nimbus Labs held a project kickoff meeting to establish a pilot for the Nimbus Ledger Sync tool, aiming to automate UPI settlements reconciliation by November 30, 2026. The teams agreed on scope limitations, security reviews, and scheduled action items for sandbox setup, mapping documentation, and compliance questionnaires.",
+    "decisions": [
+      "Pilot go-live date is set for Monday 30 November 2026.",
+      "Phase one is limited to UPI reconciliation only, excluding NEFT and IMPS.",
+      "Data hosting will use primary AWS Mumbai with a disaster recovery replica in Singapore."
+    ],
+    "action_items": [
+      {
+        "title": "Understood. I will send you our standard mutual NDA. Once it is signed we can share our SOC 2 Type II report with Vikram's team."
+      },
+      {
+        "title": "I will set up the sandbox environment and send API credentials to Vikram's team by Friday 6 November."
+      },
+      {
+        "title": "I will send those by Tuesday 10 November."
+      },
+      {
+        "title": "I will write a mapping document that says which Meridian field feeds which Nimbus field. I can have that to you by Monday 16 November."
+      },
+      {
+        "title": "I will send you their names by Friday 13 November."
+      },
+      {
+        "title": "Arjun, our intern, is not here today, but he will prepare anonymised sample transaction files from the layout you gave us. Let's say by Thursday 12 November."
+      },
+      {
+        "title": "And the NDA will be with Neha by Wednesday 4 November."
+      }
+    ],
+    "follow_up_email": {
+      "to": "Sanjay Desai",
+      "subject": "Meridian Bank x Nimbus Labs: Project Kickoff Follow-Up",
+      "body": "Dear Sanjay,\n\nThank you for a productive kickoff meeting today. As agreed, we are moving forward with the Nimbus Ledger Sync pilot for UPI reconciliation, targeting a go-live date of Monday 30 November 2026.\n\nWe have noted our action items regarding the NDA delivery, sandbox setup, and mapping documentation. We look forward to working together.\n\nBest regards,\nRiya Sharma"
+    }
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}
