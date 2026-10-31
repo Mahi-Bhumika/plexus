@@ -18,6 +18,7 @@ import { getDb } from "@/lib/db";
 import { searchMemory, deleteMemory } from "@/lib/meko";
 
 const CLEAR_TABLES = [
+  "expense_claims",
   "rfp_questions",
   "questionnaires",
   "tasks",

@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "data": {
+    "merchant": "SAFFRON & SALT",
+    "date": "2026-10-26",
+    "invoice_number": "20871",
+    "expense_type": "meal",
+    "items": [
+      "Starter platter",
+      "Lamb shank",
+      "Dal makhani",
+      "Garlic naan x4",
+      "Mocktail x2",
+      "Dessert platter"
+    ],
+    "subtotal": 5000,
+    "gst": 250,
+    "total": 5250,
+    "covers": 2,
+    "meal_type": "dinner",
+    "nights": null,
+    "city": "Mumbai",
+    "travel_class": null,
+    "trip_type": "unknown",
+    "confidence": 0.98
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}

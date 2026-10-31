@@ -33,24 +33,81 @@ const EXPENSE_TYPES = [
 ] as const;
 export type ExpenseType = (typeof EXPENSE_TYPES)[number];
 
+// What Gemini FAST returns is sloppy: it leaves keys out, sends null inside lists and
+// sometimes picks a value outside the enum. This schema accepts all of that and
+// normalizeExtraction() below turns it into the strict Extraction the policy code uses.
+// (No transforms here on purpose, so the schema can still be turned into a JSON schema.)
+const numOrNull = z.number().nullish().catch(null);
+const strOrNull = z.string().nullish().catch(null);
+
 export const extractionSchema = z.object({
-  merchant: z.string().nullable(),
-  date: z.string().nullable(), // YYYY-MM-DD
-  invoice_number: z.string().nullable(),
-  expense_type: z.enum(EXPENSE_TYPES),
-  items: z.array(z.object({ description: z.string(), amount: z.number().nullable() })),
-  subtotal: z.number().nullable(),
-  gst: z.number().nullable(),
-  total: z.number().nullable(),
-  covers: z.number().nullable(), // people on a restaurant bill
-  meal_type: z.enum(["breakfast", "lunch", "dinner", "unknown"]),
-  nights: z.number().nullable(), // hotel stays
-  city: z.string().nullable(), // hotel or travel city
-  travel_class: z.string().nullable(), // flight or train class as printed
-  trip_type: z.enum(["one_way", "round_trip", "unknown"]),
-  confidence: z.number().min(0).max(1),
+  merchant: strOrNull,
+  date: strOrNull, // YYYY-MM-DD
+  invoice_number: strOrNull,
+  expense_type: z.enum(EXPENSE_TYPES).catch("other"),
+  items: z.array(z.unknown()).catch([]),
+  subtotal: numOrNull,
+  gst: numOrNull,
+  total: numOrNull,
+  covers: numOrNull, // people on a restaurant bill
+  meal_type: z.enum(["breakfast", "lunch", "dinner", "unknown"]).catch("unknown"),
+  nights: numOrNull, // hotel stays
+  city: strOrNull, // hotel or travel city
+  travel_class: strOrNull, // flight or train class as printed
+  trip_type: z.enum(["one_way", "round_trip", "unknown"]).catch("unknown"),
+  confidence: z.number().min(0).max(1).catch(0.5), // missing or invalid -> flagged for review
 });
-export type Extraction = z.infer<typeof extractionSchema>;
+export type RawExtraction = z.infer<typeof extractionSchema>;
+
+export type Extraction = {
+  merchant: string | null;
+  date: string | null;
+  invoice_number: string | null;
+  expense_type: ExpenseType;
+  items: Array<{ description: string; amount: number | null }>;
+  subtotal: number | null;
+  gst: number | null;
+  total: number | null;
+  covers: number | null;
+  meal_type: "breakfast" | "lunch" | "dinner" | "unknown";
+  nights: number | null;
+  city: string | null;
+  travel_class: string | null;
+  trip_type: "one_way" | "round_trip" | "unknown";
+  confidence: number;
+};
+
+export function normalizeExtraction(raw: RawExtraction): Extraction {
+  const items: Extraction["items"] = [];
+  for (const it of raw.items) {
+    if (typeof it === "string") {
+      if (it.trim()) items.push({ description: it.trim(), amount: null });
+    } else if (it && typeof it === "object") {
+      const o = it as Record<string, unknown>;
+      const description = typeof o.description === "string" ? o.description : "";
+      const amount = typeof o.amount === "number" ? o.amount : null;
+      if (description || amount != null) items.push({ description, amount });
+    }
+    // null and anything else is dropped
+  }
+  return {
+    merchant: raw.merchant ?? null,
+    date: raw.date ?? null,
+    invoice_number: raw.invoice_number ?? null,
+    expense_type: raw.expense_type,
+    items,
+    subtotal: raw.subtotal ?? null,
+    gst: raw.gst ?? null,
+    total: raw.total ?? null,
+    covers: raw.covers ?? null,
+    meal_type: raw.meal_type,
+    nights: raw.nights ?? null,
+    city: raw.city ?? null,
+    travel_class: raw.travel_class ?? null,
+    trip_type: raw.trip_type,
+    confidence: raw.confidence,
+  };
+}
 
 export type IssueSeverity = "violation" | "warning";
 export type Issue = { code: string; severity: IssueSeverity; message: string };
@@ -319,12 +376,14 @@ export function checkPolicy(
   return { issues, allowed };
 }
 
-export function approverFor(amount: number | null, claimant: string | null): string {
+// Up to Rs 25,000 Karan approves; above that Riya. Nobody approves their own claim.
+// If the claimant is unknown (no card match), return null so a person assigns the approver.
+export function approverFor(amount: number | null, claimant: string | null): string | null {
+  if (!claimant) return null;
   const amt = amount ?? 0;
   if (amt > LIMITS.approverLimit) {
     return claimant === RIYA ? "Escalate (no eligible approver)" : RIYA;
   }
-  // Up to Rs 25,000 Karan approves; nobody approves their own claim.
   return claimant === KARAN ? RIYA : KARAN;
 }
 
@@ -407,8 +466,11 @@ function listReceipts(dir: string): string[] {
 
 export const EXTRACT_PROMPT = [
   "You are reading one receipt or invoice image for an expense claim. Return only what is printed on it; never guess.",
+  "Always return ALL of these keys, even when the value is unknown: merchant, date, invoice_number, expense_type, items, subtotal, gst, total, covers, meal_type, nights, city, travel_class, trip_type, confidence. Use null for a missing value and never leave a key out.",
+  "merchant is the business name at the top of the receipt. invoice_number is the invoice, bill or receipt number. date is the invoice date. items is a list of objects like {\"description\": \"...\", \"amount\": 0}, with no null entries.",
   "Amounts are Indian rupees as plain numbers (no symbols or commas). Dates are YYYY-MM-DD. Use null for anything you cannot see.",
   "expense_type: local_travel (cab, ride-hailing), auto_rickshaw, domestic_flight, train, hotel, meal (restaurant bill), team_lunch, software (subscription, SaaS, domain), office_supplies, client_entertainment, or other.",
+  "items: a list of objects, each with description (text) and amount (number or null), one per line item on the receipt.",
   "total is the final amount payable including GST. gst is the total tax amount if shown.",
   "covers: the number of people or covers printed on a restaurant bill, else null.",
   "meal_type: breakfast, lunch or dinner from the time printed on the bill or the menu items, else unknown.",
@@ -416,15 +478,45 @@ export const EXTRACT_PROMPT = [
   "confidence: 0 to 1 for how sure you are that every number you returned is correct; lower it if the image is blurry or cropped.",
 ].join("\n");
 
+// Errors worth waiting out: the model is busy, not wrong.
+const OVERLOADED = /503|UNAVAILABLE|high demand|overloaded|429|RESOURCE_EXHAUSTED/i;
+const MAX_OVERLOAD_RETRIES = 3;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 async function extractReceipt(dir: string, file: string): Promise<Extraction | { error: string }> {
   const ext = path.extname(file).toLowerCase();
   const data = (await readFile(path.join(dir, file))).toString("base64");
   const image: GeminiImage = { mimeType: MIME[ext] ?? "image/png", data };
+  const key = `expenses/receipt_${file.replace(/\.[^.]+$/, "")}`;
 
-  const res = await withReplay(`expenses/receipt_${file.replace(/\.[^.]+$/, "")}`, () =>
-    generateJson(extractionSchema, EXTRACT_PROMPT, { model: "FAST", images: [image], timeoutMs: 60000 }),
-  );
-  return res.success ? res.data : { error: res.error };
+  const readOnce = () =>
+    generateJson(extractionSchema, EXTRACT_PROMPT, { model: "FAST", images: [image], timeoutMs: 60000 });
+  const filled = (e: RawExtraction) =>
+    [e.merchant, e.date, e.invoice_number, e.total].filter((v) => v != null).length;
+
+  // FAST sometimes drops merchant, date or invoice number. Read again (up to 2 more times)
+  // and keep the fullest result. The best result is what gets recorded as the fixture.
+  const callModel = () =>
+    withReplay(key, async () => {
+      let best = await readOnce();
+      for (let i = 1; i <= 2; i++) {
+        if (!best.success) break; // errors are handled by the retry loop below
+        if (best.data.merchant && best.data.date && best.data.invoice_number) break;
+        const next = await readOnce();
+        if (next.success && filled(next.data) > filled(best.data)) best = next;
+      }
+      return best;
+    });
+
+  let res = await callModel();
+  // Wait and retry when Gemini says it is busy (503 and similar): 4 s, 8 s, 12 s.
+  for (let attempt = 1; attempt <= MAX_OVERLOAD_RETRIES && !res.success && OVERLOADED.test(res.error); attempt++) {
+    console.warn(`  ${file}: model busy, retry ${attempt}/${MAX_OVERLOAD_RETRIES} in ${4 * attempt}s`);
+    await sleep(4000 * attempt);
+    res = await callModel();
+  }
+  return res.success ? normalizeExtraction(res.data) : { error: res.error };
 }
 
 // ---- Run ---------------------------------------------------------------
@@ -581,7 +673,7 @@ export async function runExpenses(opts: { dir?: string } = {}): Promise<ExpenseR
       agent: AGENT,
       action:
         r.status === "ok"
-          ? `Expense OK: ${label} ${r.total != null ? inr(r.total) : ""} (to ${r.approver})`
+          ? `Expense OK: ${label} ${r.total != null ? inr(r.total) : ""} (to ${r.approver ?? "unassigned"})`
           : `Expense ${r.status === "violation" ? "violation" : "needs review"}: ${label}${first ? ` - ${first.message}` : ""}`,
       status: r.extractionError ? "error" : r.status === "ok" ? "done" : "flagged",
       confidence: r.confidence,

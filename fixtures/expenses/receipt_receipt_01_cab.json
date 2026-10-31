@@ -1,0 +1,28 @@
+{
+  "success": true,
+  "data": {
+    "merchant": "Zippy Cabs Pvt Ltd",
+    "date": "2026-10-25",
+    "invoice_number": "ZC-2610-48213",
+    "expense_type": "local_travel",
+    "items": [
+      "description\": \"Base fare",
+      "amount\": 800.00,  ",
+      "description\": \"CGST @ 2.5%",
+      "amount\": 20.00,  ",
+      "description\": \"SGST @ 2.5%",
+      "amount\": 20.00"
+    ],
+    "subtotal": null,
+    "gst": 40,
+    "total": 840,
+    "covers": null,
+    "meal_type": "unknown",
+    "nights": null,
+    "city": "Mumbai",
+    "travel_class": null,
+    "trip_type": "unknown",
+    "confidence": 0.95
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}
