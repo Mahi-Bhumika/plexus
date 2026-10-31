@@ -228,7 +228,7 @@ function highlight(text: string, words: string[]): ReactNode {
   const re = new RegExp("(" + escaped.join("|") + ")", "gi");
   return text.split(re).map((part, i) =>
     i % 2 === 1 ? (
-      <mark key={i} className="rounded bg-[#5046E5]/30 px-0.5 text-slate-100">
+      <mark key={i} className="rounded bg-[#5046E5]/30 px-0.5 text-slate-900 dark:text-slate-100">
         {part}
       </mark>
     ) : (
@@ -239,7 +239,7 @@ function highlight(text: string, words: string[]): ReactNode {
 
 function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="rounded border border-slate-700 bg-[#0b1120] px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
+    <kbd className="rounded border border-gray-200 dark:border-slate-700 bg-gray-100 dark:bg-[#0b1120] px-1.5 py-0.5 font-mono text-[10px] text-slate-400">
       {children}
     </kbd>
   );
@@ -367,7 +367,7 @@ export default function CommandPalette() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 p-4 pt-[10vh] backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 dark:bg-black/70 p-4 pt-[10vh] backdrop-blur-sm"
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) setOpen(false);
       }}
@@ -376,11 +376,11 @@ export default function CommandPalette() {
       aria-label="Search"
     >
       <div
-        className="w-full max-w-3xl overflow-hidden rounded-xl border border-slate-800 bg-[#0c1424] shadow-2xl"
+        className="w-full max-w-3xl overflow-hidden rounded-xl border border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-900 dark:text-slate-100 shadow-2xl"
         onKeyDown={onKeyDown}
       >
         {/* Input */}
-        <div className="flex items-center gap-3 border-b border-slate-800 px-4 py-3">
+        <div className="flex items-center gap-3 border-b border-[#E5E7EB] dark:border-slate-800 px-4 py-3">
           <Search className="h-4 w-4 shrink-0 text-slate-500" />
           <input
             autoFocus
@@ -392,12 +392,12 @@ export default function CommandPalette() {
               setMode("search");
             }}
             placeholder="Search documents, or try: catch me up on Meridian"
-            className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none"
           />
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="text-slate-500 hover:text-slate-300"
+            className="text-slate-500 hover:text-slate-700 dark:text-slate-300"
             aria-label="Close search"
           >
             <X className="h-4 w-4" />
@@ -405,9 +405,9 @@ export default function CommandPalette() {
         </div>
 
         {/* Role scope */}
-        <div className="flex items-center justify-between gap-3 border-b border-slate-800 px-4 py-2">
+        <div className="flex items-center justify-between gap-3 border-b border-[#E5E7EB] dark:border-slate-800 px-4 py-2 bg-[#F9FAFB] dark:bg-transparent">
           <span className="text-xs text-slate-500">Searching as</span>
-          <div className="flex rounded-md border border-slate-700 p-0.5">
+          <div className="flex rounded-md border border-[#E5E7EB] dark:border-slate-700 p-0.5 bg-white dark:bg-transparent">
             {ROLES.map((r) => (
               <button
                 key={r.id}
@@ -418,7 +418,7 @@ export default function CommandPalette() {
                   setPinned(null);
                 }}
                 className={`rounded px-2.5 py-1 text-xs ${
-                  role === r.id ? "bg-[#5046E5] text-white" : "text-slate-400 hover:text-slate-200"
+                  role === r.id ? "bg-[#5046E5] text-white" : "text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200"
                 }`}
               >
                 {r.label}
@@ -429,7 +429,7 @@ export default function CommandPalette() {
 
         <div className="grid max-h-[56vh] md:grid-cols-[1.35fr_1fr]">
           {/* Left column */}
-          <div className="min-h-[260px] overflow-y-auto border-slate-800 md:border-r">
+          <div className="min-h-[260px] overflow-y-auto border-[#E5E7EB] dark:border-slate-800 md:border-r">
             {mode === "briefing" ? (
               <div className="p-4">
                 <button
@@ -441,11 +441,11 @@ export default function CommandPalette() {
                 </button>
                 <div className="mt-3 flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[#5046E5]" />
-                  <h2 className="text-sm font-medium text-slate-100">
+                  <h2 className="text-sm font-medium text-slate-900 dark:text-slate-100">
                     Meridian, last 4 days (27 to 30 Oct)
                   </h2>
                 </div>
-                <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-slate-300">
+                <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
                   {BRIEFING.map((b, i) => (
                     <li key={b.cite}>
                       {b.text}
@@ -453,8 +453,8 @@ export default function CommandPalette() {
                     </li>
                   ))}
                 </ul>
-                <div className="mt-4 rounded border border-slate-800 bg-[#0b1120] p-3 text-xs text-slate-400">
-                  <span className="font-medium text-slate-300">Open items: </span>
+                <div className="mt-4 rounded border border-[#E5E7EB] dark:border-slate-800 bg-[#F9FAFB] dark:bg-[#0b1120] p-3 text-xs text-slate-400">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">Open items: </span>
                   UAT environment owner, India-only copies agreement.
                 </div>
                 <p className="mt-3 text-[11px] text-slate-500">
@@ -485,7 +485,7 @@ export default function CommandPalette() {
                 {rows.map((row, i) => {
                   const isActive = i === active && pinned === null;
                   const base = `flex w-full items-start gap-3 border-l-2 px-4 py-2.5 text-left ${
-                    isActive ? "border-[#5046E5] bg-[#5046E5]/15" : "border-transparent hover:bg-slate-800/40"
+                    isActive ? "border-[#5046E5] bg-[#5046E5]/15" : "border-transparent hover:bg-gray-100/80 dark:hover:bg-slate-800/40"
                   }`;
                   if (row.kind === "catchup") {
                     return (
@@ -501,7 +501,7 @@ export default function CommandPalette() {
                       >
                         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#5046E5]" />
                         <div>
-                          <div className="text-sm text-slate-100">Catch me up on Meridian</div>
+                          <div className="text-sm text-slate-900 dark:text-slate-100">Catch me up on Meridian</div>
                           <div className="text-xs text-slate-500">Briefing for the last 4 days, with sources</div>
                         </div>
                       </button>
@@ -526,7 +526,7 @@ export default function CommandPalette() {
                       )}
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="truncate text-sm text-slate-100">
+                          <span className="truncate text-sm text-slate-900 dark:text-slate-100">
                             {highlight(doc.title, words)}
                           </span>
                           {doc.date && <span className="font-mono text-[11px] text-slate-500">{doc.date}</span>}
@@ -551,14 +551,14 @@ export default function CommandPalette() {
               previewLocked ? (
                 <div>
                   <Lock className="h-5 w-5 text-amber-400" />
-                  <h3 className="mt-2 text-sm font-medium text-slate-100">{preview.title}</h3>
+                  <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">{preview.title}</h3>
                   <p className="mt-1 text-[13px] text-slate-400">
                     This document is limited to the founder. Interns cannot read it.
                   </p>
                   <Link
                     href="/access"
                     onClick={() => setOpen(false)}
-                    className="mt-3 inline-block rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-300 hover:bg-slate-800"
+                    className="mt-3 inline-block rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-800"
                   >
                     Request access
                   </Link>
@@ -569,8 +569,8 @@ export default function CommandPalette() {
                     <Tag>{preview.kind}</Tag>
                     {preview.date && <span className="font-mono text-[11px] text-slate-500">{preview.date}</span>}
                   </div>
-                  <h3 className="mt-2 text-sm font-medium text-slate-100">{preview.title}</h3>
-                  <p className="mt-2 text-[13px] leading-relaxed text-slate-300">
+                  <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">{preview.title}</h3>
+                  <p className="mt-2 text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
                     {highlight(preview.body, words)}
                   </p>
                   <p className="mt-3 break-all font-mono text-[11px] text-slate-500">source: doc/{preview.id}</p>
@@ -583,7 +583,7 @@ export default function CommandPalette() {
         </div>
 
         {/* Footer */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 px-4 py-2 text-[11px] text-slate-500">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-[#E5E7EB] dark:border-slate-800 px-4 py-2 text-[11px] text-gray-500 dark:text-slate-500 bg-[#F9FAFB] dark:bg-transparent">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1">
               <Kbd>Up</Kbd>

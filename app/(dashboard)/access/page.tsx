@@ -1,1131 +1,893 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  ShieldCheck,
-  ShieldAlert,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Undo2,
-  Sparkles,
-  Send,
-  AlertTriangle,
-  Zap,
-  FileCheck2,
-  KeyRound,
-  Timer,
-  User,
-} from "lucide-react";
+import { useState } from "react";
 
-export type Requester = {
+type RiskTier = "Low" | "Medium" | "High" | "Critical";
+
+type PendingRequest = {
   id: string;
-  name: string;
-  role: string;
-  handle: string;
-  manager: string;
+  requester: string;
+  target: string;
+  scopeDesc: string;
+  risk: RiskTier;
+  note: string;
+  assignedTo: string;
+  timeAgo: string;
 };
 
-export const REQUESTERS: Requester[] = [
-  { id: "meera", name: "Meera Iyer", role: "Software Engineer", handle: "@meera", manager: "Karan Malhotra" },
-  { id: "arjun", name: "Arjun Verma", role: "Engineering Intern", handle: "@arjun", manager: "Karan Malhotra" },
-  { id: "karan", name: "Karan Malhotra", role: "Engineering Manager", handle: "@karan", manager: "Riya Sharma" },
-  { id: "riya", name: "Riya Sharma", role: "Founder", handle: "@riya", manager: "None" },
-];
-
-export type PolicyRule = {
-  app: string;
-  risk: "Low" | "Medium" | "High";
-  rolesAllowed: string;
+type ActiveGrant = {
+  id: string;
+  principal: string;
+  scope: string;
+  risk: RiskTier;
   approver: string;
-  notes: string;
+  started: string;
+  ttl: string;
 };
 
-export const ACCESS_POLICIES: PolicyRule[] = [
-  { app: "Figma", risk: "Low", rolesAllowed: "Founder, Eng Manager, Engineer, Intern", approver: "Auto-approved", notes: "Default design access" },
-  { app: "Slack", risk: "Low", rolesAllowed: "All Roles", approver: "Auto-approved", notes: "Default workspace" },
-  { app: "Google Workspace", risk: "Low", rolesAllowed: "All Roles", approver: "Auto-approved", notes: "Email & Docs" },
-  { app: "GitHub", risk: "Medium", rolesAllowed: "Founder, Eng Manager, Engineer, Intern", approver: "Requester's Manager", notes: "Interns read-only" },
-  { app: "Datadog", risk: "Medium", rolesAllowed: "Founder, Eng Manager, Engineer", approver: "Requester's Manager", notes: "Observability metrics" },
-  { app: "AWS Production", risk: "High", rolesAllowed: "Founder, Eng Manager, Engineer", approver: "Karan Malhotra (A request from Karan goes to Riya Sharma)", notes: "Just-in-time, max 8 hours. Interns ineligible." },
-  { app: "Payroll Tool", risk: "High", rolesAllowed: "Founder", approver: "Riya Sharma", notes: "Founder only (Ineligible for Eng Manager & Engineers)" },
-];
-
-export type ActiveGrant = {
+type AuditEntry = {
   id: string;
-  requesterName: string;
-  app: string;
-  risk: "Low" | "Medium" | "High";
-  approver: string;
-  grantedAt: number;
-  maxDurationHours: number;
-};
-
-export type AccessAuditRow = {
-  id: string;
+  principal: string;
+  scope: string;
+  risk: RiskTier | "Enforced";
+  decision: string;
   timestamp: string;
-  requesterName: string;
-  app: string;
-  risk: "Low" | "Medium" | "High";
-  decision: "granted" | "denied" | "pending_approval" | "undone";
-  approver: string;
-  justification?: string;
-  canUndo?: boolean;
+  reverted?: boolean;
 };
 
-// Built on the client after mount so Date.now() is never read during prerender.
-function makeInitialGrants(base: number): ActiveGrant[] {
-  return [
-    {
-      id: "grant_1",
-      requesterName: "Meera Iyer",
-      app: "Figma",
-      risk: "Low",
-      approver: "Auto-approved (Policy)",
-      grantedAt: base - 36 * 60 * 1000,
-      maxDurationHours: 24,
-    },
-    {
-      id: "grant_2",
-      requesterName: "Karan Malhotra",
-      app: "AWS Production",
-      risk: "High",
-      approver: "Riya Sharma (Founder)",
-      grantedAt: base - 14 * 60 * 1000,
-      maxDurationHours: 8,
-    },
-  ];
-}
-
-// Backend stores approver_id (e.g. "karan"); show the person's name instead.
-function approverLabel(raw: string | null | undefined): string {
-  if (!raw) return "—";
-  const person = REQUESTERS.find((p) => p.id === raw.toLowerCase());
-  if (!person) return raw;
-  if (person.role === "Founder") return `${person.name} (Founder)`;
-  if (person.role === "Engineering Manager") return `${person.name} (Eng Manager)`;
-  return person.name;
-}
-
-// Find the person behind a display name like "Karan Malhotra (Eng Manager)".
-function personForName(display: string): Requester | undefined {
-  return REQUESTERS.find((p) => display.startsWith(p.name));
-}
-
-const INITIAL_MOCK_AUDIT: AccessAuditRow[] = [
+const INITIAL_PENDING: PendingRequest[] = [
   {
-    id: "req_1",
-    timestamp: "2026-10-31T14:10:00Z",
-    requesterName: "Meera Iyer",
-    app: "Figma",
-    risk: "Low",
-    decision: "granted",
-    approver: "Auto-approved (Policy)",
-    justification: "Need Figma editor seat for payments redesign.",
-    canUndo: true,
+    id: "AC-802",
+    requester: "Karan Malhotra",
+    target: "AWS Production Servers",
+    scopeDesc: "Target: Primary Server Cluster (Max 8 hours)",
+    risk: "High",
+    note: "Karan requested Server Access for the bank pilot. Because Karan is a manager, the system sent this to Riya (CEO) so he doesn't approve his own request.",
+    assignedTo: "Riya Sharma (CEO Anti Self-Approval)",
+    timeAgo: "Requested 11 mins ago",
   },
   {
-    id: "req_2",
-    timestamp: "2026-10-31T14:15:00Z",
-    requesterName: "Meera Iyer",
-    app: "AWS Production",
-    risk: "High",
-    decision: "pending_approval",
-    approver: "Karan Malhotra",
-    justification: "Need access to debug production webhook retry lag.",
-    canUndo: false,
+    id: "AC-804",
+    requester: "Meera Iyer",
+    target: "Datadog Prod Metrics",
+    scopeDesc: "Scope: monitors:read, logs:filter:prod-ledger",
+    risk: "Medium",
+    note: "Investigate 4xx spike on settlement webhook during Meridian 2PM settlement test.",
+    assignedTo: "Karan Malhotra",
+    timeAgo: "Requested 18 mins ago",
   },
 ];
 
-function formatTime(timestamp: string): string {
-  try {
-    const d = new Date(timestamp);
-    if (isNaN(d.getTime())) return "--:--";
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    return `${hours}:${minutes}`;
-  } catch {
-    return "--:--";
-  }
-}
+const INITIAL_ACTIVE: ActiveGrant[] = [
+  {
+    id: "grant-1",
+    principal: "Meera Iyer",
+    scope: "AWS Staging",
+    risk: "Low",
+    approver: "Auto-approved",
+    started: "2h ago",
+    ttl: "5h 42m",
+  },
+  {
+    id: "grant-2",
+    principal: "Karan Malhotra",
+    scope: "GitHub Repo Admin",
+    risk: "Medium",
+    approver: "Riya Sharma",
+    started: "8h ago",
+    ttl: "1d 4h",
+  },
+];
+
+const INITIAL_AUDIT: AuditEntry[] = [
+  {
+    id: "audit-1",
+    principal: "Meera Iyer",
+    scope: "Figma Nimbus UX",
+    risk: "Low",
+    decision: "Auto-approved",
+    timestamp: "13:45:12",
+  },
+  {
+    id: "audit-2",
+    principal: "Arjun Verma",
+    scope: "AWS Production",
+    risk: "High",
+    decision: "Rejected (Policy: Ineligible)",
+    timestamp: "13:12:08",
+  },
+  {
+    id: "audit-3",
+    principal: "Karan Malhotra",
+    scope: "GitHub Admin",
+    risk: "Medium",
+    decision: "Approved by Riya",
+    timestamp: "11:02:44",
+  },
+  {
+    id: "audit-4",
+    principal: "External Auditor",
+    scope: "SOC2 Bucket",
+    risk: "Low",
+    decision: "Revoked (Expired)",
+    timestamp: "09:30:19",
+  },
+];
 
 export default function AccessPage() {
-  const [mounted, setMounted] = useState(false);
-  const [now, setNow] = useState(0);
+  const [requester, setRequester] = useState("Meera Iyer");
+  const [targetApp, setTargetApp] = useState("AWS Production");
+  const [justification, setJustification] = useState(
+    "Hotfix UPI settlement queue latency for Meridian pilot",
+  );
 
-  // Request Form State
-  const [selectedRequesterId, setSelectedRequesterId] = useState("meera");
-  const [selectedApp, setSelectedApp] = useState("Figma");
-  const [justification, setJustification] = useState("Need access for upcoming sprint tasks.");
+  const [pendingQueue, setPendingQueue] = useState<PendingRequest[]>(INITIAL_PENDING);
+  const [activeGrants, setActiveGrants] = useState<ActiveGrant[]>(INITIAL_ACTIVE);
+  const [auditList, setAuditList] = useState<AuditEntry[]>(INITIAL_AUDIT);
 
-  // Access Requests, Active Grants & Audit Log State
-  const [activeGrants, setActiveGrants] = useState<ActiveGrant[]>([]);
-  const [auditRows, setAuditRows] = useState<AccessAuditRow[]>(INITIAL_MOCK_AUDIT);
-  const [actionSuccessBanner, setActionSuccessBanner] = useState<string | null>(null);
+  // Policy Evaluation logic
+  const isArjunBlocked = requester.includes("Arjun") && targetApp === "AWS Production";
+  const isSelfApprovalRisk = requester.includes("Karan") && targetApp === "AWS Production";
 
-  const selectedRequester = REQUESTERS.find((r) => r.id === selectedRequesterId) ?? REQUESTERS[0];
-  const pendingRequests = auditRows.filter((row) => row.decision === "pending_approval");
+  let riskTier: RiskTier = "Medium";
+  let previewText = "";
+  let outcomeText = "";
+  let outcomeIcon = "rule";
+  let outcomeColor = "text-amber-600";
 
-  useEffect(() => {
-    // Client-only: real time, seed grants and the countdown tick all start after mount.
-    const start = Date.now();
-    setMounted(true);
-    setNow(start);
-    setActiveGrants((prev) => (prev.length > 0 ? prev : makeInitialGrants(start)));
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-
-    // Initial fetch from real /api/access backend
-    fetch("/api/access")
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json() as Promise<{
-          requests: Array<{
-            id: string;
-            user_id: string;
-            app: string;
-            risk: "Low" | "Medium" | "High";
-            status: "granted" | "denied" | "pending_approval" | "undone";
-            approver_id: string;
-            requested_at: string;
-            decided_at: string | null;
-            user_name: string | null;
-            user_role: string | null;
-          }>;
-        }>;
-      })
-      .then((data) => {
-        if (data.requests && data.requests.length > 0) {
-          // Safety net: a row where the approver is the requester is stale/corrupt.
-          // Show it as denied by the guard and never turn it into a grant.
-          const isSelfApproved = (r: { user_id: string; approver_id: string }) =>
-            !!r.approver_id && r.user_id.toLowerCase() === r.approver_id.toLowerCase();
-
-          const backendRows: AccessAuditRow[] = data.requests.map((r) => {
-            const selfApproved = isSelfApproved(r);
-            return {
-              id: r.id,
-              timestamp: r.requested_at,
-              requesterName: r.user_name || r.user_id,
-              app: r.app,
-              risk: r.risk,
-              decision: selfApproved ? ("denied" as const) : r.status,
-              approver: selfApproved
-                ? "Policy Guard (self-approval blocked)"
-                : approverLabel(r.approver_id),
-              canUndo: !selfApproved && r.status === "granted",
-            };
-          });
-          setAuditRows(backendRows);
-
-          // Build active grants from granted requests
-          const backendGrants: ActiveGrant[] = data.requests
-            .filter((r) => r.status === "granted" && !isSelfApproved(r))
-            .map((r) => ({
-              id: `grant_${r.id}`,
-              requesterName: r.user_name || r.user_id,
-              app: r.app,
-              risk: r.risk,
-              approver: approverLabel(r.approver_id),
-              grantedAt: new Date(r.decided_at || r.requested_at).getTime(),
-              maxDurationHours: r.risk === "High" ? 8 : 24,
-            }));
-          if (backendGrants.length > 0) {
-            setActiveGrants(backendGrants);
-          }
-        }
-      })
-      .catch((err) => {
-        // Fallback to local initial state if backend DB has no rows yet
-        console.log("Using initial access audit state", err);
-      });
-
-    return () => clearInterval(timer);
-  }, []);
-
-  function triggerNotice(msg: string) {
-    setActionSuccessBanner(msg);
-    setTimeout(() => setActionSuccessBanner(null), 4000);
-  }
-
-  function getRemainingTime(grant: ActiveGrant): string {
-    const totalMs = grant.maxDurationHours * 60 * 60 * 1000;
-    const elapsedMs = now - grant.grantedAt;
-    const remainingMs = Math.max(0, totalMs - elapsedMs);
-
-    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
-    const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remainingMs % (1000 * 60)) / 1000);
-
-    if (grant.risk === "High") {
-      return `${hours}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
-    }
-    return `${hours}h ${String(minutes).padStart(2, "0")}m`;
-  }
-
-  function resolveApprover(requester: Requester, policy: PolicyRule): { approver: string; eligible: boolean; reason?: string } {
-    if (policy.app === "Payroll Tool" && requester.role !== "Founder") {
-      return { approver: "Riya Sharma", eligible: false, reason: "Payroll Tool is Founder-only (Riya Sharma)." };
-    }
-    if (requester.role.includes("Intern") && policy.app.includes("AWS")) {
-      return { approver: "Policy Rule", eligible: false, reason: "Interns are not eligible for Production access." };
-    }
-
-    if (requester.id === "karan") {
-      return { approver: "Riya Sharma (Founder)", eligible: true };
-    }
-
-    if (requester.id === "riya") {
-      return { approver: "Self (Founder)", eligible: true };
-    }
-
-    if (policy.risk === "High") {
-      return { approver: "Karan Malhotra (Eng Manager)", eligible: true };
-    }
-    if (policy.risk === "Medium") {
-      return { approver: requester.manager || "Karan Malhotra", eligible: true };
-    }
-
-    return { approver: "Auto-approved (Policy)", eligible: true };
-  }
-
-  async function handleRequestSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const policy = ACCESS_POLICIES.find((p) => p.app.toLowerCase() === selectedApp.toLowerCase()) || {
-      app: selectedApp,
-      risk: "Medium" as const,
-      rolesAllowed: "Engineer",
-      approver: selectedRequester.manager,
-      notes: "Custom request",
-    };
-
-    const resolution = resolveApprover(selectedRequester, policy);
-    const newId = `req_${Date.now()}`;
-    const newTimestamp = new Date().toISOString();
-
-    if (!resolution.eligible) {
-      const row: AccessAuditRow = {
-        id: newId,
-        timestamp: newTimestamp,
-        requesterName: selectedRequester.name,
-        app: policy.app,
-        risk: policy.risk,
-        decision: "denied",
-        approver: `Policy Guard (${resolution.reason})`,
-        justification,
-        canUndo: false,
-      };
-      setAuditRows([row, ...auditRows]);
-      triggerNotice(`Denied: ${resolution.reason}`);
-      return;
-    }
-
-    // Call backend API /api/access
-    try {
-      await fetch("/api/access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: selectedRequester.id,
-          userName: selectedRequester.name,
-          app: policy.app,
-          risk: policy.risk,
-          justification,
-          approverId: resolution.approver,
-        }),
-      });
-    } catch (err) {
-      console.warn("Backend /api/access sync error:", err);
-    }
-
-    if (policy.risk === "High" || policy.risk === "Medium") {
-      const row: AccessAuditRow = {
-        id: newId,
-        timestamp: newTimestamp,
-        requesterName: selectedRequester.name,
-        app: policy.app,
-        risk: policy.risk,
-        decision: "pending_approval",
-        approver: resolution.approver,
-        justification,
-        canUndo: false,
-      };
-      setAuditRows([row, ...auditRows]);
-      triggerNotice(`Gated: ${policy.app} request submitted. Awaiting approval from ${resolution.approver}.`);
+  if (targetApp === "Figma") {
+    riskTier = "Low";
+    previewText =
+      "Figma Team: Low Risk · Autonomous Self-Serve · Approver: Instant Auto-Grant · All active employees eligible.";
+    outcomeText = "Predicted outcome: Instant Autonomous Grant (No human in loop)";
+    outcomeIcon = "bolt";
+    outcomeColor = "text-emerald-600";
+  } else if (targetApp === "AWS Production") {
+    riskTier = isArjunBlocked ? "High" : "High";
+    previewText =
+      "AWS Production: High Risk · Just-In-Time (Max 8h) · Approver: Karan Malhotra (or Riya if requester is Karan) · Interns ineligible.";
+    if (isArjunBlocked) {
+      outcomeText = "Predicted outcome: REJECTED (Interns prohibited from Prod environments)";
+      outcomeIcon = "cancel";
+      outcomeColor = "text-rose-600";
+    } else if (isSelfApprovalRisk) {
+      outcomeText = "Predicted outcome: Escalation to Riya Sharma (Anti Self-Approval #9)";
+      outcomeIcon = "call_split";
+      outcomeColor = "text-[#3B5BFD]";
     } else {
-      const row: AccessAuditRow = {
+      outcomeText = "Predicted outcome: Routing to Karan Malhotra for synchronous signoff";
+      outcomeIcon = "rule";
+      outcomeColor = "text-amber-600";
+    }
+  } else if (targetApp === "GitHub") {
+    riskTier = "Medium";
+    previewText =
+      "GitHub Repo Admin: Medium Risk · TTL: 24h · Approver: Riya Sharma · Eng Core members only.";
+    outcomeText = "Predicted outcome: Routing to Riya Sharma for elevated repo privileges";
+    outcomeIcon = "rule";
+    outcomeColor = "text-[#3B5BFD]";
+  } else if (targetApp === "Datadog") {
+    riskTier = "Medium";
+    previewText =
+      "Datadog Prod: Medium Risk · TTL: 12h · Approver: Karan Malhotra · Eng Core & QA.";
+    outcomeText = "Predicted outcome: Routing to Karan Malhotra for signoff";
+    outcomeIcon = "rule";
+    outcomeColor = "text-amber-600";
+  } else if (targetApp === "Payroll Tool") {
+    riskTier = "Critical";
+    previewText =
+      "Payroll Tool: Critical Risk · TTL: 2h · Dual Authorization required (Riya Sharma + Hardware 2FA key).";
+    outcomeText = "Predicted outcome: Escalation to Riya Sharma + Dual Auth Challenge";
+    outcomeIcon = "lock";
+    outcomeColor = "text-rose-600";
+  }
+
+  const injectScenario = (scenarioKey: "A" | "B" | "C" | "D") => {
+    if (scenarioKey === "A") {
+      setRequester("Meera Iyer");
+      setTargetApp("Figma");
+      setJustification("Review design token exports and audit UI spec for Meridian Bank merchant flows");
+    } else if (scenarioKey === "B") {
+      setRequester("Meera Iyer");
+      setTargetApp("AWS Production");
+      setJustification("Inspect CloudWatch alarms and hotfix latency bottleneck in UPI settlement queue");
+    } else if (scenarioKey === "C") {
+      setRequester("Karan Malhotra");
+      setTargetApp("AWS Production");
+      setJustification("Reconfigure core VPC peering for India primary DC failover during pilot testing");
+    } else if (scenarioKey === "D") {
+      setRequester("Arjun Verma");
+      setTargetApp("AWS Production");
+      setJustification("Debugging prod database credentials to replicate staging parity issue");
+    }
+  };
+
+  const handleSendRequest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isArjunBlocked) return;
+
+    const timeString = new Date().toTimeString().split(" ")[0];
+
+    if (targetApp === "Figma") {
+      const newGrant: ActiveGrant = {
+        id: `grant-${Date.now()}`,
+        principal: requester,
+        scope: "Figma Team",
+        risk: "Low",
+        approver: "Auto-approved",
+        started: "Just now",
+        ttl: "90d",
+      };
+      const newAudit: AuditEntry = {
+        id: `audit-${Date.now()}`,
+        principal: requester,
+        scope: "Figma Team",
+        risk: "Low",
+        decision: "Auto-approved",
+        timestamp: timeString,
+      };
+      setActiveGrants((prev) => [newGrant, ...prev]);
+      setAuditList((prev) => [newAudit, ...prev]);
+    } else {
+      const newId = `AC-${Math.floor(805 + Math.random() * 80)}`;
+      const newPending: PendingRequest = {
         id: newId,
-        timestamp: newTimestamp,
-        requesterName: selectedRequester.name,
-        app: policy.app,
-        risk: policy.risk,
-        decision: "granted",
-        approver: "Auto-approved (Policy)",
-        justification,
-        canUndo: true,
+        requester,
+        target: targetApp,
+        scopeDesc: "Scope: Just-In-Time Escalation",
+        risk: riskTier,
+        note: justification,
+        assignedTo: isSelfApprovalRisk || targetApp === "Payroll Tool" ? "Riya Sharma" : "Karan Malhotra",
+        timeAgo: "Requested just now",
       };
-      setAuditRows([row, ...auditRows]);
-
-      const grant: ActiveGrant = {
-        id: `grant_${Date.now()}`,
-        requesterName: selectedRequester.name,
-        app: policy.app,
-        risk: policy.risk,
-        approver: "Auto-approved (Policy)",
-        grantedAt: Date.now(),
-        maxDurationHours: 24,
-      };
-      setActiveGrants([grant, ...activeGrants]);
-
-      triggerNotice(`Granted: Low-risk access to ${policy.app} auto-approved instantly.`);
+      setPendingQueue((prev) => [newPending, ...prev]);
     }
-  }
+  };
 
-  // Fast Demo Scenarios (also calls backend API)
-  async function simulateMeeraFigma() {
-    setSelectedRequesterId("meera");
-    setSelectedApp("Figma");
-    setJustification("Need editor access for payment review.");
-
-    try {
-      await fetch("/api/access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: "meera",
-          userName: "Meera Iyer",
-          app: "Figma",
-          risk: "Low",
-          justification: "Need editor access for payment review.",
-          approverId: "Auto-approved (Policy)",
-        }),
-      });
-    } catch (err) {
-      console.warn("/api/access error", err);
-    }
-
-    const row: AccessAuditRow = {
-      id: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      requesterName: "Meera Iyer",
-      app: "Figma",
-      risk: "Low",
-      decision: "granted",
-      approver: "Auto-approved (Policy)",
-      justification: "Need editor access for payment review.",
-      canUndo: true,
+  const handleApprove = (req: PendingRequest) => {
+    setPendingQueue((prev) => prev.filter((p) => p.id !== req.id));
+    const timeString = new Date().toTimeString().split(" ")[0];
+    const newGrant: ActiveGrant = {
+      id: `grant-${Date.now()}`,
+      principal: req.requester,
+      scope: req.target,
+      risk: req.risk,
+      approver: "Riya Sharma",
+      started: "Just now",
+      ttl: "8h",
     };
-    setAuditRows((prev) => [row, ...prev]);
-
-    const grant: ActiveGrant = {
-      id: `grant_${Date.now()}`,
-      requesterName: "Meera Iyer",
-      app: "Figma",
-      risk: "Low",
-      approver: "Auto-approved (Policy)",
-      grantedAt: Date.now(),
-      maxDurationHours: 24,
+    const newAudit: AuditEntry = {
+      id: `audit-${Date.now()}`,
+      principal: req.requester,
+      scope: req.target,
+      risk: req.risk,
+      decision: "Approved by Riya Sharma",
+      timestamp: timeString,
     };
-    setActiveGrants((prev) => [grant, ...prev]);
+    setActiveGrants((prev) => [newGrant, ...prev]);
+    setAuditList((prev) => [newAudit, ...prev]);
+  };
 
-    triggerNotice("Simulation: Meera requested Figma → Auto-granted instantly!");
-  }
-
-  async function simulateMeeraAwsProd() {
-    setSelectedRequesterId("meera");
-    setSelectedApp("AWS Production");
-    setJustification("Urgent JIT access to inspect payment gateway webhook error.");
-
-    try {
-      await fetch("/api/access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: "meera",
-          userName: "Meera Iyer",
-          app: "AWS Production",
-          risk: "High",
-          justification: "Urgent JIT access to inspect payment gateway webhook error.",
-          approverId: "Karan Malhotra (Eng Manager)",
-        }),
-      });
-    } catch (err) {
-      console.warn("/api/access error", err);
-    }
-
-    const row: AccessAuditRow = {
-      id: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      requesterName: "Meera Iyer",
-      app: "AWS Production",
-      risk: "High",
-      decision: "pending_approval",
-      approver: "Karan Malhotra (Eng Manager)",
-      justification: "Urgent JIT access to inspect payment gateway webhook error.",
-      canUndo: false,
+  const handleDeny = (req: PendingRequest) => {
+    setPendingQueue((prev) => prev.filter((p) => p.id !== req.id));
+    const timeString = new Date().toTimeString().split(" ")[0];
+    const newAudit: AuditEntry = {
+      id: `audit-${Date.now()}`,
+      principal: req.requester,
+      scope: req.target,
+      risk: req.risk,
+      decision: "Rejected by Approver",
+      timestamp: timeString,
     };
-    setAuditRows((prev) => [row, ...prev]);
-    triggerNotice("Simulation: Meera requested AWS Prod → Gated, awaiting Karan's approval!");
-  }
+    setAuditList((prev) => [newAudit, ...prev]);
+  };
 
-  async function simulateKaranAwsProd() {
-    setSelectedRequesterId("karan");
-    setSelectedApp("AWS Production");
-    setJustification("Scheduled database maintenance on Meridian prod cluster.");
-
-    try {
-      await fetch("/api/access", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: "karan",
-          userName: "Karan Malhotra",
-          app: "AWS Production",
-          risk: "High",
-          justification: "Scheduled database maintenance on Meridian prod cluster.",
-          approverId: "Riya Sharma (Founder)",
-        }),
-      });
-    } catch (err) {
-      console.warn("/api/access error", err);
-    }
-
-    const row: AccessAuditRow = {
-      id: `req_${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      requesterName: "Karan Malhotra",
-      app: "AWS Production",
-      risk: "High",
-      decision: "pending_approval",
-      approver: "Riya Sharma (Founder)",
-      justification: "Scheduled database maintenance on Meridian prod cluster.",
-      canUndo: false,
-    };
-    setAuditRows((prev) => [row, ...prev]);
-    triggerNotice("Simulation: Karan requested AWS Prod → Escalated to Riya Sharma (Founder) to prevent self-approval!");
-  }
-
-  async function handleApprovalDecision(id: string, decision: "granted" | "denied", approverName: string) {
-    const targetReq = auditRows.find((r) => r.id === id);
-
-    // Segregation of duties: nobody can approve their own request.
-    const requesterPerson = targetReq ? personForName(targetReq.requesterName) : undefined;
-    const approverPerson = personForName(approverName);
-    if (decision === "granted" && requesterPerson && approverPerson && requesterPerson.id === approverPerson.id) {
-      triggerNotice(`Blocked: ${requesterPerson.name} cannot approve their own request.`);
-      return;
-    }
-
-    // Call backend API /api/access/decide
-    try {
-      await fetch("/api/access/decide", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id,
-          decision,
-          approverName,
-        }),
-      });
-    } catch (err) {
-      console.warn("Backend /api/access/decide error:", err);
-    }
-
-    setAuditRows((prev) =>
-      prev.map((row) => {
-        if (row.id === id) {
-          return {
-            ...row,
-            decision,
-            approver: `${approverName} (${decision === "denied" ? "Denied" : "Approved"} by Guard)`,
-            canUndo: decision === "granted",
-          };
-        }
-        return row;
-      }),
-    );
-
-    if (decision === "granted" && targetReq) {
-      const grant: ActiveGrant = {
-        id: `grant_${Date.now()}`,
-        requesterName: targetReq.requesterName,
-        app: targetReq.app,
-        risk: targetReq.risk,
-        approver: approverName,
-        grantedAt: Date.now(),
-        maxDurationHours: targetReq.risk === "High" ? 8 : 24,
-      };
-      setActiveGrants((prev) => [grant, ...prev]);
-    }
-
-    triggerNotice(
-      decision === "granted"
-        ? `Access Granted: ${approverName} approved the high-risk JIT access (8-hour window).`
-        : `Access Denied: ${approverName} rejected the request.`,
-    );
-  }
-
-  async function handleRevokeGrant(grantId: string) {
+  const handleRevoke = (grantId: string) => {
     const grant = activeGrants.find((g) => g.id === grantId);
     if (!grant) return;
-
     setActiveGrants((prev) => prev.filter((g) => g.id !== grantId));
-
-    try {
-      await fetch("/api/access/revoke", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: grant.id.replace("grant_", ""),
-          reason: "Active grant revoked early via dashboard Undo",
-        }),
-      });
-    } catch (err) {
-      console.warn("Backend /api/access/revoke error:", err);
-    }
-
-    const auditRow: AccessAuditRow = {
-      id: `rev_${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      requesterName: grant.requesterName,
-      app: grant.app,
-      risk: grant.risk,
-      decision: "undone",
-      approver: "Security Admin (Manual Revoke)",
-      justification: "Active grant revoked early via dashboard Undo.",
-      canUndo: false,
+    const timeString = new Date().toTimeString().split(" ")[0];
+    const newAudit: AuditEntry = {
+      id: `audit-${Date.now()}`,
+      principal: grant.principal,
+      scope: grant.scope,
+      risk: "Enforced",
+      decision: "Revoked early by Admin",
+      timestamp: timeString,
     };
-    setAuditRows((prev) => [auditRow, ...prev]);
+    setAuditList((prev) => [newAudit, ...prev]);
+  };
 
-    triggerNotice(`Revocation Complete: ${grant.app} grant for ${grant.requesterName} was revoked and logged.`);
-  }
-
-  async function handleUndo(id: string) {
-    const row = auditRows.find((r) => r.id === id);
-    if (row) {
-      setActiveGrants((prev) => prev.filter((g) => !(g.requesterName === row.requesterName && g.app === row.app)));
-    }
-
-    try {
-      await fetch("/api/access/revoke", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, reason: "Manual Undo from Decision Audit table" }),
-      });
-    } catch (err) {
-      console.warn("Backend /api/access/revoke error:", err);
-    }
-
-    setAuditRows((prev) =>
-      prev.map((r) => {
-        if (r.id === id) {
-          return {
-            ...r,
-            decision: "undone",
-            canUndo: false,
-          };
-        }
-        return r;
-      }),
+  const handleToggleRevertAudit = (auditId: string) => {
+    setAuditList((prev) =>
+      prev.map((a) => (a.id === auditId ? { ...a, reverted: true } : a)),
     );
-    triggerNotice("Revocation Complete: Access grant was rolled back via Undo.");
-  }
+  };
 
   return (
-    <div className="p-8 max-w-6xl space-y-7">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-bold tracking-tight text-white">Access Agent</h2>
-            <span className="text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
-              JIT Guard & Auto-Grant
-            </span>
-          </div>
-          <p className="text-sm text-slate-400 mt-1">
-            Policy-enforced tool and infrastructure access. Auto-approves low risk (Figma), gates high risk (AWS prod) with human approvals, and prevents self-approval.
-          </p>
-        </div>
-      </div>
-
-      {/* Notice Banner */}
-      {actionSuccessBanner && (
-        <div className="p-3.5 rounded-xl bg-indigo-950/70 border border-indigo-500/40 text-indigo-200 text-xs flex items-center justify-between shadow-lg shadow-indigo-950/30 animate-in fade-in">
-          <div className="flex items-center gap-2 font-medium">
-            <Zap className="w-4 h-4 text-indigo-400" />
-            <span>{actionSuccessBanner}</span>
-          </div>
-        </div>
-      )}
-
-      {/* Top Section: Request Box & Demo Fast Triggers */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Request Box Form */}
-        <div className="lg:col-span-2 rounded-2xl bg-[#0e1726] border border-indigo-950/70 p-5 shadow-lg shadow-indigo-950/20 space-y-4">
-          <div className="flex items-center justify-between border-b border-indigo-900/30 pb-3">
-            <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                <Send className="w-3.5 h-3.5" />
+    <div className="max-w-[1400px] mx-auto px-6 py-6 pb-20 flex flex-col gap-6">
+      {/* TOP BANNER & OPERATIONAL SCENARIOS */}
+      <section className="p-5 rounded-xl bg-white border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.05)] flex flex-col gap-5 relative overflow-hidden">
+        <div className="absolute -top-24 right-1/4 w-80 h-32 bg-blue-100/60 blur-[60px] pointer-events-none rounded-full"></div>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 z-10">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-gray-500 text-xs font-mono">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#3B5BFD] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#3B5BFD]"></span>
               </span>
-              New Access Request
-            </h3>
-            {/* Requester Role Badge Chip */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-slate-400">Current Role:</span>
-              <span className="text-xs text-indigo-300 font-semibold bg-indigo-950/80 px-2.5 py-0.5 rounded-full border border-indigo-700/50">
-                {selectedRequester.role}
+              <span className="font-medium text-[#3B5BFD]">Access Control System</span>
+              <span>/</span>
+              <span>Automatic Safeguards</span>
+            </div>
+            <h1 className="text-xl lg:text-2xl font-semibold tracking-tight text-[#111827]">
+              Team Access &amp; Permissions
+            </h1>
+            <p className="text-xs text-gray-600 max-w-2xl leading-relaxed">
+              Easily approve, review, and set time limits for team tools and server access.
+            </p>
+          </div>
+
+          {/* Stats Metric Pill Group */}
+          <div className="flex items-center gap-4 bg-[#F9FAFB] border border-[#E5E7EB] p-2.5 rounded-lg self-start lg:self-auto shadow-2xs">
+            <div className="px-2 text-right">
+              <span className="block text-[10px] font-mono uppercase text-gray-400 tracking-wider">
+                Active Access
+              </span>
+              <span className="font-mono text-base font-semibold text-emerald-600">
+                14 people
+              </span>
+            </div>
+            <div className="w-px h-6 bg-[#E5E7EB]"></div>
+            <div className="px-2 text-right">
+              <span className="block text-[10px] font-mono uppercase text-gray-400 tracking-wider">
+                Security Issues
+              </span>
+              <span className="font-mono text-base font-semibold text-[#3B5BFD]">
+                0 issues
               </span>
             </div>
           </div>
+        </div>
 
-          <form onSubmit={handleRequestSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Requester
+        {/* Quick Scenario Preset Bar */}
+        <div className="flex flex-col gap-2 pt-2 border-t border-[#E5E7EB] z-10">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-gray-400 font-medium">
+              Try Sample Requests:
+            </span>
+            <span className="text-[11px] font-mono text-gray-400">
+              Click to test how approvals work
+            </span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.5">
+            <button
+              type="button"
+              onClick={() => injectScenario("A")}
+              className="group text-left p-3 rounded-lg bg-[#F9FAFB] hover:bg-neutral-100/80 border border-[#E5E7EB] hover:border-gray-300 transition-all flex flex-col justify-between shadow-2xs cursor-pointer"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px]">bolt</span>Sample 1
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Instant
+                </span>
+              </div>
+              <span className="text-xs text-gray-600 group-hover:text-[#111827] transition-colors leading-snug">
+                Meera asks for Figma (Safe · Approved instantly)
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => injectScenario("B")}
+              className="group text-left p-3 rounded-lg bg-[#F9FAFB] hover:bg-neutral-100/80 border border-[#E5E7EB] hover:border-gray-300 transition-all flex flex-col justify-between shadow-2xs cursor-pointer"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono text-xs font-semibold text-amber-600 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px]">verified_user</span>Sample 2
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                  Needs Review
+                </span>
+              </div>
+              <span className="text-xs text-gray-600 group-hover:text-[#111827] transition-colors leading-snug">
+                Meera asks for Server Access (Needs manager approval)
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => injectScenario("C")}
+              className="group text-left p-3 rounded-lg bg-[#F9FAFB] hover:bg-neutral-100/80 border border-[#E5E7EB] hover:border-gray-300 transition-all flex flex-col justify-between shadow-2xs cursor-pointer"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono text-xs font-semibold text-[#3B5BFD] flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px]">call_split</span>Sample 3
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 text-[#3B5BFD] border border-blue-200">
+                  To CEO
+                </span>
+              </div>
+              <span className="text-xs text-gray-600 group-hover:text-[#111827] transition-colors leading-snug">
+                Karan asks for Server Access (Escalates to CEO because Karan cannot approve himself)
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => injectScenario("D")}
+              className="group text-left p-3 rounded-lg bg-[#F9FAFB] hover:bg-neutral-100/80 border border-[#E5E7EB] hover:border-gray-300 transition-all flex flex-col justify-between shadow-2xs cursor-pointer"
+            >
+              <div className="flex items-center justify-between w-full mb-1.5">
+                <span className="font-mono text-xs font-semibold text-rose-600 flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-[15px]">block</span>Sample 4
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
+                  Blocked
+                </span>
+              </div>
+              <span className="text-xs text-gray-600 group-hover:text-[#111827] transition-colors leading-snug">
+                Arjun (Intern) asks for Production (Blocked by rule)
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* TWO-COLUMN WORKSPACE */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN: REQUEST SIMULATOR & POLICY MATRIX (5 COLS) */}
+        <div className="xl:col-span-5 flex flex-col gap-6">
+          {/* New Request Interactive Console */}
+          <div className="flex flex-col bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.05)] gap-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-[#3B5BFD]">tune</span>
+                <h2 className="text-sm font-semibold text-[#111827] tracking-tight">
+                  Request Tool Access
+                </h2>
+              </div>
+              <span className="font-mono text-[11px] text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-[#E5E7EB] font-medium">
+                Loop #JIT-90
+              </span>
+            </div>
+
+            <form onSubmit={handleSendRequest} className="flex flex-col gap-3.5">
+              {/* Requester Principal */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono text-gray-400 uppercase tracking-wider font-medium">
+                  Who needs access
                 </label>
                 <div className="relative">
                   <select
-                    value={selectedRequesterId}
-                    onChange={(e) => setSelectedRequesterId(e.target.value)}
-                    className="w-full bg-[#0a101d] border border-indigo-900/40 hover:border-indigo-700/60 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                    value={requester}
+                    onChange={(e) => setRequester(e.target.value)}
+                    className="w-full bg-[#F9FAFB] px-3 py-2 rounded-lg text-xs font-medium text-[#111827] border border-[#E5E7EB] hover:border-gray-400 focus:outline-none focus:border-[#3B5BFD] focus:bg-white transition-colors cursor-pointer appearance-none shadow-2xs"
                   >
-                    {REQUESTERS.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        {r.name}
-                      </option>
-                    ))}
+                    <option value="Meera Iyer">Meera Iyer (Senior Backend Engineer · Team Nimbus)</option>
+                    <option value="Karan Malhotra">Karan Malhotra (Staff Lead / Approver · Team Infra)</option>
+                    <option value="Arjun Verma">Arjun Verma (Security Eng Intern · 90-Day Cohort)</option>
                   </select>
+                  <span className="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-gray-400 pointer-events-none">
+                    expand_more
+                  </span>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                  Target Application / Resource
+              {/* Target Application */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-mono text-gray-400 uppercase tracking-wider font-medium">
+                  Which tool or server
                 </label>
-                <select
-                  value={selectedApp}
-                  onChange={(e) => setSelectedApp(e.target.value)}
-                  className="w-full bg-[#0a101d] border border-indigo-900/40 hover:border-indigo-700/60 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                <div className="relative">
+                  <select
+                    value={targetApp}
+                    onChange={(e) => setTargetApp(e.target.value)}
+                    className="w-full bg-[#F9FAFB] px-3 py-2 rounded-lg text-xs font-medium text-[#111827] border border-[#E5E7EB] hover:border-gray-400 focus:outline-none focus:border-[#3B5BFD] focus:bg-white transition-colors cursor-pointer appearance-none shadow-2xs"
+                  >
+                    <option value="AWS Production">AWS Production Servers (us-east-1 VPC)</option>
+                    <option value="Figma">Figma (Design Workspace)</option>
+                    <option value="GitHub">GitHub (Code Repositories)</option>
+                    <option value="Datadog">Datadog (Monitoring & Logs)</option>
+                    <option value="Payroll Tool">Payroll Tool (Finance & Banking)</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-2.5 top-2.5 text-[16px] text-gray-400 pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+              </div>
+
+              {/* Justification */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-[10px] font-mono text-gray-400 uppercase tracking-wider font-medium">
+                    Why do you need it?
+                  </label>
+                  <span className="text-[10px] font-mono text-gray-400">A few words</span>
+                </div>
+                <textarea
+                  value={justification}
+                  onChange={(e) => setJustification(e.target.value)}
+                  className="w-full bg-[#F9FAFB] px-3 py-2 rounded-lg text-xs text-[#111827] border border-[#E5E7EB] hover:border-gray-400 focus:outline-none focus:border-[#3B5BFD] focus:bg-white resize-none transition-colors shadow-2xs"
+                  rows={2}
+                />
+              </div>
+
+              {/* Policy Rule Preview */}
+              <div className="p-3 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider font-medium">
+                    Rule check
+                  </span>
+                  <span
+                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
+                      isArjunBlocked
+                        ? "text-rose-700 bg-rose-50 border border-rose-200"
+                        : riskTier === "Low"
+                        ? "text-emerald-700 bg-emerald-50 border border-emerald-200"
+                        : "text-amber-700 bg-amber-50 border border-amber-200"
+                    }`}
+                  >
+                    {isArjunBlocked ? "POLICY BLOCKED" : `${riskTier.toUpperCase()} RISK`}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-600 leading-relaxed">{previewText}</p>
+              </div>
+
+              {/* Auto Evaluation Outcome Pill */}
+              <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB]">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`material-symbols-outlined text-[16px] ${outcomeColor}`}
+                  >
+                    {outcomeIcon}
+                  </span>
+                  <span className="font-mono text-xs text-[#111827]">{outcomeText}</span>
+                </div>
+                <span className="text-[9px] font-mono text-gray-400 uppercase tracking-wider bg-white px-1.5 py-0.5 rounded border border-[#E5E7EB] font-medium">
+                  Policy Checked
+                </span>
+              </div>
+
+              {/* Action Dispatch Buttons */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => injectScenario("B")}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 hover:text-[#111827] hover:bg-neutral-100 transition-colors cursor-pointer"
                 >
-                  {ACCESS_POLICIES.map((p) => (
-                    <option key={p.app} value={p.app}>
-                      {p.app} ({p.risk} Risk)
-                    </option>
-                  ))}
-                </select>
+                  Reset
+                </button>
+                <button
+                  type="submit"
+                  disabled={isArjunBlocked}
+                  className={`px-4 py-2 rounded-lg text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5 ${
+                    isArjunBlocked
+                      ? "bg-gray-300 opacity-60 cursor-not-allowed"
+                      : "bg-[#3B5BFD] hover:bg-[#2549ED] cursor-pointer active:scale-[0.98]"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">send</span>
+                  <span>Send Access Request</span>
+                </button>
               </div>
-            </div>
+            </form>
+          </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">
-                Business Justification
-              </label>
-              <textarea
-                value={justification}
-                onChange={(e) => setJustification(e.target.value)}
-                rows={2}
-                placeholder="Reason for requesting access…"
-                className="w-full bg-[#0a101d] border border-indigo-900/40 hover:border-indigo-700/60 rounded-xl p-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none transition-colors"
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                Segregation of Duties: Approver cannot equal Requester
+          {/* Active Access Policy Table Matrix */}
+          <div className="flex flex-col bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.05)] gap-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-emerald-600">
+                  policy
+                </span>
+                <h2 className="text-sm font-semibold text-[#111827] tracking-tight">
+                  Active Access Policy Matrix
+                </h2>
               </div>
-              <button
-                type="submit"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4F46E5] hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/30"
-              >
-                Submit Request
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Demo Fast Scenarios */}
-        <div className="rounded-2xl bg-[#131126] border border-purple-900/40 p-5 shadow-lg shadow-purple-950/20 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                <Zap className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-mono font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                6 Managed Tiers
               </span>
-              <h3 className="text-sm font-semibold text-white">
-                Demo Fast Scenarios
-              </h3>
             </div>
-            <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-              Click to simulate policy evaluation & anti-self-approval rules:
-            </p>
-
-            <div className="space-y-2">
-              <button
-                onClick={simulateMeeraFigma}
-                className="w-full text-left p-2.5 rounded-xl bg-[#0c0a1a] hover:bg-[#161230] border border-emerald-900/30 hover:border-emerald-600/50 transition-all group shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-200 group-hover:text-emerald-300">
-                    1. Meera asks for Figma
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-700/60">
-                    Instant Auto
-                  </span>
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Low-risk role match → Auto-approved instantly.
-                </div>
-              </button>
-
-              <button
-                onClick={simulateMeeraAwsProd}
-                className="w-full text-left p-2.5 rounded-xl bg-[#0c0a1a] hover:bg-[#161230] border border-amber-900/30 hover:border-amber-600/50 transition-all group shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-200 group-hover:text-amber-300">
-                    2. Meera asks for AWS Prod
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-amber-400 px-2 py-0.5 rounded-full bg-amber-950/70 border border-amber-700/60">
-                    Karan Gated
-                  </span>
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  High-risk infra → Requires Karan Malhotra's sign-off.
-                </div>
-              </button>
-
-              <button
-                onClick={simulateKaranAwsProd}
-                className="w-full text-left p-2.5 rounded-xl bg-[#0c0a1a] hover:bg-[#161230] border border-indigo-900/40 hover:border-indigo-600/50 transition-all group shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300">
-                    3. Karan asks for AWS Prod
-                  </span>
-                  <span className="text-[10px] uppercase font-bold text-indigo-400 px-2 py-0.5 rounded-full bg-indigo-950/70 border border-indigo-700/60">
-                    Riya Gated
-                  </span>
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">
-                  Cannot self-approve → Escalated to Riya Sharma (Founder).
-                </div>
-              </button>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-[10px] font-mono uppercase text-gray-400 border-b border-[#E5E7EB]">
+                    <th className="py-2 px-2 font-medium">Target App</th>
+                    <th className="py-2 px-2 font-medium">Risk</th>
+                    <th className="py-2 px-2 font-medium">Allowed Roles</th>
+                    <th className="py-2 px-2 font-medium">Approver Rule</th>
+                    <th className="py-2 px-2 font-medium text-right">TTL Max</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 font-mono text-[11px] text-gray-600">
+                  <tr className="hover:bg-[#F9FAFB] transition-colors">
+                    <td className="py-2.5 px-2 font-medium text-[#111827]">AWS Prod</td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                        High
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-2 text-gray-400">Eng Staff+</td>
+                    <td className="py-2.5 px-2 text-[#111827] font-medium">Karan / Riya</td>
+                    <td className="py-2.5 px-2 text-right text-gray-400">8h</td>
+                  </tr>
+                  <tr className="hover:bg-[#F9FAFB] transition-colors">
+                    <td className="py-2.5 px-2 font-medium text-[#111827]">GitHub Admin</td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                        Medium
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-2 text-gray-400">Eng Core</td>
+                    <td className="py-2.5 px-2 text-[#111827] font-medium">Riya Sharma</td>
+                    <td className="py-2.5 px-2 text-right text-gray-400">24h</td>
+                  </tr>
+                  <tr className="hover:bg-[#F9FAFB] transition-colors">
+                    <td className="py-2.5 px-2 font-medium text-[#111827]">Figma Team</td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                        Low
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-2 text-gray-400">All Employees</td>
+                    <td className="py-2.5 px-2 text-emerald-700 font-medium">Auto-Grant</td>
+                    <td className="py-2.5 px-2 text-right text-gray-400">90d</td>
+                  </tr>
+                  <tr className="hover:bg-[#F9FAFB] transition-colors">
+                    <td className="py-2.5 px-2 font-medium text-[#111827]">Datadog Prod</td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                        Medium
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-2 text-gray-400">Eng Core, QA</td>
+                    <td className="py-2.5 px-2 text-[#111827] font-medium">Karan Malhotra</td>
+                    <td className="py-2.5 px-2 text-right text-gray-400">12h</td>
+                  </tr>
+                  <tr className="hover:bg-[#F9FAFB] transition-colors">
+                    <td className="py-2.5 px-2 font-medium text-[#111827]">Payroll Tool</td>
+                    <td className="py-2.5 px-2">
+                      <span className="text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                        Critical
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-2 text-gray-400">Exec Ops</td>
+                    <td className="py-2.5 px-2 text-rose-700 font-medium">Riya + 2FA</td>
+                    <td className="py-2.5 px-2 text-right text-gray-400">2h</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
-
-          <div className="text-[10px] text-purple-300/60 pt-2.5 border-t border-purple-900/30 mt-2 font-mono">
-            Policy doc 04: Karan requests escalate to Founder
           </div>
         </div>
-      </div>
 
-      {/* Active Grants Card */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <KeyRound className="w-3.5 h-3.5" />
-            </span>
-            <h3 className="text-sm font-semibold text-white">Active Leases & Grants</h3>
-          </div>
-          <span className="text-xs text-slate-400 font-mono bg-slate-900 px-2.5 py-0.5 rounded-md border border-slate-800">
-            {activeGrants.length} active sessions
-          </span>
-        </div>
+        {/* RIGHT COLUMN: APPROVAL QUEUE, ACTIVE GRANTS & AUDIT (7 COLS) */}
+        <div className="xl:col-span-7 flex flex-col gap-6">
+          {/* PENDING APPROVALS QUEUE */}
+          <div className="flex flex-col bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.05)] gap-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-amber-600">
+                  pending_actions
+                </span>
+                <h2 className="text-sm font-semibold text-[#111827] tracking-tight">
+                  Waiting for Approval ({pendingQueue.length} requests)
+                </h2>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-semibold">
+                {pendingQueue.length} Awaiting Action
+              </span>
+            </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-emerald-950/60 bg-[#07130f] shadow-lg shadow-emerald-950/20">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-emerald-900/30 bg-[#050e0b] text-emerald-300/80 font-semibold">
-                <th className="text-left px-4 py-3">User</th>
-                <th className="text-left px-4 py-3">App / Resource</th>
-                <th className="text-left px-4 py-3 w-24">Risk</th>
-                <th className="text-left px-4 py-3">Granted Time</th>
-                <th className="text-left px-4 py-3">Expires In</th>
-                <th className="text-left px-4 py-3">Approver</th>
-                <th className="text-right px-4 py-3 w-28">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-emerald-950/40">
-              {activeGrants.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-6 text-slate-500 text-xs italic">
-                    No active grants at this time.
-                  </td>
-                </tr>
+            <div className="flex flex-col gap-3">
+              {pendingQueue.length === 0 ? (
+                <div className="p-4 text-center text-xs font-mono text-gray-400">
+                  All requests processed! Zero items awaiting sign-off.
+                </div>
               ) : (
-                activeGrants.map((grant) => {
-                  const isHigh = grant.risk === "High";
-                  const grantedTimeStr = mounted ? formatTime(new Date(grant.grantedAt).toISOString()) : "--:--";
-                  const remainingStr = mounted && now > 0 ? getRemainingTime(grant) : "--:--";
+                pendingQueue.map((req) => (
+                  <div
+                    key={req.id}
+                    className="p-4 rounded-lg bg-[#F9FAFB] hover:bg-neutral-100/60 border border-[#E5E7EB] transition-all flex flex-col gap-2.5 shadow-2xs"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-50 text-[#3B5BFD] border border-blue-200 font-semibold">
+                          #{req.id}
+                        </span>
+                        <div>
+                          <h3 className="text-xs font-semibold text-[#111827]">
+                            {req.requester}{" "}
+                            <span className="text-gray-400 font-normal">requesting</span>{" "}
+                            {req.target}
+                          </h3>
+                          <p className="text-[11px] font-mono text-gray-400">{req.scopeDesc}</p>
+                        </div>
+                      </div>
+                      <span
+                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded border font-medium ${
+                          req.risk === "Critical"
+                            ? "bg-rose-50 text-rose-700 border-rose-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200"
+                        }`}
+                      >
+                        {req.risk.toUpperCase()} RISK
+                      </span>
+                    </div>
 
-                  return (
-                    <tr key={grant.id} className="hover:bg-emerald-950/20 transition-colors">
-                      <td className="px-4 py-2.5 font-semibold text-slate-100 flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5 text-emerald-400" />
-                        {grant.requesterName}
+                    <div className="p-2.5 rounded bg-white border border-[#E5E7EB] text-xs text-gray-600 leading-relaxed">
+                      <span className="text-gray-400 font-mono text-[10px] uppercase mr-1">
+                        Note:
+                      </span>
+                      {req.note}
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-[#E5E7EB]">
+                      <span className="text-[11px] font-mono text-gray-400">{req.timeAgo}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleDeny(req)}
+                          className="px-2.5 py-1 rounded text-xs font-medium text-rose-700 hover:bg-rose-50 border border-rose-200 transition-colors cursor-pointer"
+                        >
+                          Deny
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleApprove(req)}
+                          className="px-3 py-1 rounded text-xs text-white font-medium bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all cursor-pointer"
+                        >
+                          Approve Access
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* ACTIVE JUST-IN-TIME GRANTS */}
+          <div className="flex flex-col bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.05)] gap-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-emerald-600">
+                  verified
+                </span>
+                <h2 className="text-sm font-semibold text-[#111827] tracking-tight">
+                  Currently Active Access ({activeGrants.length} team members)
+                </h2>
+              </div>
+              <span className="text-xs font-mono text-emerald-700 font-semibold flex items-center gap-1.5 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                {activeGrants.length} Active Leases
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-[10px] font-mono uppercase text-gray-400 border-b border-[#E5E7EB]">
+                    <th className="py-2 px-2 font-medium">Principal</th>
+                    <th className="py-2 px-2 font-medium">Target Scope</th>
+                    <th className="py-2 px-2 font-medium">Risk</th>
+                    <th className="py-2 px-2 font-medium">Approved By</th>
+                    <th className="py-2 px-2 font-medium">Started</th>
+                    <th className="py-2 px-2 font-medium">TTL Remaining</th>
+                    <th className="py-2 px-2 font-medium text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100 font-mono text-[11px] text-[#111827]">
+                  {activeGrants.map((grant) => (
+                    <tr key={grant.id} className="hover:bg-[#F9FAFB] transition-colors">
+                      <td className="py-2.5 px-2 font-medium text-[#111827] font-sans">
+                        {grant.principal}
                       </td>
-                      <td className="px-4 py-2.5 font-medium text-slate-200">{grant.app}</td>
-                      <td className="px-4 py-2.5">
+                      <td className="py-2.5 px-2 text-gray-600">{grant.scope}</td>
+                      <td className="py-2.5 px-2">
                         <span
-                          className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                            grant.risk === "Low"
-                              ? "bg-emerald-950/80 text-[#16A34A] border border-emerald-700/60"
-                              : grant.risk === "Medium"
-                              ? "bg-amber-950/80 text-[#F59E0B] border border-amber-700/60"
-                              : "bg-rose-950/80 text-[#DC2626] border border-rose-700/60"
+                          className={`px-1.5 py-0.5 rounded text-[10px] font-medium border ${
+                            grant.risk === "High"
+                              ? "text-amber-700 bg-amber-50 border-amber-200"
+                              : grant.risk === "Critical"
+                              ? "text-rose-700 bg-rose-50 border-rose-200"
+                              : "text-emerald-700 bg-emerald-50 border-emerald-200"
                           }`}
                         >
                           {grant.risk}
                         </span>
                       </td>
-                      <td className="px-4 py-2.5 text-slate-400 font-mono text-[11px]">{grantedTimeStr}</td>
-                      <td className="px-4 py-2.5 font-mono">
-                        <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-semibold ${
-                            isHigh
-                              ? "bg-rose-950/70 text-rose-300 border border-rose-800/60 animate-pulse"
-                              : "bg-emerald-950/60 text-emerald-300 border border-emerald-800/50"
-                          }`}
-                        >
-                          <Timer className="w-3 h-3" />
-                          {remainingStr}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-slate-400 text-[11px]">{grant.approver}</td>
-                      <td className="px-4 py-2.5 text-right">
+                      <td className="py-2.5 px-2 text-gray-500">{grant.approver}</td>
+                      <td className="py-2.5 px-2 text-gray-400">{grant.started}</td>
+                      <td className="py-2.5 px-2 text-emerald-700 font-semibold">{grant.ttl}</td>
+                      <td className="py-2.5 px-2 text-right font-sans">
                         <button
-                          onClick={() => handleRevokeGrant(grant.id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-950/80 hover:bg-rose-900 border border-rose-700/60 text-rose-300 text-[10px] font-semibold transition-colors shadow-sm"
-                          title="Revoke access immediately"
+                          type="button"
+                          onClick={() => handleRevoke(grant.id)}
+                          className="px-2 py-0.5 rounded text-[10px] font-mono text-rose-700 hover:bg-rose-50 border border-rose-200 uppercase transition-colors cursor-pointer"
                         >
-                          <Undo2 className="w-3 h-3" />
-                          Undo / Revoke
+                          Remove Access
                         </button>
                       </td>
                     </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Middle Section: Pending Approval Cards */}
-      {pendingRequests.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <AlertTriangle className="w-3.5 h-3.5" />
-            </span>
-            <h3 className="text-sm font-semibold text-white">
-              Pending Approvals Queue
-            </h3>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-950/80 text-amber-400 border border-amber-700/60 font-mono font-medium">
-              {pendingRequests.length} action needed
-            </span>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pendingRequests.map((req) => (
-              <div
-                key={req.id}
-                className="p-5 rounded-2xl bg-[#1a1409] border border-amber-700/40 shadow-lg shadow-amber-950/20 space-y-3.5"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-white">{req.app}</span>
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-rose-950/80 text-rose-400 border border-rose-700/60">
-                        {req.risk} Risk
-                      </span>
-                    </div>
-                    <div className="text-xs text-slate-400 mt-1">
-                      Requested by <strong className="text-slate-200">{req.requesterName}</strong>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[11px] font-medium text-amber-400 flex items-center justify-end gap-1">
-                      <Clock className="w-3 h-3" />
-                      Pending Approval
-                    </span>
-                    <span className="text-[10px] text-amber-200/80 font-mono">
-                      Assigned Approver: <strong className="text-white">{req.approver}</strong>
-                    </span>
-                  </div>
-                </div>
-
-                <div className="text-xs text-slate-200 bg-[#0f0c05] p-3 rounded-xl border border-amber-900/30">
-                  <span className="text-amber-400/80 font-medium">Justification: </span>
-                  {req.justification || "Production investigation required."}
-                </div>
-
-                <div className="flex items-center gap-2 pt-1">
-                  <button
-                    onClick={() => handleApprovalDecision(req.id, "granted", req.approver)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-[#16A34A] hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-900/30"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Approve as {req.approver.split(" ")[0]} (8h JIT)
-                  </button>
-                  <button
-                    onClick={() => handleApprovalDecision(req.id, "denied", req.approver)}
-                    className="flex-1 py-2 px-3 rounded-xl bg-slate-900 hover:bg-rose-950/70 hover:text-rose-300 text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-800 hover:border-rose-800 transition-colors"
-                  >
-                    <XCircle className="w-3.5 h-3.5" />
-                    Deny Request
-                  </button>
-                </div>
+          {/* DECISION HISTORY & AUDIT LOG TABLE */}
+          <div className="flex flex-col bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-[0_1px_3px_rgba(0,0,0,0.05)] gap-3.5">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px] text-[#3B5BFD]">
+                  history_edu
+                </span>
+                <h2 className="text-sm font-semibold text-[#111827] tracking-tight">
+                  Recent Access History
+                </h2>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Policy Rules Table */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-teal-500/10 text-teal-400 border border-teal-500/20">
-              <ShieldCheck className="w-3.5 h-3.5" />
-            </span>
-            <h3 className="text-sm font-semibold text-white">Access Policy Table (Nimbus Labs)</h3>
-          </div>
-          <span className="text-xs text-teal-400/70 font-mono">Seed Document 04 Reference</span>
-        </div>
-
-        <div className="overflow-x-auto rounded-2xl border border-teal-950/80 bg-[#0b1319] shadow-lg shadow-teal-950/10">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-teal-900/40 bg-[#081014] text-teal-300/80 font-semibold">
-                <th className="text-left px-4 py-3">App / Resource</th>
-                <th className="text-left px-4 py-3 w-28">Risk</th>
-                <th className="text-left px-4 py-3">Roles Allowed</th>
-                <th className="text-left px-4 py-3">Approver</th>
-                <th className="text-left px-4 py-3">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-teal-950/50">
-              {ACCESS_POLICIES.map((policy) => {
-                const isLow = policy.risk === "Low";
-                const isMedium = policy.risk === "Medium";
-                const isHigh = policy.risk === "High";
-
-                return (
-                  <tr key={policy.app} className="hover:bg-teal-950/20 transition-colors">
-                    <td className="px-4 py-2.5 font-semibold text-slate-100">{policy.app}</td>
-                    <td className="px-4 py-2.5">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                          isLow
-                            ? "bg-emerald-950/80 text-[#16A34A] border border-emerald-700/60"
-                            : isMedium
-                            ? "bg-amber-950/80 text-[#F59E0B] border border-amber-700/60"
-                            : "bg-rose-950/80 text-[#DC2626] border border-rose-700/60"
-                        }`}
-                      >
-                        {policy.risk}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-300">{policy.rolesAllowed}</td>
-                    <td className="px-4 py-2.5 font-medium text-slate-200">
-                      {isLow ? (
-                        <span className="text-[#16A34A] flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Auto-approved
-                        </span>
-                      ) : (
-                        policy.approver
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-400 text-[11px] leading-relaxed">{policy.notes}</td>
+              <span className="text-[10px] font-mono text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-[#E5E7EB] uppercase font-medium">
+                Immutable Chain
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-[10px] font-mono uppercase text-gray-400 border-b border-[#E5E7EB]">
+                    <th className="py-2 px-2 font-medium">Principal</th>
+                    <th className="py-2 px-2 font-medium">Target Scope</th>
+                    <th className="py-2 px-2 font-medium">Risk</th>
+                    <th className="py-2 px-2 font-medium">Decision Vector</th>
+                    <th className="py-2 px-2 font-medium">Timestamp</th>
+                    <th className="py-2 px-2 font-medium text-right">Revert</th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Audit Rows & Decision History */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="p-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-              <FileCheck2 className="w-3.5 h-3.5" />
-            </span>
-            <h3 className="text-sm font-semibold text-white">Access Decision Audit Log</h3>
+                </thead>
+                <tbody className="divide-y divide-gray-100 font-mono text-[11px] text-gray-600">
+                  {auditList.map((entry) => (
+                    <tr
+                      key={entry.id}
+                      className={`hover:bg-[#F9FAFB] transition-colors ${
+                        entry.reverted ? "opacity-40 line-through" : ""
+                      }`}
+                    >
+                      <td className="py-2.5 px-2 font-medium text-[#111827] font-sans">
+                        {entry.principal}
+                      </td>
+                      <td className="py-2.5 px-2">{entry.scope}</td>
+                      <td className="py-2.5 px-2">
+                        <span className="text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                          {entry.risk}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-2 text-emerald-700 flex items-center gap-1.5 font-sans font-medium">
+                        <span className="material-symbols-outlined text-[13px]">
+                          verified
+                        </span>
+                        {entry.decision}
+                      </td>
+                      <td className="py-2.5 px-2 text-gray-400">{entry.timestamp}</td>
+                      <td className="py-2.5 px-2 text-right font-sans">
+                        {entry.reverted ? (
+                          <span className="text-rose-600 text-[11px]">Reverted</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleToggleRevertAudit(entry.id)}
+                            className="px-2 py-0.5 rounded text-gray-500 hover:text-[#111827] hover:bg-neutral-100 border border-transparent hover:border-[#E5E7EB] transition-colors cursor-pointer"
+                          >
+                            Revert
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-          <span className="text-xs text-slate-400 font-mono bg-slate-800/60 px-2 py-0.5 rounded-md border border-slate-700">
-            {auditRows.length} logged events
-          </span>
-        </div>
-
-        <div className="overflow-x-auto rounded-2xl border border-slate-700/60 bg-[#0f172a] shadow-lg">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-slate-800 bg-[#0c1322] text-slate-300 font-semibold">
-                <th className="text-left px-4 py-3 w-28">Time</th>
-                <th className="text-left px-4 py-3">Requester</th>
-                <th className="text-left px-4 py-3">App</th>
-                <th className="text-left px-4 py-3">Decision</th>
-                <th className="text-left px-4 py-3">Approver</th>
-                <th className="text-right px-4 py-3 w-24">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {auditRows.map((row) => {
-                const timeStr = mounted ? formatTime(row.timestamp) : "--:--";
-
-                return (
-                  <tr key={row.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-2.5 text-slate-400 font-mono text-[11px]" suppressHydrationWarning>
-                      {timeStr}
-                    </td>
-                    <td className="px-4 py-2.5 font-semibold text-slate-100">{row.requesterName}</td>
-                    <td className="px-4 py-2.5 text-slate-200 font-medium">{row.app}</td>
-                    <td className="px-4 py-2.5">
-                      {row.decision === "granted" ? (
-                        <span className="inline-flex items-center gap-1 text-[#16A34A] font-semibold">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Granted
-                        </span>
-                      ) : row.decision === "pending_approval" ? (
-                        <span className="inline-flex items-center gap-1 text-[#F59E0B] font-semibold">
-                          <Clock className="w-3 h-3" />
-                          Pending
-                        </span>
-                      ) : row.decision === "undone" ? (
-                        <span className="inline-flex items-center gap-1 text-purple-400 font-semibold">
-                          <Undo2 className="w-3 h-3" />
-                          Revoked (Undone)
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[#DC2626] font-semibold">
-                          <XCircle className="w-3 h-3" />
-                          Denied
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-400 text-[11px]">{row.approver}</td>
-                    <td className="px-4 py-2.5 text-right">
-                      {row.canUndo && row.decision === "granted" && (
-                        <button
-                          onClick={() => handleUndo(row.id)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-950/70 hover:bg-purple-900 border border-purple-700/60 text-purple-300 text-[10px] font-semibold transition-colors shadow-sm"
-                          title="Revoke and rollback granted access"
-                        >
-                          <Undo2 className="w-3 h-3" />
-                          Undo
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
         </div>
       </div>
     </div>
