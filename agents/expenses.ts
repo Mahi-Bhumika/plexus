@@ -114,7 +114,7 @@ const RIYA = "Riya Sharma";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function asOfDate(): Date {
+export function asOfDate(): Date {
   const raw = process.env.EXPENSES_AS_OF ?? process.env.ZOMBIE_AS_OF;
   const d = raw ? new Date(raw) : null;
   return d && !isNaN(d.getTime()) ? d : new Date();
