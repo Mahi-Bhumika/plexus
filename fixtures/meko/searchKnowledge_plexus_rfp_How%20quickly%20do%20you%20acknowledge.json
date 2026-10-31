@@ -1,7 +1,1 @@
-[
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Incident Response Plan > Severity levels\n\nLevel: P1; Meaning: Customer data exposed or full outage; Acknowledge within: 15 minutes\nLevel: P2; Meaning: Major feature down or suspected exposure; Acknowledge within: 1 hour\nLevel: P3; Meaning: Degraded service, workaround exists; Acknowledge within: 1 business day\nLevel: P4; Meaning: Minor issue; Acknowledge within: 3 business days",
-    "ref": "6949b2fb-b2b3-4372-ab1f-289276f6da44"
-  }
-]
+[]
