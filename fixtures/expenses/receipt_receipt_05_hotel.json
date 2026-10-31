@@ -5,11 +5,8 @@
     "date": "2026-10-25",
     "invoice_number": "55120",
     "expense_type": "hotel",
-    "items": [
-      "description\": \"Room charge",
-      "amount\": 6500.00}, {"
-    ],
-    "subtotal": null,
+    "items": [],
+    "subtotal": 6500,
     "gst": 780,
     "total": 7280,
     "covers": null,

@@ -32,15 +32,19 @@ function adapt(raw: unknown): View | null {
   const all = pick(r, ["tools", "allTools", "all_tools", "rows", "items"]);
   const zombies = Array.isArray(zs) ? zs.map((x) => toTool(x, true)) : [];
   let tools: Tool[];
-  if (Array.isArray(all)) {
-    tools = all.map((x) => toTool(x, false));
-    const zn = new Set(zombies.map((z) => z.name));
-    tools = tools.map((t) => (zn.has(t.name) ? { ...t, zombie: true } : t));
-  } else {
-    tools = zombies;
-  }
-  if (tools.length === 0) return null;
-  const waste = num(pick(r, ["wastePerMonth", "monthlyWaste", "totalMonthlyWaste", "total_waste_inr", "wasted_per_month"]));
+if (Array.isArray(zs)) {
+  // report has an explicit zombie list: mark matches inside the full list
+  tools = Array.isArray(all) ? all.map((x) => toTool(x, false)) : zombies;
+  const zn = new Set(zombies.map((z) => z.name));
+  tools = tools.map((t) => (zn.has(t.name) ? { ...t, zombie: true } : t));
+} else if (Array.isArray(all)) {
+  // your ZombieReport: `tools` already contains only zombies
+  tools = all.map((x) => toTool(x, true));
+} else {
+  tools = zombies;
+}
+if (tools.length === 0) return null;
+  const waste = num(pick(r, ["monthlyWasteInr", "wastePerMonth", "monthlyWaste", "totalMonthlyWaste", "total_waste_inr", "wasted_per_month"]));
   return {
     checked: num(pick(r, ["totalToolsChecked"])) ?? tools.length,
     tools,
