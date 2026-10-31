@@ -1,0 +1,22 @@
+AQ.Ab8RN6LFBs3IqZB1xtC2mmZv87Z_N5q9W6YpP69vveVk3stneA
+
+API Key
+AQ.Ab8RN6LFBs3IqZB1xtC2mmZv87Z_N5q9W6YpP69vveVk3stneA
+Name
+Gemini API Key
+Project name
+projects/50269606322
+Project number
+50269606322
+
+
+   MEKO_MCP_URL=https://mcp.mekodata.ai/mcp
+   MEKO_AUTH=mko_tkn_<new key>
+   MEKO_DATAPACK_ID=e2e101d5-5f68-4672-8343-0c809adb98f2
+   GEMINI_MODEL_FAST=gemini-3.5-flash-lite
+   GEMINI_MODEL_FALLBACK=gemini-3.1-flash-lite
+   GEMINI_MODEL_SMART=gemini-3.6-flash
+
+GEMINI_MODEL_FAST=gemini-3.5-flash-lite      # tested: 5/5 clean, 8/8 correct
+GEMINI_MODEL_FALLBACK=gemini-3.1-flash-lite  # tested: 5/5 clean, 8/8 correct
+GEMINI_MODEL_SMART=gemini-3.6-flash          # only ~20 requests/day on free tier; use only to record fixtures

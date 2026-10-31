@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "ref": "5b30de01-e9fe-4807-aebd-8409fd9e0334"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Retention schedule\n\nData type: Customer data (transaction files, reconciliation results); Retention: For the contract term plus 90 days\nData type: Application and system logs; Retention: 400 days\nData type: Database backups; Retention: 35 days\nData type: Support tickets; Retention: 3 years\nData type: Security audit logs; Retention: 7 years\nData type: Employee records; Retention: 7 years after the end of employment",
+    "ref": "44bc0fe8-d603-431b-b40b-453c570fa3dc"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
+    "ref": "95dd8646-f9af-47e9-8a3f-c79f0c4da25b"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Customer requests\n\nA customer administrator can request early deletion in writing. Nimbus Labs confirms completion by email within 10 business days of the request.",
+    "ref": "e50d6acf-6cbd-4f67-98b8-858264fa060f"
+  }
+]

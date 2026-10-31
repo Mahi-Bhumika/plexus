@@ -1,0 +1,4 @@
+{
+  "success": true,
+  "memoryId": "{\"_meta\":{\"fastmcp\":{\"wrap_result\":true}},\"content\":[{\"type\":\"text\",\"text\":\"{\\n  \\\"results\\\": [\\n    {\\n      \\\"id\\\": \\\"a9f84a49-b27c-4a46-9210-023fbe226625\\\",\\n      \\\"memory\\\": \\\"RFP_FIX | test question | test approved answer | Mahi\\\",\\n      \\\"event\\\": \\\"ADD\\\",\\n      \\\"actor_id\\\": null,\\n      \\\"role\\\": \\\"user\\\"\\n    }\\n  ]\\n}\"}],\"structuredContent\":{\"result\":\"{\\n  \\\"results\\\": [\\n    {\\n      \\\"id\\\": \\\"a9f84a49-b27c-4a46-9210-023fbe226625\\\",\\n      \\\"memory\\\": \\\"RFP_FIX | test question | test approved answer | Mahi\\\",\\n      \\\"event\\\": \\\"ADD\\\",\\n      \\\"actor_id\\\": null,\\n      \\\"role\\\": \\\"user\\\"\\n    }\\n  ]\\n}\"},\"isError\":false}"
+}

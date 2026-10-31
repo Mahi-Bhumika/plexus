@@ -1,0 +1,117 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Individual requests\n\nWhen a bank forwards a request from an individual (access, correction or erasure), Nimbus Labs responds to the bank within 15 days.",
+    "ref": "99ffa279-944e-4923-a475-9339e7420d9d"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Individual requests\n\nWhen a bank forwards a request from an individual (access, correction or erasure), Nimbus Labs responds to the bank within 15 days.",
+    "ref": "36b595c9-9eec-47bd-8687-304c336a7529"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > Secure development\n\nEngineers complete secure coding training once a year. Secrets are stored in AWS Secrets Manager and are never committed to source control; a secrets scanner blocks any commit that contains one.",
+    "ref": "936a8eaf-7e54-4873-a012-6feb344bee7f"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Roles\n\nFor the transaction data it processes for banks, Nimbus Labs acts as a data processor on the customer's instructions. The customer remains the data fiduciary.",
+    "ref": "33faf7a1-c7a3-4d45-ae02-312a6791d6e7"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Roles\n\nFor the transaction data it processes for banks, Nimbus Labs acts as a data processor on the customer's instructions. The customer remains the data fiduciary.",
+    "ref": "301bc45d-66f1-4f3b-ad4f-78ea9b947d0e"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Vendor tiers\n\nVendors are placed in three tiers:\n\nTier 1: handles customer data or is critical to running the platform.Tier 2: handles internal business data only.Tier 3: no access to company or customer data.\n\nNimbus Labs currently has 14 Tier 1 vendors.",
+    "ref": "8ece0be4-1f53-439d-a448-0f0422973296"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard > Sensitive fields\n\nAccount numbers and UPI identifiers are additionally encrypted at the field level before they are written to the database, so they remain protected even in database exports.",
+    "ref": "a5fa08e9-5804-4275-85f3-defd5b6692e9"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard\n\nDocument owner: Karan Malhotra · Version: 1.6 · Last reviewed: 10 Sep 2026",
+    "ref": "25b73e64-05ba-46f4-b527-238f2cafbd18"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note\n\nDocument owner: Riya Sharma · Version: 1.2 · Last reviewed: 5 Oct 2026",
+    "ref": "6d50b6d2-b4c1-437f-9708-2a961ea11a32"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note\n\nDocument owner: Riya Sharma · Version: 1.2 · Last reviewed: 5 Oct 2026",
+    "ref": "bc1350dd-cd1a-4fbd-ad79-03ddbc3a2591"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Legal holds\n\nIf a legal hold applies, deletion is paused for the data in scope. The founder is the only person who can place or release a legal hold.",
+    "ref": "92078a71-d9c2-43c0-b747-ce482689e1e0"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Approach\n\nNimbus Labs designs Nimbus Ledger Sync for alignment with India's Digital Personal Data Protection (DPDP) Act, 2023. This is a design goal, not a certification or a compliance statement.",
+    "ref": "20cbe048-4499-4551-b220-3b7078c7174f"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Approach\n\nNimbus Labs designs Nimbus Ledger Sync for alignment with India's Digital Personal Data Protection (DPDP) Act, 2023. This is a design goal, not a certification or a compliance statement.",
+    "ref": "0adf850a-7e08-498e-b1f2-43b6fbfe39ba"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Due diligence\n\nBefore a Tier 1 vendor is onboarded, Nimbus Labs reviews its security reports (for example SOC 2 or ISO 27001), signs a data processing agreement and records the review in the vendor register. The Engineering Manager approves every Tier 1 vendor.",
+    "ref": "ce7c51d8-bacd-43a2-85a0-04eb09d00c02"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Exit\n\nWhen a vendor is removed, Nimbus Labs confirms in writing that data held by the vendor has been returned or deleted.",
+    "ref": "0a5bb844-f873-441b-838d-18abed96407e"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy\n\nDocument owner: Riya Sharma · Version: 1.3 · Last reviewed: 3 Aug 2026",
+    "ref": "d0985595-5f7e-4cf0-be27-b896702934ba"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper\n\nDocument owner: Karan Malhotra · Version: 3.0 · Last reviewed: 2 Sep 2026",
+    "ref": "6d603ea9-75cb-4ee2-9df3-b03b45234842"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard > Customer-managed keys\n\nCustomer-managed keys (bring-your-own-key) are not supported in the current product. All keys are managed by Nimbus Labs through AWS KMS. This capability is not on the committed roadmap.",
+    "ref": "10ed925e-c001-4858-b0c3-7a38ec36855d"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Privacy contact\n\nQuestions go to privacy@nimbuslabs.example. Riya Sharma is the named privacy lead.",
+    "ref": "52021c47-5d17-4d02-9830-da909d4e13e0"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > What this document does not claim\n\nNimbus Labs does not currently run a public bug bounty program.",
+    "ref": "36833dce-fe9f-4e52-810c-e4dd00d68312"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > Network and application security\n\nProduction runs in private subnets; only the load balancer is internet-facing.A web application firewall filters all inbound traffic.Every code change is peer-reviewed by at least one other engineer before it can be merged.Static code analysis and dependency scanning run on every pull request.",
+    "ref": "50726915-4ae0-458b-8169-4ff925e0b3ff"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan > Testing\n\nThe plan is exercised through a tabletop drill twice a year. The latest drill took place on 4 June 2026.",
+    "ref": "6fd8f6ef-8a0d-4e88-abfa-094ad0249d5f"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Change notice\n\nCustomers receive 30 days' advance notice before a new sub-processor is added. A customer may object in writing within that period.",
+    "ref": "def6a082-0462-45ef-918a-dddf73da79ac"
+  }
+]
