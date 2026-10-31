@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "21",
+      "answer": "Administrator accounts must use hardware security keys in addition to passwords.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "c679f90f-b290-45c4-a2bf-9b24ee5f7340"
+    },
+    {
+      "id": "22",
+      "answer": "Severity 1 (P1) incidents are acknowledged within 15 minutes.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6949b2fb-b2b3-4372-ab1f-289276f6da44"
+    },
+    {
+      "id": "23",
+      "answer": "When a breach involving customer data is confirmed, affected customers are notified within 72 hours.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "0553c871-ff4b-49ed-91b1-3fd6be055512"
+    },
+    {
+      "id": "24",
+      "answer": "A written postmortem is completed within 5 business days of closing any P1 or P2 incident.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "febed243-2973-4e10-aa07-d9eb8a3b812e"
+    },
+    {
+      "id": "25",
+      "answer": "The plan is exercised through a tabletop drill twice a year.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6fd8f6ef-8a0d-4e88-abfa-094ad0249d5f"
+    },
+    {
+      "id": "26",
+      "answer": "All customer data is encrypted at rest with AES-256, covering databases, object storage, backups, and laptop disks.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "09447b24-3ef4-4313-9d0b-13a5a5e13232"
+    },
+    {
+      "id": "27",
+      "answer": "All connections to Nimbus Ledger Sync use TLS 1.2 or higher, with TLS 1.3 preferred and negotiated whenever supported.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b9111fea-8c14-43d3-b167-54ed936aae7a"
+    },
+    {
+      "id": "28",
+      "answer": "Encryption keys are created and stored in AWS KMS and are rotated every 365 days. Access to key administration is limited to two named engineers and is logged.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "4796b3e5-bc8e-43d0-ac0c-f753481f04f9"
+    },
+    {
+      "id": "29",
+      "answer": "The Recovery Point Objective (RPO) is 1 hour, and the Recovery Time Objective (RTO) is 4 hours.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "27560314-f845-44db-87c1-a93529f1b012"
+    },
+    {
+      "id": "30",
+      "answer": "Production runs in AWS Mumbai (ap-south-1) and a cross-region disaster recovery replica is maintained in Singapore (ap-southeast-1).",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "7348afeb-6cf8-4fe8-aa37-4a6df670a12a"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

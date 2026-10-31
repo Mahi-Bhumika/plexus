@@ -16,7 +16,7 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function getDatapackId(): string {
+export function getDatapackId(): string {
   const id = process.env.MEKO_DATAPACK_ID;
   if (!id) {
     throw new Error("MEKO_DATAPACK_ID not set");
@@ -59,7 +59,7 @@ function isRetryableError(err: any): boolean {
   return false;
 }
 
-async function invokeToolSafe(
+export async function invokeToolSafe(
   client: Client,
   toolName: string,
   args: Record<string, unknown>,
@@ -80,7 +80,7 @@ async function invokeToolSafe(
   return result;
 }
 
-async function getMekoClient(): Promise<Client | null> {
+export async function getMekoClient(): Promise<Client | null> {
   const mekoUrl = process.env.MEKO_MCP_URL || "https://mcp.mekodata.ai/mcp";
   const mekoAuth = process.env.MEKO_AUTH;
 
@@ -121,7 +121,7 @@ async function getMekoClient(): Promise<Client | null> {
   }
 }
 
-async function getOrCreateConversation(client: Client, agentId: string): Promise<string> {
+export async function getOrCreateConversation(client: Client, agentId: string): Promise<string> {
   const existing = agentConversationMap.get(agentId);
   if (existing) {
     return existing;
@@ -171,6 +171,7 @@ async function callWithRetry<T>(fn: () => Promise<T>): Promise<T> {
 }
 
 export type MemorySearchResult = {
+  id?: string;
   text: string;
   score?: number;
   fallback?: boolean;
@@ -204,7 +205,17 @@ export async function addMemory(
             text,
           }),
         );
-        return { success: true, memoryId: JSON.stringify(res) };
+        let extractedId: string | undefined;
+        try {
+          if (res?.content?.[0]?.text) {
+            const parsed = JSON.parse(res.content[0].text);
+            const first = Array.isArray(parsed?.results) ? parsed.results[0] : parsed?.results;
+            if (first?.id) extractedId = String(first.id);
+          }
+        } catch {
+          // fallback to JSON string
+        }
+        return { success: true, memoryId: extractedId || JSON.stringify(res) };
       }
     } catch (err: any) {
       console.warn(`meko memory_add failed: ${sanitizeErrorMessage(err?.message || String(err))}`);
@@ -217,6 +228,38 @@ export async function addMemory(
       .prepare("INSERT INTO memories (id, agent_id, text, created_at) VALUES (?, ?, ?, ?)")
       .run(id, agentId, text, now);
     return { success: true, memoryId: id, fallback: true };
+  });
+}
+
+export async function deleteMemory(
+  memoryId: string,
+  agentId = "plexus_rfp",
+  replayKey?: string,
+): Promise<{ success: boolean; fallback?: boolean }> {
+  const key = replayKey || `meko/deleteMemory_${agentId}_${memoryId}`;
+  return withReplay(key, async () => {
+    const datapackId = getDatapackId();
+    try {
+      const client = await getMekoClient();
+      if (client) {
+        const convId = await getOrCreateConversation(client, agentId);
+        await callWithRetry(() =>
+          invokeToolSafe(client, "memory_delete_by_id", {
+            conversation_id: convId,
+            agent_id: agentId,
+            datapack_id: datapackId,
+            memory_id: memoryId,
+          }),
+        );
+        return { success: true };
+      }
+    } catch (err: any) {
+      console.warn(`meko memory_delete_by_id failed: ${sanitizeErrorMessage(err?.message || String(err))}`);
+    }
+
+    // SQLite fallback
+    getDb().prepare("DELETE FROM memories WHERE id = ?").run(memoryId);
+    return { success: true, fallback: true };
   });
 }
 
@@ -245,6 +288,7 @@ export async function searchMemory(
           const parsed = JSON.parse(res.content[0].text);
           const results = Array.isArray(parsed?.results) ? parsed.results : Array.isArray(parsed) ? parsed : [];
           return results.map((m: any) => ({
+            id: m.id ? String(m.id) : undefined,
             text: m.memory || m.text || (typeof m === "string" ? m : JSON.stringify(m)),
             score: m.score,
           }));
@@ -260,22 +304,22 @@ export async function searchMemory(
       .map((w) => w.trim().replace(/[%_]/g, ""))
       .filter((w) => w.length > 2);
 
-    let rows: Array<{ text: string }> = [];
+    let rows: Array<{ id: string; text: string }> = [];
     if (words.length > 0) {
       const conditions = words.map(() => "text LIKE ?").join(" OR ");
       const params = words.map((w) => `%${w}%`);
       rows = getDb()
         .prepare(
-          `SELECT text FROM memories WHERE (agent_id = ? OR agent_id = 'all') AND (${conditions}) ORDER BY created_at DESC LIMIT 10`,
+          `SELECT id, text FROM memories WHERE (agent_id = ? OR agent_id = 'all') AND (${conditions}) ORDER BY created_at DESC LIMIT 10`,
         )
-        .all(agentId, ...params) as Array<{ text: string }>;
+        .all(agentId, ...params) as Array<{ id: string; text: string }>;
     } else {
       rows = getDb()
-        .prepare("SELECT text FROM memories WHERE agent_id = ? OR agent_id = 'all' ORDER BY created_at DESC LIMIT 10")
-        .all(agentId) as Array<{ text: string }>;
+        .prepare("SELECT id, text FROM memories WHERE agent_id = ? OR agent_id = 'all' ORDER BY created_at DESC LIMIT 10")
+        .all(agentId) as Array<{ id: string; text: string }>;
     }
 
-    return rows.map((r) => ({ text: r.text, fallback: true }));
+    return rows.map((r) => ({ id: r.id, text: r.text, fallback: true }));
   });
 }
 

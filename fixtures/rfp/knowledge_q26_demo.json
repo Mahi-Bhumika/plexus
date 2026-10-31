@@ -1,0 +1,7 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard > Encryption at rest\n\nAll customer data is encrypted at rest with AES-256. This covers databases, object storage, backups and laptop disks.",
+    "ref": "09447b24-3ef4-4313-9d0b-13a5a5e13232"
+  }
+]
