@@ -61,3 +61,5 @@ fixtures/rfp/*_test_*.json
 fixtures/rfp/*_lt1_*.json
 fixtures/rfp/*_lt2_*.json
 plexus.db*
+
+fixtures/meko/

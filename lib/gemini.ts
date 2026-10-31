@@ -30,10 +30,14 @@ function cleanJsonSchema(schema: Record<string, unknown>): Record<string, unknow
   return cloned;
 }
 
+// base64 image data WITHOUT the "data:...;base64," prefix
+export type GeminiImage = { mimeType: string; data: string };
+
 export type GenerateJsonOptions = {
   model?: "FAST" | "SMART" | "FALLBACK";
   systemInstruction?: string;
   timeoutMs?: number;
+  images?: GeminiImage[]; // for receipts and other vision calls
 };
 
 export type GenerateJsonResult<T> =
@@ -50,6 +54,14 @@ function getModelName(slot: "FAST" | "SMART" | "FALLBACK" = "FAST"): string {
   return process.env.GEMINI_MODEL_FAST || "gemini-3.5-flash-lite";
 }
 
+function describeError(err: any): string {
+  const base = String(err?.message || err);
+  const c = err?.cause;
+  const cause = c ? String(c.code || c.message || c) : "";
+  const status = err?.status ? ` [status ${err.status}]` : "";
+  return `${base}${cause ? ` (cause: ${cause})` : ""}${status}`;
+}
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -61,14 +73,30 @@ async function callGeminiOnce(
   jsonSchema: Record<string, unknown>,
   timeoutMs: number,
   systemInstruction?: string,
+  images?: GeminiImage[],
 ): Promise<string> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const contents =
+      images && images.length > 0
+        ? [
+            {
+              role: "user",
+              parts: [
+                ...images.map((i) => ({
+                  inlineData: { mimeType: i.mimeType, data: i.data },
+                })),
+                { text: prompt },
+              ],
+            },
+          ]
+        : prompt;
+
     const response = await ai.models.generateContent({
       model: modelName,
-      contents: prompt,
+      contents,
       config: {
         systemInstruction,
         responseMimeType: "application/json",
@@ -111,6 +139,7 @@ export async function generateJson<T>(
   const initialModelSlot = options.model || (process.env.USE_SMART === "true" ? "SMART" : "FAST");
   let currentModelName = getModelName(initialModelSlot);
   const timeoutMs = options.timeoutMs || 25000;
+  const images = options.images;
 
   const delays = [2000, 4000, 8000];
   let lastError: any = null;
@@ -126,6 +155,7 @@ export async function generateJson<T>(
         responseJsonSchema,
         timeoutMs,
         options.systemInstruction,
+        images,
       );
       break;
     } catch (err: any) {
@@ -152,6 +182,7 @@ export async function generateJson<T>(
           responseJsonSchema,
           timeoutMs,
           options.systemInstruction,
+          images,
         );
       } catch (err: any) {
         lastError = err;
@@ -163,7 +194,7 @@ export async function generateJson<T>(
     return {
       success: false,
       flagged: true,
-      error: lastError ? String(lastError.message || lastError) : "Failed to obtain Gemini response after retries",
+      error: lastError ? describeError(lastError) : "Failed to obtain Gemini response after retries",
       modelUsed: currentModelName,
     };
   }
@@ -183,6 +214,7 @@ export async function generateJson<T>(
         responseJsonSchema,
         timeoutMs,
         options.systemInstruction,
+        images,
       );
       parsedJson = JSON.parse(rawResponseText);
     } catch (retryErr: any) {
@@ -219,6 +251,7 @@ export async function generateJson<T>(
       responseJsonSchema,
       timeoutMs,
       options.systemInstruction,
+      images,
     );
     const retryParsed = JSON.parse(rawResponseText);
     const retryValidation = schema.safeParse(retryParsed);

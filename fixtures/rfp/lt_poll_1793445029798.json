@@ -1,12 +1,12 @@
 [
   {
-    "id": "3e3644cc-96a3-4b78-9576-e8f944938fac",
+    "id": "65b06980-b6b0-4056-9cab-437c84294c92",
     "text": "RFP_FIX | Can personal (BYOD) devices be used to access customer data? | No. Access is from company-issued, MDM-managed laptops with enforced disk encryption; personal devices are not permitted. | Karan",
-    "score": 0.43653015358618535
+    "score": 0.4385778600097372
   },
   {
-    "id": "e17d323d-551c-4efa-ba1c-d97891c822ca",
+    "id": "57a943eb-c948-40ee-981e-22cc36485c68",
     "text": "RFP_FIX | Will you provide a certificate of deletion when our data is removed? | Nimbus Labs confirms deletion in writing by email within 10 business days of an early-deletion request; a signed deletion confirmation is available on request. | Karan",
-    "score": 0.4171836371669533
+    "score": 0.41908339930053123
   }
 ]

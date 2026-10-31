@@ -341,7 +341,7 @@ export async function searchKnowledge(
             agent_id: agentId,
             datapack_id: datapackId,
             query,
-            limit: 5,
+            limit: 8,
           }),
         );
 
@@ -349,12 +349,17 @@ export async function searchKnowledge(
           const parsed = JSON.parse(res.content[0].text);
           const results = Array.isArray(parsed?.results) ? parsed.results : Array.isArray(parsed) ? parsed : [];
 
-          if (results.length > 0 && !loggedKnowledgeKeys) {
-            console.warn("Meko knowledge item keys:", Object.keys(results[0]));
+          // Knowledge search also returns planning-note memories that Meko indexes
+          // into the knowledge base (metadata_filters.source === "memory"). Keep
+          // policy documents only; learned RFP fixes come back through searchMemory.
+          const docs = results.filter((r: any) => r?.metadata_filters?.source !== "memory");
+
+          if (docs.length > 0 && !loggedKnowledgeKeys) {
+            console.warn("Meko knowledge item keys:", Object.keys(docs[0]));
             loggedKnowledgeKeys = true;
           }
 
-          return results.map((item: any) => ({
+          return docs.map((item: any) => ({
             title: item.title || item.doc_name || item.document_name || item.name || "Knowledge Doc",
             content: item.chunk_text || item.content || item.text || "",
             ref: item.id ? String(item.id) : item.ref || item.doc_name || "policy",

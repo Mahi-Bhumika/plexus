@@ -112,6 +112,8 @@ function resolveRow(
     };
   }
   const d = decide(r, (ctx?.chunks.length ?? 0) > 0);
+  // Gemini cites a chunk id; show the document section title instead
+  const cited = ctx?.chunks.find((c) => c.ref === r.source_ref);
   return {
     q,
     answer: r.answer,
@@ -119,7 +121,7 @@ function resolveRow(
     coverage: r.coverage,
     status: d.status,
     reason: d.reason,
-    sourceRef: r.source_ref,
+    sourceRef: cited ? deriveCitationTitle(cited) : r.source_ref,
     reused: 0,
   };
 }
@@ -308,6 +310,7 @@ function buildBatchPrompt(
 ): string {
   const lines: string[] = [
     "You are filling an RFP questionnaire. For each question, use ONLY the provided knowledge chunks to answer. Never use outside knowledge.",
+    "Write each answer in 1 to 3 sentences. Include every specific date, number, count and name in the chunks that bears on the question; do not leave one out.",
     "",
     "Set coverage for each question using these exact rules:",
     "- \"full\": the chunks answer every part of the question, and contain everything a customer would need to rely on the answer.",
@@ -329,7 +332,7 @@ function buildBatchPrompt(
       for (const chunk of ctx.chunks) {
         const title = deriveCitationTitle(chunk);
         lines.push(`- [${title}] ref:${chunk.ref}`);
-        lines.push(`  "${chunk.content.slice(0, 500)}"`);
+        lines.push(`  "${chunk.content.slice(0, 1200)}"`);
       }
     } else {
       lines.push("  (no knowledge chunks found)");

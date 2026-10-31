@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "41",
+      "answer": "Production access is just-in-time with grants lasting a maximum of 8 hours before expiring automatically. Interns are not eligible for production access. Access by Nimbus Labs staff is limited to support and operations needs under the access control policy.",
+      "coverage": "partial",
+      "confidence": 0.8,
+      "source_ref": "21b0c71e-5407-4dd5-aa35-312895df8f6b"
+    },
+    {
+      "id": "42",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "43",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "44",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "45",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "46",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "47",
+      "answer": "Customer-managed keys (bring-your-own-key) are not supported in the current product, and this capability is not on the committed roadmap. All keys are managed by Nimbus Labs through AWS KMS.",
+      "coverage": "partial",
+      "confidence": 0.8,
+      "source_ref": "10ed925e-c001-4858-b0c3-7a38ec36855d"
+    },
+    {
+      "id": "48",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "49",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "50",
+      "answer": "Nimbus Labs holds a SOC 2 Type II report and does not yet hold ISO 27001 certification, which is planned for 2027.",
+      "coverage": "partial",
+      "confidence": 0.9,
+      "source_ref": "bc963c62-cf2d-4b99-9685-316b0ae95a9b"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

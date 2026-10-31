@@ -18,18 +18,13 @@ function isDemoMode(): boolean {
   return process.env.DEMO_MODE === "true";
 }
 
+// A failed result must never be recorded, or Demo Mode would replay it as a success.
 function isUnsuccessful(result: unknown): boolean {
   if (!result || typeof result !== "object") {
     return false;
   }
-  const value = result as { flagged?: unknown; ok?: unknown };
-  if (value.flagged === true) {
-    return true;
-  }
-  if (value.ok === false) {
-    return true;
-  }
-  return false;
+  const value = result as { flagged?: unknown; ok?: unknown; success?: unknown };
+  return value.flagged === true || value.ok === false || value.success === false;
 }
 
 export async function withReplay<T>(key: string, fn: () => Promise<T>): Promise<T> {
