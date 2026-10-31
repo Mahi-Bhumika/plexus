@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { generateJson } from "@/lib/gemini";
-import { searchKnowledge, searchMemory, logTurn } from "@/lib/meko";
+import { searchKnowledge, searchMemory, addMemory, logTurn } from "@/lib/meko";
 import { withReplay } from "@/lib/replay";
 import { emitEvent, newEventId } from "@/lib/events";
 import { getDb } from "@/lib/db";
@@ -37,6 +37,91 @@ type MemoryFix = {
   text: string;
 };
 
+type Fix = { answer: string; approver: string };
+type Ctx = { chunks: KnowledgeChunk[]; memFix: Fix | null };
+
+export type RowStatus = "filled" | "flagged" | "error";
+export type Coverage = "full" | "partial" | "none";
+export type FlagReason =
+  | "gemini_error" // Gemini call failed or returned nothing for this id
+  | "no_knowledge" // knowledge search returned zero chunks
+  | "coverage:none" // chunks found, but they do not answer the question
+  | "coverage:partial" // chunks answer only part, or reveal a gap
+  | "low_confidence"; // full coverage but confidence under threshold
+
+type Resolved = {
+  q: QuestionInput;
+  answer: string | null;
+  confidence: number;
+  coverage: Coverage | null;
+  status: RowStatus;
+  reason: FlagReason | null;
+  sourceRef: string | null;
+  reused: number;
+};
+
+export function decide(
+  r: QuestionResult,
+  hadChunks: boolean,
+): { status: RowStatus; reason: FlagReason | null } {
+  if (r.coverage === "none") {
+    return {
+      status: "flagged",
+      reason: hadChunks ? "coverage:none" : "no_knowledge",
+    };
+  }
+  if (r.coverage === "partial") {
+    return { status: "flagged", reason: "coverage:partial" };
+  }
+  if (r.confidence < CONFIDENCE_THRESHOLD) {
+    return { status: "flagged", reason: "low_confidence" };
+  }
+  return { status: "filled", reason: null };
+}
+
+function resolveRow(
+  q: QuestionInput,
+  r: QuestionResult | undefined,
+  ctx: Ctx | undefined,
+  failedIds: Set<string>,
+): Resolved {
+  if (ctx?.memFix) {
+    return {
+      q,
+      answer: ctx.memFix.answer,
+      confidence: 1,
+      coverage: "full",
+      status: "filled",
+      reason: null,
+      sourceRef: `fix:${ctx.memFix.approver}`,
+      reused: 1,
+    };
+  }
+  if (!r || failedIds.has(q.id)) {
+    return {
+      q,
+      answer: null,
+      confidence: 0,
+      coverage: null,
+      status: "error",
+      reason: "gemini_error",
+      sourceRef: null,
+      reused: 0,
+    };
+  }
+  const d = decide(r, (ctx?.chunks.length ?? 0) > 0);
+  return {
+    q,
+    answer: r.answer,
+    confidence: r.confidence,
+    coverage: r.coverage,
+    status: d.status,
+    reason: d.reason,
+    sourceRef: r.source_ref,
+    reused: 0,
+  };
+}
+
 function deriveCitationTitle(chunk: KnowledgeChunk): string {
   const firstLine = chunk.content.split("\n")[0]?.trim() ?? "";
   if (firstLine.startsWith("Section: ")) {
@@ -45,50 +130,79 @@ function deriveCitationTitle(chunk: KnowledgeChunk): string {
   return chunk.title || "Knowledge Doc";
 }
 
-function parseMemoryFix(
-  text: string,
-  question: string,
-): { answer: string; approver: string } | null {
-  // Format: "RFP_FIX | <question> | <approved answer> | <approver>"
-  if (!text.startsWith("RFP_FIX")) return null;
-  const parts = text.split("|").map((p) => p.trim());
+// ---- Safer reuse match -------------------------------------------------
+// A stored fix is reused only when the new question is clearly a rewording
+// of the fixed one: same numbers, and at least half of the shorter question's
+// content words appear in the other. Thresholds are a starting point; tune
+// them against the real sheet 1 / sheet 2 pairs with scripts/learning-test.ts.
+
+const STOP = new Set([
+  "the", "and", "for", "are", "you", "your", "our", "does", "do", "how",
+  "what", "which", "that", "this", "with", "from", "have", "has", "can",
+  "will", "any", "all", "please", "describe", "provide", "explain", "its",
+  "who", "when", "where", "into", "not", "than", "then", "also", "such",
+]);
+
+function tokens(s: string): Set<string> {
+  return new Set(
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9\s.%]/g, " ")
+      .split(/\s+/)
+      .map((w) => w.replace(/^\.+|\.+$/g, ""))
+      .filter((w) => w.length > 2 && !STOP.has(w))
+      // crude stemming: retain / retained / retention share a prefix
+      .map((w) => (/\d/.test(w) || w.length <= 5 ? w : w.slice(0, 5))),
+  );
+}
+
+export function sameQuestion(a: string, b: string): boolean {
+  const ta = tokens(a);
+  const tb = tokens(b);
+  if (ta.size === 0 || tb.size === 0) return false;
+
+  const nums = (s: Set<string>) =>
+    [...s].filter((w) => /\d/.test(w)).sort().join(",");
+  if (nums(ta) !== nums(tb)) return false;
+
+  let inter = 0;
+  for (const w of ta) if (tb.has(w)) inter++;
+  if (inter < 3) return false;
+  return inter / Math.min(ta.size, tb.size) >= 0.5;
+}
+
+function parseMemoryFix(text: string, question: string): Fix | null {
+  // Stored as: "RFP_FIX | <question> | <approved answer> | <approver>"
+  // Meko may rewrite memories, so look for the marker rather than
+  // requiring it at position 0.
+  const idx = text.indexOf("RFP_FIX");
+  if (idx < 0) return null;
+  const parts = text
+    .slice(idx)
+    .split("|")
+    .map((p) => p.trim());
   if (parts.length < 4) return null;
-  const fixQuestion = parts[1] ?? "";
-  const answer = parts[2] ?? "";
-  const approver = parts[3] ?? "";
-
-  // Only reuse if clearly about the same topic (case-insensitive keyword overlap)
-  const qWords = question
-    .toLowerCase()
-    .split(/\s+/)
-    .filter((w) => w.length > 4);
-  const fqWords = fixQuestion.toLowerCase();
-  const overlapCount = qWords.filter((w) => fqWords.includes(w)).length;
-  if (overlapCount < 2) return null;
-
+  const [, fixQuestion, answer, approver] = parts;
+  if (!fixQuestion || !answer || !approver) return null;
+  if (!sameQuestion(question, fixQuestion)) return null;
   return { answer, approver };
 }
 
 async function fetchQuestionContext(
   q: QuestionInput,
   questionnaireId: string,
-): Promise<{
-  chunks: KnowledgeChunk[];
-  memFix: { answer: string; approver: string } | null;
-}> {
+): Promise<Ctx> {
   const knowledgeKey = `rfp/knowledge_q${q.id}_${questionnaireId}`;
   const memoryKey = `rfp/memory_q${q.id}_${questionnaireId}`;
 
   const [chunks, memories] = await Promise.all([
-    withReplay(knowledgeKey, () =>
-      searchKnowledge("plexus_rfp", q.question),
-    ),
+    withReplay(knowledgeKey, () => searchKnowledge("plexus_rfp", q.question)),
     withReplay(memoryKey, () =>
       searchMemory("plexus_rfp", `RFP_FIX ${q.question}`),
     ),
   ]);
 
-  let memFix: { answer: string; approver: string } | null = null;
+  let memFix: Fix | null = null;
   for (const mem of memories as MemoryFix[]) {
     const parsed = parseMemoryFix(mem.text, q.question);
     if (parsed) {
@@ -102,13 +216,16 @@ async function fetchQuestionContext(
 
 function buildBatchPrompt(
   batch: QuestionInput[],
-  contexts: Map<
-    string,
-    { chunks: KnowledgeChunk[]; memFix: { answer: string; approver: string } | null }
-  >,
+  contexts: Map<string, Ctx>,
 ): string {
   const lines: string[] = [
-    "You are filling an RFP questionnaire. For each question, use ONLY the provided knowledge chunks to answer. If chunks don't fully answer, set coverage to \"partial\" or \"none\".",
+    "You are filling an RFP questionnaire. For each question, use ONLY the provided knowledge chunks to answer. Never use outside knowledge.",
+    "",
+    "Set coverage for each question using these exact rules:",
+    "- \"full\": the chunks answer every part of the question, and contain everything a customer would need to rely on the answer.",
+    "- \"partial\": the chunks answer only part of the question, OR the honest answer reveals a gap between what the customer is asking for and what we do (for example, some data or copies fall outside their stated requirement) and the chunks contain no policy, option or next step for handling that gap.",
+    "- \"none\": the chunks do not answer the question at all.",
+    "For \"partial\" or \"none\", still give a short draft answer from the chunks if there is one, otherwise null.",
     "",
     "Questions and their knowledge:",
   ];
@@ -138,96 +255,82 @@ function buildBatchPrompt(
   return lines.join("\n");
 }
 
-function saveBatchToDb(
-  questionnaireId: string,
-  batch: QuestionInput[],
-  results: QuestionResult[],
-  contexts: Map<
-    string,
-    { chunks: KnowledgeChunk[]; memFix: { answer: string; approver: string } | null }
-  >,
-): void {
+function saveRows(questionnaireId: string, rows: Resolved[]): void {
   const db = getDb();
   const upsert = db.prepare(`
-    INSERT INTO rfp_questions (id, questionnaire_id, number, question, answer, confidence, status, source_ref, reused_from_fix)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO rfp_questions (id, questionnaire_id, number, question, answer, confidence, coverage, status, source_ref, flag_reason, reused_from_fix)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       answer = excluded.answer,
       confidence = excluded.confidence,
+      coverage = excluded.coverage,
       status = excluded.status,
       source_ref = excluded.source_ref,
+      flag_reason = excluded.flag_reason,
       reused_from_fix = excluded.reused_from_fix
   `);
 
-  const resultMap = new Map<string, QuestionResult>();
-  for (const r of results) {
-    resultMap.set(r.id, r);
-  }
-
-  for (const q of batch) {
-    const r = resultMap.get(q.id);
-    const ctx = contexts.get(q.id);
-    const rowId = `${questionnaireId}_q${q.number}`;
-
-    if (!r) {
-      // Error case: flag the row
-      upsert.run(rowId, questionnaireId, q.number, q.question, null, 0, "flagged", null, 0);
-      continue;
+  const tx = db.transaction((items: Resolved[]) => {
+    for (const r of items) {
+      upsert.run(
+        `${questionnaireId}_q${r.q.number}`,
+        questionnaireId,
+        r.q.number,
+        r.q.question,
+        r.answer,
+        r.confidence,
+        r.coverage,
+        r.status,
+        r.sourceRef,
+        r.reason,
+        r.reused,
+      );
     }
+  });
+  tx(rows);
+}
 
-    const isFilled =
-      r.coverage === "full" && r.confidence >= CONFIDENCE_THRESHOLD;
-    const status = isFilled ? "filled" : "flagged";
-    const reusedFromFix = ctx?.memFix != null ? 1 : 0;
-
-    let answer = r.answer;
-    let sourceRef = r.source_ref;
-    if (ctx?.memFix) {
-      answer = ctx.memFix.answer;
-      sourceRef = `fix:${ctx.memFix.approver}`;
-    }
-
-    upsert.run(
-      rowId,
-      questionnaireId,
-      q.number,
-      q.question,
-      answer,
-      r.confidence,
-      status,
-      sourceRef,
-      reusedFromFix,
-    );
-  }
+function markBatchError(questionnaireId: string, batch: QuestionInput[]): void {
+  saveRows(
+    questionnaireId,
+    batch.map((q) => ({
+      q,
+      answer: null,
+      confidence: 0,
+      coverage: null,
+      status: "error" as const,
+      reason: "gemini_error" as const,
+      sourceRef: null,
+      reused: 0,
+    })),
+  );
 }
 
 async function processBatch(
   questionnaireId: string,
   batch: QuestionInput[],
   batchIndex: number,
-): Promise<{ filled: number; flagged: number }> {
+): Promise<{ filled: number; flagged: number; errors: number }> {
   const traceId = newEventId();
 
-  // Fetch knowledge and memory for each question in parallel
-  type CtxEntry = { chunks: KnowledgeChunk[]; memFix: { answer: string; approver: string } | null };
-  const contextEntries: Array<[string, CtxEntry]> = await Promise.all(
-    batch.map(async (q): Promise<[string, CtxEntry]> => {
+  const contextEntries: Array<[string, Ctx]> = await Promise.all(
+    batch.map(async (q): Promise<[string, Ctx]> => {
       try {
-        const ctx = await fetchQuestionContext(q, questionnaireId);
-        return [q.id, ctx];
-      } catch {
+        return [q.id, await fetchQuestionContext(q, questionnaireId)];
+      } catch (err) {
+        console.warn(
+          `rfp context failed for q${q.id}: ${err instanceof Error ? err.message : String(err)}`,
+        );
         return [q.id, { chunks: [], memFix: null }];
       }
     }),
   );
-  const contexts = new Map<string, CtxEntry>(contextEntries);
+  const contexts = new Map<string, Ctx>(contextEntries);
 
-  // Build questions where memory fix is available - skip Gemini for those
+  // Questions with a reusable human fix skip Gemini entirely
   const needsGemini = batch.filter((q) => !contexts.get(q.id)?.memFix);
-  const hasMemFix = batch.filter((q) => !!contexts.get(q.id)?.memFix);
-
+  const failedIds = new Set<string>();
   let geminiResults: QuestionResult[] = [];
-  let batchStatus: "done" | "flagged" | "error" = "done";
 
   if (needsGemini.length > 0) {
     const prompt = buildBatchPrompt(needsGemini, contexts);
@@ -240,65 +343,49 @@ async function processBatch(
     if (genResult.success) {
       geminiResults = genResult.data;
     } else {
-      batchStatus = "error";
-      // Flag all questions in batch that needed Gemini
-      geminiResults = needsGemini.map((q) => ({
-        id: q.id,
-        answer: null,
-        coverage: "none" as const,
-        confidence: 0,
-        source_ref: null,
-      }));
+      for (const q of needsGemini) failedIds.add(q.id);
     }
   }
 
-  // Build memory fix results
-  const fixResults: QuestionResult[] = hasMemFix.map((q) => {
-    const ctx = contexts.get(q.id)!;
-    return {
-      id: q.id,
-      answer: ctx.memFix!.answer,
-      coverage: "full" as const,
-      confidence: 1.0,
-      source_ref: `fix:${ctx.memFix!.approver}`,
-    };
-  });
+  const resultMap = new Map<string, QuestionResult>();
+  for (const r of geminiResults) resultMap.set(r.id, r);
 
-  const allResults = [...geminiResults, ...fixResults];
+  const rows = batch.map((q) =>
+    resolveRow(q, resultMap.get(q.id), contexts.get(q.id), failedIds),
+  );
+  saveRows(questionnaireId, rows);
 
-  // Save to DB
-  saveBatchToDb(questionnaireId, batch, allResults, contexts);
+  const filled = rows.filter((r) => r.status === "filled").length;
+  const errors = rows.filter((r) => r.status === "error").length;
+  const flagged = rows.length - filled;
 
-  // Compute counts
-  let filled = 0;
-  let flagged = 0;
+  const batchStatus: "done" | "flagged" | "error" =
+    errors > 0 ? "error" : flagged > 0 ? "flagged" : "done";
+
   const sources: Array<{ title: string; ref: string }> = [];
-
-  for (const r of allResults) {
-    const isFilled =
-      r.coverage === "full" && r.confidence >= CONFIDENCE_THRESHOLD;
-    if (isFilled) {
-      filled++;
-    } else {
-      flagged++;
-      if (batchStatus === "done") batchStatus = "flagged";
-    }
-    if (r.source_ref) {
-      sources.push({ title: r.source_ref, ref: r.source_ref });
-    }
+  for (const r of rows) {
+    if (r.sourceRef) sources.push({ title: r.sourceRef, ref: r.sourceRef });
   }
 
   const avgConfidence =
-    allResults.length > 0
-      ? allResults.reduce((sum, r) => sum + r.confidence, 0) / allResults.length
+    rows.length > 0
+      ? rows.reduce((sum, r) => sum + r.confidence, 0) / rows.length
       : 0;
 
-  // Emit batch activity event
+  const reasonCounts = new Map<string, number>();
+  for (const r of rows) {
+    if (r.reason) reasonCounts.set(r.reason, (reasonCounts.get(r.reason) ?? 0) + 1);
+  }
+  const reasonText =
+    reasonCounts.size > 0
+      ? ` [${[...reasonCounts].map(([k, v]) => `${k}:${v}`).join(", ")}]`
+      : "";
+
   emitEvent({
     id: newEventId(),
     timestamp: new Date().toISOString(),
     agent: "rfp",
-    action: `Batch ${batchIndex + 1}: answered ${allResults.length} questions (${filled} filled, ${flagged} flagged)`,
+    action: `Batch ${batchIndex + 1}: answered ${rows.length} questions (${filled} filled, ${flagged} flagged)${reasonText}`,
     status: batchStatus,
     confidence: avgConfidence,
     sources: sources.slice(0, 3),
@@ -306,31 +393,30 @@ async function processBatch(
     undoable: false,
   });
 
-  // Log turn
   await logTurn(
     "plexus_rfp",
     `Batch ${batchIndex}: ${batch.map((q) => q.id).join(",")}`,
-    `filled=${filled} flagged=${flagged}`,
+    `filled=${filled} flagged=${flagged} errors=${errors}${reasonText}`,
     ["Fetch knowledge", "Search memory", "Call Gemini", "Save to DB"],
     `Processed ${batch.length} questions with ${filled} filled at threshold ${CONFIDENCE_THRESHOLD}`,
+    `rfp/logTurn_${questionnaireId}_b${batchIndex}`,
   );
 
-  return { filled, flagged };
+  return { filled, flagged, errors };
 }
 
 export async function runRfp(
   questionnaireId: string,
   filePath: string,
-): Promise<{ filled: number; flagged: number; total: number }> {
+): Promise<{ filled: number; flagged: number; errors: number; total: number }> {
   const { readQuestions } = await import("@/lib/xlsx");
   const questions = await readQuestions(filePath);
   const total = questions.length;
 
   if (total === 0) {
-    return { filled: 0, flagged: 0, total: 0 };
+    return { filled: 0, flagged: 0, errors: 0, total: 0 };
   }
 
-  // Batch 10 questions per Gemini call, run 2 batches concurrently at most
   const BATCH_SIZE = 10;
   const CONCURRENCY = 2;
   const batches: QuestionInput[][] = [];
@@ -340,36 +426,123 @@ export async function runRfp(
 
   let totalFilled = 0;
   let totalFlagged = 0;
+  let totalErrors = 0;
 
-  // Process batches with concurrency limit of 2
   for (let i = 0; i < batches.length; i += CONCURRENCY) {
     const window = batches.slice(i, i + CONCURRENCY);
     const results = await Promise.all(
-      window.map((batch, j) => {
+      window.map(async (batch, j) => {
         try {
-          return processBatch(questionnaireId, batch, i + j);
-        } catch {
-          return Promise.resolve({ filled: 0, flagged: batch.length });
+          return await processBatch(questionnaireId, batch, i + j);
+        } catch (err) {
+          console.warn(
+            `rfp batch ${i + j} failed: ${err instanceof Error ? err.message : String(err)}`,
+          );
+          // Write error rows so the sheet shows them instead of dropping them
+          markBatchError(questionnaireId, batch);
+          return { filled: 0, flagged: batch.length, errors: batch.length };
         }
       }),
     );
     for (const r of results) {
       totalFilled += r.filled;
       totalFlagged += r.flagged;
+      totalErrors += r.errors;
     }
   }
 
-  // Emit summary event
   emitEvent({
     id: newEventId(),
     timestamp: new Date().toISOString(),
     agent: "rfp",
-    action: `RFP complete: filled ${totalFilled} of ${total}, flagged ${totalFlagged}`,
-    status: totalFlagged === 0 ? "done" : "flagged",
+    action: `RFP complete: filled ${totalFilled} of ${total}, flagged ${totalFlagged}${totalErrors > 0 ? `, ${totalErrors} errors` : ""}`,
+    status: totalErrors > 0 ? "error" : totalFlagged === 0 ? "done" : "flagged",
     sources: [],
     traceId: newEventId(),
     undoable: false,
   });
 
-  return { filled: totalFilled, flagged: totalFlagged, total };
+  return { filled: totalFilled, flagged: totalFlagged, errors: totalErrors, total };
+}
+
+// ---- Human fix ---------------------------------------------------------
+// POST /api/rfp/fix { questionId, answer?, approver } -> { row }
+// Saves the approved answer on the row and stores it as a memory so the
+// next questionnaire can reuse it (memory_search is cross-agent within the
+// datapack, so no separate promote step is needed for reuse to work).
+// If answer is omitted or blank, the row's current answer is approved as-is.
+
+export type RfpRow = {
+  id: string;
+  number: number;
+  question: string;
+  answer: string | null;
+  coverage: Coverage | null;
+  confidence: number;
+  status: RowStatus;
+  flag_reason: FlagReason | null;
+  source_ref: string | null;
+  reused_from_fix: number;
+};
+
+const ROW_COLUMNS =
+  "id, number, question, COALESCE(human_answer, answer) AS answer, coverage, confidence, status, flag_reason, source_ref, reused_from_fix";
+
+export function getRow(questionId: string): RfpRow | undefined {
+  return getDb()
+    .prepare(`SELECT ${ROW_COLUMNS} FROM rfp_questions WHERE id = ?`)
+    .get(questionId) as RfpRow | undefined;
+}
+
+export async function humanFix(
+  questionId: string,
+  answer: string | undefined,
+  approver: string,
+): Promise<{ row: RfpRow; memoryId?: string; fallback: boolean }> {
+  const who = approver.replace(/\|/g, "/").trim();
+  if (!who) throw new Error("approver is required");
+
+  const db = getDb();
+  const existing = db
+    .prepare(
+      "SELECT id, number, question, COALESCE(human_answer, answer) AS current FROM rfp_questions WHERE id = ?",
+    )
+    .get(questionId) as
+    | { id: string; number: number; question: string; current: string | null }
+    | undefined;
+  if (!existing) throw new Error(`No question with id ${questionId}`);
+
+  const clean = (answer ?? existing.current ?? "")
+    .replace(/\|/g, "/")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!clean) throw new Error("No answer to approve: send an answer");
+
+  db.prepare(
+    `UPDATE rfp_questions
+     SET human_answer = ?, status = 'filled', confidence = 1, flag_reason = NULL, source_ref = ?
+     WHERE id = ?`,
+  ).run(clean, `fix:${who}`, existing.id);
+
+  const questionText = existing.question.replace(/\|/g, "/").replace(/\s+/g, " ").trim();
+  const mem = await addMemory(
+    "plexus_rfp",
+    `RFP_FIX | ${questionText} | ${clean} | ${who}`,
+  );
+
+  emitEvent({
+    id: newEventId(),
+    timestamp: new Date().toISOString(),
+    agent: "rfp",
+    action: `Human fix saved for Q${existing.number} (approved by ${who})`,
+    status: "done",
+    confidence: 1,
+    sources: [{ title: `fix:${who}`, ref: `fix:${who}` }],
+    traceId: newEventId(),
+    undoable: false,
+  });
+
+  const row = getRow(existing.id);
+  if (!row) throw new Error("Row vanished after update");
+  return { row, memoryId: mem.memoryId, fallback: mem.fallback ?? false };
 }

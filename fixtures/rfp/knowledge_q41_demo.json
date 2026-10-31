@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Access Control Policy > Production access\n\nProduction access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Interns are not eligible for production access.",
+    "ref": "21b0c71e-5407-4dd5-aa35-312895df8f6b"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
+    "ref": "5914e523-910a-4177-965a-3947429a9719"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
+    "ref": "adba155f-0f87-448e-8d59-bbd626735652"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "ref": "5b30de01-e9fe-4807-aebd-8409fd9e0334"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Onboarding and Offboarding Procedure > Onboarding\n\nA company laptop is issued with mobile device management (MDM) installed and disk encryption enforced.Accounts are created from the person's role template; additional access is requested through the access request process.Security awareness training must be completed within 7 days of joining. Access to production systems is not available until it is complete.Everyone signs a confidentiality agreement and the acceptable use policy.Annual refresher training is required for all staff.",
+    "ref": "213ea23f-94b2-4de7-90e0-35b6068042bd"
+  }
+]

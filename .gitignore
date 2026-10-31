@@ -49,3 +49,9 @@ next-env.d.ts
 
 # custom paths
 seed/answer_keys
+.env
+.env.*
+plexus.db
+plexus.db-wal
+plexus.db-shm
+fixtures/rfp/*_test_*.json

@@ -1,5 +1,6 @@
 // Run: pnpm tsx scripts/rfp-test.ts
 import path from "node:path";
+import fs from "node:fs";
 import { runRfp } from "@/agents/rfp";
 import { readQuestions } from "@/lib/xlsx";
 import ExcelJS from "exceljs";
@@ -93,7 +94,7 @@ async function main() {
   const answerKeyPath = path.resolve(process.cwd(), "data", "answer_key.xlsx");
 
   // Step 1: Run the RFP agent
-  const questionnaireId = `test_${crypto.randomUUID().slice(0, 8)}`;
+  const questionnaireId = process.env.DEMO_MODE === "true" ? "demo" : `test_${crypto.randomUUID().slice(0, 8)}`;
   console.log(`Running RFP agent on meridian.xlsx (questionnaireId: ${questionnaireId})...`);
 
   const rfpResult = await runRfp(questionnaireId, meridianPath);
@@ -164,8 +165,101 @@ async function main() {
 
   if (wrongRows.length > 0) {
     console.log(`\nWrong rows:`);
+    const keyMap = new Map<number, AnswerKeyRow>();
+    for (const k of answerKey) {
+      keyMap.set(k.id, k);
+    }
+
+    // Load fixtures to retrieve coverage, confidence, and source chunks
+    const fixturesDir = path.resolve(process.cwd(), "fixtures", "rfp");
+    const batchMap = new Map<
+      string,
+      { coverage?: string; confidence?: number; source_ref?: string | null }
+    >();
+
+    if (fs.existsSync(fixturesDir)) {
+      const files = fs
+        .readdirSync(fixturesDir)
+        .filter(
+          (f) =>
+            f.startsWith(`batch_q${questionnaireId}_`) ||
+            f.startsWith("batch_qdemo_") ||
+            f.startsWith("batch_qtest_8b13a3ad_"),
+        );
+      for (const file of files) {
+        try {
+          const content = JSON.parse(
+            fs.readFileSync(path.join(fixturesDir, file), "utf8"),
+          );
+          const items = Array.isArray(content)
+            ? content
+            : Array.isArray(content?.data)
+              ? content.data
+              : [];
+          for (const item of items) {
+            if (item?.id != null && !batchMap.has(String(item.id))) {
+              batchMap.set(String(item.id), item);
+            }
+          }
+        } catch {
+          // ignore corrupted fixture files
+        }
+      }
+    }
+
+    function getSourceChunkPreview(id: number, sourceRef: string | null): string {
+      if (!fs.existsSync(fixturesDir)) return "(no source chunk)";
+      const candNames = [
+        `knowledge_q${id}_${questionnaireId}.json`,
+        `knowledge_q${id}_demo.json`,
+        `knowledge_q${id}_test_8b13a3ad.json`,
+      ];
+      for (const cand of candNames) {
+        const fullPath = path.join(fixturesDir, cand);
+        if (fs.existsSync(fullPath)) {
+          try {
+            const parsed = JSON.parse(fs.readFileSync(fullPath, "utf8"));
+            const chunks = Array.isArray(parsed) ? parsed : [];
+            if (chunks.length > 0) {
+              const matched = sourceRef
+                ? chunks.find((c: any) => c?.ref === sourceRef)
+                : undefined;
+              const target = matched || chunks[0];
+              const text = target?.content || target?.text || target?.chunk_text || "";
+              return text.slice(0, 200).replace(/\r?\n/g, " ");
+            }
+          } catch {
+            // ignore
+          }
+        }
+      }
+      return "(no source chunk)";
+    }
+
     for (const row of wrongRows) {
-      console.log(`  ${row}`);
+      console.log(`\n  ${row}`);
+      const m = row.match(/^ID (\d+):/);
+      if (m) {
+        const id = Number(m[1]);
+        const keyItem = keyMap.get(id);
+        const agentItem = agentMap.get(id);
+        const batchItem = batchMap.get(String(id));
+
+        const question = keyItem?.question ?? agentItem?.question ?? "(unknown)";
+        const keyAnswer = keyItem?.correctAnswer ?? "(none)";
+        const agentAnswer = agentItem?.human_answer ?? agentItem?.answer ?? "(none)";
+        const coverage = batchItem?.coverage ?? "(not recorded)";
+        const confidence = agentItem?.confidence ?? batchItem?.confidence ?? 0;
+        const sourceRef = agentItem?.source_ref ?? batchItem?.source_ref ?? null;
+        const sourceChunkPreview = getSourceChunkPreview(id, sourceRef);
+
+        console.log(`    Question:     ${question}`);
+        console.log(`    Key answer:   ${keyAnswer}`);
+        console.log(`    Agent answer: ${agentAnswer}`);
+        console.log(`    Coverage:     ${coverage}`);
+        console.log(`    Confidence:   ${confidence}`);
+        console.log(`    Source chunk: ${sourceChunkPreview}`);
+      }
     }
   }
 }

@@ -1,0 +1,7 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan > Postmortems\n\nA written postmortem is completed within 5 business days of closing any P1 or P2 incident. It lists the timeline, root cause and corrective actions with owners and due dates. Customers affected by a P1 receive a summary.",
+    "ref": "febed243-2973-4e10-aa07-d9eb8a3b812e"
+  }
+]
