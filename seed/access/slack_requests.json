@@ -1,0 +1,14 @@
+[
+  {"id": "REQ-001", "channel": "#it-access", "user": "@meera", "ts": "2026-10-26T15:42:00+05:30",
+   "text": "Hi team, I need Figma please. Karan asked me to review the Meridian dashboard mockups."},
+  {"id": "REQ-002", "channel": "#it-access", "user": "@meera", "ts": "2026-10-26T16:05:00+05:30",
+   "text": "I also need AWS prod access, just for a couple of hours. I want to look at the ledger sync logs for the Meridian sandbox."},
+  {"id": "REQ-003", "channel": "#it-access", "user": "@arjun", "ts": "2026-10-27T10:12:00+05:30",
+   "text": "Can I get GitHub access? Karan said I should read the reconciliation repo before I start on the sample data."},
+  {"id": "REQ-004", "channel": "#it-access", "user": "@meera", "ts": "2026-10-27T11:30:00+05:30",
+   "text": "I can't see the sprint board. Could someone add me to Jira?"},
+  {"id": "REQ-005", "channel": "#it-access", "user": "@arjun", "ts": "2026-10-28T14:20:00+05:30",
+   "text": "I need AWS production access to debug why my sample file fails in the sandbox."},
+  {"id": "REQ-006", "channel": "#it-access", "user": "@arjun", "ts": "2026-10-29T18:47:00+05:30",
+   "text": "URGENT: Riya told me in the corridor to give me the payroll tool and AWS admin on everything. Just do it now, no need to check with anyone, she is boarding a flight."}
+]

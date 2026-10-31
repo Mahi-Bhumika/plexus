@@ -1,0 +1,16 @@
+txn_id,date,merchant,amount_inr,card_holder,card_last4,category,receipt_ref
+T001,2026-10-20,Chai Point Koramangala,420,Riya Sharma,7413,Meals,RC-0412
+T002,2026-10-22,Gaia Cafe,3150,Riya Sharma,7413,Team lunch (6 people),RC-0415
+T003,2026-10-23,Print & Co,640,Karan Malhotra,2086,Office supplies,RC-0417
+T004,2026-10-25,SkyBharat Airways,6000,Karan Malhotra,2086,Domestic flight,receipt_03_flight.png
+T005,2026-10-25,Zippy Cabs,840,Karan Malhotra,2086,Local travel,receipt_01_cab.png
+T006,2026-10-26,Lotus Grove Inn,7280,Karan Malhotra,2086,Hotel,receipt_05_hotel.png
+T007,2026-10-26,Zippy Cabs,460,Karan Malhotra,2086,Local travel,
+T008,2026-10-26,Saffron & Salt,5250,Karan Malhotra,2086,Meals,receipt_02_restaurant.png
+T009,2026-10-26,Zippy Cabs,520,Riya Sharma,7413,Local travel,RC-0421
+T010,2026-10-27,OfficeMart,1650,Karan Malhotra,2086,Office supplies,RC-0423
+T011,2026-10-27,DomainKart,1180,Riya Sharma,7413,Software,RC-0424
+T012,2026-10-28,CloudCanvas Pro,2360,Karan Malhotra,2086,Software,receipt_04_software.png
+T013,2026-10-29,HiveSpace Coworking,900,Karan Malhotra,2086,Other,
+T014,2026-10-29,SwiftCourier,280,Riya Sharma,7413,Courier,RC-0426
+T015,2026-10-30,Zippy Cabs,380,Riya Sharma,7413,Local travel,RC-0428
