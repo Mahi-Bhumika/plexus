@@ -19,7 +19,7 @@ import { getDb } from "@/lib/db";
 
 const FIX_NUMBERS = [40, 43]; // Meridian questions a human fixes
 // Aegis questions that should reuse those fixes: Q43 -> Aegis Q8, Q40 -> Aegis Q14
-const EXPECT_REUSED = [8, 14];
+const EXPECT_REUSED = [8, 14, 30];
 const APPROVER = "Karan";
 
 function arg(name: string, fallback: string): string {

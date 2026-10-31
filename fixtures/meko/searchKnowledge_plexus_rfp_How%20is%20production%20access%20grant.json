@@ -1,7 +1,22 @@
 [
   {
     "title": "Knowledge Doc",
-    "content": "5. ACCESS WITH A HUMAN IN THE LOOP: 1:45 to 2:15 - BHUMIKA\n\nOn screen: Access tab. Type \"I need Figma.\" Then \"I need AWS production access.” Pick up the phone, tap Approve.\n\n\"Now Meera, our new hire, asks for Figma. Low risk, granted instantly. She asks for AWS production. High risk. It goes to Karan, her manager, on his phone. [tap Approve] Only now is access granted. Fast where it's safe, human where it matters.\"",
-    "ref": "a62ba9f4-6639-401f-abef-6341ea9c2fcf"
+    "content": "Section: Nimbus Labs Access Control Policy > Production access\n\nProduction access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Interns are not eligible for production access.",
+    "ref": "21b0c71e-5407-4dd5-aa35-312895df8f6b"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Access Control Policy > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "ref": "a93ace6c-1790-45f6-beac-1af4a810da7e"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Access Control Policy > Principles\n\nAccess is granted on a least-privilege basis and tied to a person's role. Every grant has a named approver and is recorded in the audit log.",
+    "ref": "7a3c9333-01b3-41dc-85be-89d36bc46a33"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Access Control Policy > Risk levels and approvals\n\nLow risk applications (for example design and note-taking tools) are approved automatically if the requester's role allows them.Medium risk applications need approval from the person's manager.High risk applications, including AWS production, need approval from the Engineering Manager.",
+    "ref": "167a7d4a-b2e8-462d-829d-c37931b909cc"
   }
 ]

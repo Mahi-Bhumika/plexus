@@ -1,0 +1,40 @@
+{
+  "success": true,
+  "data": {
+    "summary": "Meridian Bank and Nimbus Labs kicked off the pilot for the Nimbus Ledger Sync project, aiming to automate UPI reconciliation by November 30. The meeting established scope limits, security details, and a clear timeline for sandbox access, sample data, and mapping documents.",
+    "decisions": [
+      "Pilot go-live date is set for Monday 30 November 2026.",
+      "Phase one is limited to UPI reconciliation only, excluding NEFT and IMPS.",
+      "Primary hosting will be AWS Mumbai with a disaster recovery replica in Singapore."
+    ],
+    "action_items": [
+      {
+        "title": "I will send you our standard mutual NDA."
+      },
+      {
+        "title": "I will set up the sandbox environment and send API credentials to Vikram's team by Friday 6 November."
+      },
+      {
+        "title": "I will send those by Tuesday 10 November."
+      },
+      {
+        "title": "I will write a mapping document that says which Meridian field feeds which Nimbus field. I can have that to you by Monday 16 November."
+      },
+      {
+        "title": "I will send you their names by Friday 13 November."
+      },
+      {
+        "title": "Arjun, our intern, is not here today, but he will prepare anonymised sample transaction files from the layout you gave us. Let's say by Thursday 12 November."
+      },
+      {
+        "title": "And the NDA will be with Neha by Wednesday 4 November."
+      }
+    ],
+    "follow_up_email": {
+      "to": "Sanjay Desai",
+      "subject": "Meridian Bank x Nimbus Labs: Pilot Kickoff Follow-up",
+      "body": "Thank you for the productive kickoff meeting today. As agreed, we are targeting a go-live date of Monday 30 November 2026 for the UPI reconciliation pilot. We have outlined several action items to get the sandbox, security documentation, and data mapping underway this week. Please let us know if you need anything further in the meantime."
+    }
+  },
+  "modelUsed": "gemini-3.5-flash-lite"
+}

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { readCardFeed, asOfDate } from "@/agents/expenses";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 // GET /api/finance/card-feed -> { asOf, txns: CardTxn[] }, or { status: "error", message }
 export async function GET() {
   try {

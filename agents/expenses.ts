@@ -4,8 +4,9 @@ import path from "node:path";
 import { z } from "zod";
 import { generateJson, type GeminiImage } from "@/lib/gemini";
 import { withReplay } from "@/lib/replay";
-import { emitEvent, newEventId } from "@/lib/events";
+import { emitEvent, newEventId, type AgentName } from "@/lib/events";
 import { getDb } from "@/lib/db";
+import { checkInjection } from "@/lib/guard-rules";
 
 // ZeroTouch Expenses: receipt image -> Gemini vision -> policy check -> card match.
 // The policy rules below are plain code (not an LLM) so the verdict is repeatable.
@@ -13,8 +14,7 @@ import { getDb } from "@/lib/db";
 
 const CONFIDENCE_THRESHOLD = parseFloat(process.env.CONFIDENCE_THRESHOLD ?? "0.85");
 
-// The event feed's agent name; cast so this compiles whichever names lib/events allows.
-const AGENT = "finance" as unknown as Parameters<typeof emitEvent>[0]["agent"];
+const AGENT: AgentName = "finance";
 
 // ---- Types -------------------------------------------------------------
 
@@ -565,7 +565,20 @@ export function buildResult(
   const type: ExpenseType = cardType ?? ex.expense_type;
   const claimant = match?.txn.card_holder ?? null;
 
-  const { issues, allowed } = checkPolicy(ex, { type, claimant, cardTxns: txns, seenInvoices, file, asOf });
+  const policy = checkPolicy(ex, { type, claimant, cardTxns: txns, seenInvoices, file, asOf });
+  const issues = policy.issues;
+  let allowed = policy.allowed;
+
+  // Guard: text printed on a receipt must never be able to give the AI orders.
+  const injection = checkInjection(ex.merchant, ex.invoice_number, ex.city, ex.travel_class, ...ex.items.map((i) => i.description));
+  if (injection.flagged) {
+    issues.push({
+      code: "possible_injection",
+      severity: "violation",
+      message: `Text on the receipt looks like instructions to the AI (${injection.matches.join(", ")}). Blocked; a person must review it.`,
+    });
+    allowed = 0;
+  }
 
   if (!match) {
     issues.push({ code: "no_card_match", severity: "warning", message: "No card transaction matches this receipt; treat as an out-of-pocket claim." });
@@ -675,7 +688,13 @@ export async function runExpenses(opts: { dir?: string } = {}): Promise<ExpenseR
         r.status === "ok"
           ? `Expense OK: ${label} ${r.total != null ? inr(r.total) : ""} (to ${r.approver ?? "unassigned"})`
           : `Expense ${r.status === "violation" ? "violation" : "needs review"}: ${label}${first ? ` - ${first.message}` : ""}`,
-      status: r.extractionError ? "error" : r.status === "ok" ? "done" : "flagged",
+      status: r.extractionError
+        ? "error"
+        : r.issues.some((i) => i.code === "possible_injection")
+          ? "blocked"
+          : r.status === "ok"
+            ? "done"
+            : "flagged",
       confidence: r.confidence,
       sources: [{ title: r.file, ref: r.file }],
       traceId: newEventId(),
