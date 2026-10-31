@@ -3,6 +3,7 @@ import { undoAction } from "@/lib/guard";
 import "@/agents/actionswarm";
 // Importing the agents registers their undo handlers (side effect). Add one line per agent that has undoable actions.
 import "@/agents/rfp";
+import "@/agents/access";
 
 export const runtime = "nodejs";
 

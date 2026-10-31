@@ -155,18 +155,90 @@ function inferAssigneeAndDue(title: string): { assignee: string | null; due: str
   return { assignee, due };
 }
 
+// ---------- task cleanup: short imperative titles and de-duplication ----------
+
+const DATE_WORDS =
+  "(?:(?:mon|tues|wednes|thurs|fri|satur|sun)day\\s+)?(?:\\d{1,2}\\s+[A-Za-z]+(?:\\s+\\d{4})?|end of (?:today|the day|the week)|today|tomorrow)";
+const TRAILING_DATE = new RegExp("\\s+(?:by|on|before)\\s+" + DATE_WORDS + "\\.?$", "i");
+
+export function cleanTitle(raw: string): string {
+  let t = raw.trim().replace(/\s+/g, " ");
+  t = t.replace(/^(?:i|we)\s*(?:will|'ll|\u2019ll|shall|am going to)\s+/i, "");
+  t = t.replace(/^(?:will|please|need to|needs to)\s+/i, "");
+  t = t.replace(/^(?:riya|karan|meera|arjun)(?:\s+(?:sharma|malhotra|iyer|verma))?\s+(?:will|to)\s+/i, "");
+  t = t.replace(TRAILING_DATE, "");
+  t = t.replace(/[.\s]+$/, "");
+  if (t.length > 70) {
+    const cut = t.slice(0, 70);
+    const sp = cut.lastIndexOf(" ");
+    t = (sp > 40 ? cut.slice(0, sp) : cut).trim();
+  }
+  return t ? t.charAt(0).toUpperCase() + t.slice(1) : raw.trim();
+}
+
+const TITLE_STOP = new Set([
+  "the", "and", "for", "will", "with", "that", "this", "those", "them", "you", "are", "our", "has", "have",
+  "been", "not", "all", "any", "from", "into", "send", "sent", "share", "prepare", "write", "provide",
+  "create", "make", "set", "ensure", "confirm", "arrange", "get", "give",
+]);
+
+function titleWords(s: string): Set<string> {
+  return new Set(
+    s
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length > 2 && !TITLE_STOP.has(w))
+      .map((w) => (w.length > 5 ? w.slice(0, 5) : w)),
+  );
+}
+
+// Two items are the same commitment when the owners and dates do not clash and the titles share the key words.
+function sameCommitment(a: Extraction["items"][number], b: Extraction["items"][number]): boolean {
+  if (a.assignee && b.assignee && a.assignee !== b.assignee) return false;
+  if (a.due && b.due && a.due !== b.due) return false;
+  const wa = titleWords(a.title);
+  const wb = titleWords(b.title);
+  const shared = [...wa].filter((w) => wb.has(w)).length;
+  const smaller = Math.min(wa.size, wb.size);
+  if (smaller === 0) return false;
+  const sameOwnerAndDate = !!a.assignee && a.assignee === b.assignee && !!a.due && a.due === b.due;
+  return (shared >= 2 && shared / smaller >= 0.5) || (sameOwnerAndDate && shared >= 1);
+}
+
+export function dedupeItems(items: Extraction["items"]): Extraction["items"] {
+  const out: Extraction["items"] = [];
+  for (const it of items) {
+    const i = out.findIndex((o) => sameCommitment(o, it));
+    if (i < 0) {
+      out.push({ ...it });
+      continue;
+    }
+    const keep = out[i];
+    if (it.confidence > keep.confidence) {
+      keep.title = it.title;
+      keep.confidence = it.confidence;
+    }
+    keep.assignee = keep.assignee ?? it.assignee;
+    keep.due = keep.due ?? it.due;
+    keep.quote = keep.quote ?? it.quote;
+  }
+  return out;
+}
+
 function normalize(raw: z.infer<typeof extractionSchema>): Extraction {
   const rawItems = (raw.action_items ?? []).filter((i): i is NonNullable<typeof i> => i !== null && Boolean(i.title && i.title.trim()));
   
   // Clean items and infer missing assignees/dues
   const items: Extraction["items"] = [];
   for (const i of rawItems) {
-    const title = i.title!.trim();
+    const rawTitle = i.title!.trim();
+    const title = cleanTitle(rawTitle);
     let assignee = canonicalPerson(i.assignee);
     let due = i.due && /^\d{4}-\d{2}-\d{2}$/.test(i.due.trim()) ? i.due.trim() : null;
 
     if (!assignee || !due) {
-      const inferred = inferAssigneeAndDue(title);
+      const inferred = inferAssigneeAndDue(rawTitle);
       if (!assignee) assignee = inferred.assignee;
       if (!due) due = inferred.due;
     }
@@ -179,6 +251,13 @@ function normalize(raw: z.infer<typeof extractionSchema>): Extraction {
       confidence: assignee ? conf : Math.min(conf, 0.5),
       quote: i.quote?.trim() || null,
     });
+  }
+
+  // One commitment, one task (the NDA is mentioned twice in the transcript)
+  {
+    const deduped = dedupeItems(items);
+    items.length = 0;
+    items.push(...deduped);
   }
 
   // Ensure we have between 5 and 8 tasks if model omitted some
@@ -243,7 +322,7 @@ function buildPrompt(cleanText: string, meetingDate: string): string {
     '- summary (string): 2 to 3 sentences on what the meeting decided and why it matters',
     "- decisions (array of strings): each decision made in the meeting",
     "- action_items (array of objects): every task someone committed to, each with:",
-    "    title (string, a clear imperative task),",
+    "    title (string): a short imperative task of 3 to 8 words that names the thing, for example 'Send mutual NDA to Neha Kapoor'. Never start with 'I will'; never use words like 'those' or 'it' for the object; leave the date out of the title,",
     "    assignee (string or null),",
     "    due (string YYYY-MM-DD or null),",
     "    confidence (number 0 to 1: how sure you are this is a real commitment with the right owner and date),",
@@ -253,6 +332,7 @@ function buildPrompt(cleanText: string, meetingDate: string): string {
     "- When a speaker says 'I will...' or 'I'll...', that speaker is the assignee. When someone else says a named person will do it, that named person is the assignee.",
     "- Tasks owned by people outside the allowed list: set assignee to null.",
     "- follow_up_email must be a JSON object with keys to, subject and body. body must be plain text, not a string containing JSON. Set 'to' to the client contact who led the meeting if named, otherwise 'client'.",
+    "- If the same commitment is mentioned more than once in the transcript (same person, same thing), return it only once.",
     "- Only mention facts that are stated in the transcript. Do not invent meetings, calls, dates, prices or commitments.",
     "",
     "TRANSCRIPT:",
@@ -612,8 +692,8 @@ export function findTranscriptFile(): string | null {
   const fs = require("node:fs") as typeof import("node:fs");
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const path = require("node:path") as typeof import("node:path");
-  const root = path.resolve(process.cwd(), "data");
-  if (!fs.existsSync(root)) return null;
+  const roots = ["seed", "data"].map((d) => path.resolve(process.cwd(), d)).filter((d) => fs.existsSync(d));
+  if (roots.length === 0) return null;
   const found: string[] = [];
   const walk = (dir: string) => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -622,7 +702,7 @@ export function findTranscriptFile(): string | null {
       else if (/(transcript|kickoff)/i.test(e.name) && /\.(txt|md)$/i.test(e.name)) found.push(full);
     }
   };
-  walk(root);
+  for (const r of roots) walk(r);
   found.sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
   return found[0] ?? null;
 }

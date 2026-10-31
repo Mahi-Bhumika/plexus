@@ -1,7 +1,1 @@
-[
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Security Whitepaper > Secure development\n\nEngineers complete secure coding training once a year. Secrets are stored in AWS Secrets Manager and are never committed to source control; a secrets scanner blocks any commit that contains one.",
-    "ref": "936a8eaf-7e54-4873-a012-6feb344bee7f"
-  }
-]
+[]

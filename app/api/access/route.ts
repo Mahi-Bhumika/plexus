@@ -1,16 +1,9 @@
 import { getDb } from "@/lib/db";
-import { emitEvent, newEventId } from "@/lib/events";
+import { createAccessRequest, AccessError } from "@/agents/access";
 
-export type AccessRequestRow = {
-  id: string;
-  user_id: string;
-  app: string;
-  risk: string;
-  status: string; // 'granted' | 'pending_approval' | 'denied' | 'undone'
-  approver_id: string;
-  requested_at: string;
-  decided_at: string | null;
-};
+export type { AccessRequestRow } from "@/agents/access";
+
+export const runtime = "nodejs";
 
 // GET /api/access -> returns list of requests and audit rows
 export async function GET() {
@@ -24,7 +17,7 @@ export async function GET() {
          LEFT JOIN users u ON u.id = ar.user_id
          ORDER BY ar.requested_at DESC`,
       )
-      .all() as Array<AccessRequestRow & { user_name: string | null; user_role: string | null }>;
+      .all();
 
     return Response.json({ requests: rows });
   } catch (err: unknown) {
@@ -34,64 +27,36 @@ export async function GET() {
 }
 
 // POST /api/access -> Submit new access request
-// Body: { userId, userName, app, risk, justification, approverId }
+// Body: { userId, userName, app, justification?, text? }
+// risk and approverId in the body are ignored: the policy table decides both.
+// Response keeps the old shape ({ ok, request }) and adds decision, reasons, eventId, approver, message.
+// status in request is one of: granted | pending_approval | denied
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {
-      userId: string;
-      userName: string;
-      app: string;
-      risk: "Low" | "Medium" | "High";
+      userId?: string;
+      userName?: string;
+      app?: string;
       justification?: string;
-      approverId: string;
+      text?: string;
+      risk?: string;
+      approverId?: string;
     };
-
-    const { userId, userName, app, risk, approverId, justification } = body;
-    const db = getDb();
-
-    // Auto-approve Low risk, gate Medium/High
-    const isAutoApproved = risk === "Low";
-    const status = isAutoApproved ? "granted" : "pending_approval";
-    const decidedAt = isAutoApproved ? new Date().toISOString() : null;
-    const reqId = `req_${Date.now()}`;
-    const requestedAt = new Date().toISOString();
-
-    db.prepare(
-      `INSERT INTO access_requests (id, user_id, app, risk, status, approver_id, requested_at, decided_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(reqId, userId, app, risk, status, approverId, requestedAt, decidedAt);
-
-    // Emit live event into ActivityFeed
-    emitEvent({
-      id: newEventId(),
-      timestamp: requestedAt,
-      agent: "access",
-      action: isAutoApproved
-        ? `Access granted: ${userName} -> ${app} (auto-approved)`
-        : `Access requested: ${userName} -> ${app} (${risk} risk, awaiting ${approverId})`,
-      status: isAutoApproved ? "done" : "pending_approval",
-      confidence: 1.0,
-      sources: [{ title: "Access Policy", ref: "doc_04_access_policy" }],
-      traceId: newEventId(),
-      undoable: isAutoApproved,
-    });
-
+    const out = createAccessRequest(body);
     return Response.json({
       ok: true,
-      request: {
-        id: reqId,
-        user_id: userId,
-        app,
-        risk,
-        status,
-        approver_id: approverId,
-        requested_at: requestedAt,
-        decided_at: decidedAt,
-      },
+      request: out.request,
+      decision: out.decision,
+      blocked: out.decision === "block",
+      reasons: out.reasons,
+      eventId: out.eventId,
+      approver: out.approver,
+      message: out.message,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
+    const status = err instanceof AccessError ? err.httpStatus : 500;
     console.error("Error in POST /api/access:", message);
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: message }, { status });
   }
 }

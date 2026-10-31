@@ -1,7 +1,1 @@
-[
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Security Whitepaper > Authentication\n\nEmployees sign in through our identity provider using SAML 2.0 single sign-on. Multi-factor authentication is mandatory for every employee account with no exceptions. Customer administrators can connect their own SAML 2.0 identity provider to Nimbus Ledger Sync.",
-    "ref": "161ce703-5354-4cb1-b88d-360362d10227"
-  }
-]
+[]
