@@ -5,7 +5,9 @@
     "date": "2026-10-22",
     "invoice_number": null,
     "expense_type": "domestic_flight",
-    "items": [],
+    "items": [
+      null
+    ],
     "subtotal": 5400,
     "gst": 270,
     "total": 6000,
@@ -15,7 +17,7 @@
     "city": "Bengaluru",
     "travel_class": "Economy",
     "trip_type": "one_way",
-    "confidence": 0.95
+    "confidence": 0.99
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

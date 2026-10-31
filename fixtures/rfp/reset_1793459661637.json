@@ -1,0 +1,12 @@
+[
+  {
+    "id": "0d567cc3-455f-42bc-a6fc-da87f387cce4",
+    "text": "ACTIONSWARM | 2026-10-31 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs kicked off their UPI reconciliation pilot with a target go-live date of November 30, 2026. The scope is strictly limited to UPI settlements for phase one, excluding NEFT and IMPS for now. Both teams aligned on immediate next steps including sandbox setup, security questionnaires, and mapping documentation. | Decisions: Pilot go-live date is set for Monday, 30 November 2026.; Phase one scope is limited to UPI reconciliation only; NEFT and IMPS are deferred to phase two.; Data will be hosted primarily in AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: Send the standard mutual NDA to Neha Kapoor (unassigned); Set up the sandbox environment and send API credentials to Vikram's team (unassigned); Provide IP ranges needed allowlisted for the UPI feed (unassigned); Write a mapping document mapping Meridian fields to Nimbus fields (unassigned); Nominate two analysts for user acceptance testing and send their names (unassigned); Prepare anonymised sample transaction files from the layout given (unassigned)",
+    "score": 0.2614006327718176
+  },
+  {
+    "id": "4dc9f5e1-78b4-47f1-b1d8-e06c432487d0",
+    "text": "User designated Batch 4 to include ten items numbered 41-50: 41, 42, 43, 44, 45, 46, 47, 48, 49, 50.",
+    "score": 0.20137052854826232
+  }
+]

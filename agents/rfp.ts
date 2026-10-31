@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { generateJson } from "@/lib/gemini";
-import { searchKnowledge, searchMemory, addMemory, logTurn } from "@/lib/meko";
+import { searchKnowledge, searchMemory, addMemory, deleteMemory, logTurn } from "@/lib/meko";
 import { withReplay } from "@/lib/replay";
 import { emitEvent, newEventId } from "@/lib/events";
 import { getDb } from "@/lib/db";
+import { guard, recordUndo, registerUndoHandler } from "@/lib/guard";
 
 const CONFIDENCE_THRESHOLD = parseFloat(
   process.env.CONFIDENCE_THRESHOLD ?? "0.85",
@@ -565,6 +566,11 @@ export async function runRfp(
 // next questionnaire can reuse it (memory_search is cross-agent within the
 // datapack, so no separate promote step is needed for reuse to work).
 // If answer is omitted or blank, the row's current answer is approved as-is.
+//
+// Guard layer: the answer and the question text are checked for prompt injection
+// BEFORE anything is saved, because a saved fix is fed back into Gemini prompts
+// on every later questionnaire. An allowed fix is undoable: undo restores the row
+// and deletes the RFP_FIX memory, so the learned answer stops being reused.
 
 export type RfpRow = {
   id: string;
@@ -588,11 +594,47 @@ export function getRow(questionId: string): RfpRow | undefined {
     .get(questionId) as RfpRow | undefined;
 }
 
+// What the row looked like before the fix, so undo can put it back.
+type PrevRow = {
+  human_answer: string | null;
+  status: string;
+  confidence: number | null;
+  flag_reason: string | null;
+  source_ref: string | null;
+};
+type FixUndoPayload = { questionId: string; prev: PrevRow; memoryId: string | null };
+
+// Meko returns a UUID; the SQLite fallback uses mem_<uuid>. Anything else is not safe to delete.
+const MEMORY_ID = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|mem_[0-9a-f-]{36})$/i;
+
+registerUndoHandler("rfp_human_fix", async (raw) => {
+  const p = raw as FixUndoPayload;
+  getDb()
+    .prepare(
+      `UPDATE rfp_questions
+       SET human_answer = ?, status = ?, confidence = ?, flag_reason = ?, source_ref = ?
+       WHERE id = ?`,
+    )
+    .run(p.prev.human_answer, p.prev.status, p.prev.confidence ?? 0, p.prev.flag_reason, p.prev.source_ref, p.questionId);
+
+  // Forget the learned answer so the next questionnaire does not reuse it.
+  // Meko search can lag a few seconds before the deleted memory stops appearing.
+  if (p.memoryId && MEMORY_ID.test(p.memoryId)) {
+    try {
+      await deleteMemory(p.memoryId, "plexus_rfp");
+    } catch (err) {
+      console.warn(
+        `undo: row restored but memory ${p.memoryId} was not deleted: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+});
+
 export async function humanFix(
   questionId: string,
   answer: string | undefined,
   approver: string,
-): Promise<{ row: RfpRow; memoryId?: string; fallback: boolean }> {
+): Promise<{ row: RfpRow; memoryId?: string; fallback: boolean; eventId: string }> {
   const who = approver.replace(/\|/g, "/").trim();
   if (!who) throw new Error("approver is required");
 
@@ -612,13 +654,36 @@ export async function humanFix(
     .trim();
   if (!clean) throw new Error("No answer to approve: send an answer");
 
+  const questionText = existing.question.replace(/\|/g, "/").replace(/\s+/g, " ").trim();
+
+  const prev = db
+    .prepare(
+      "SELECT human_answer, status, confidence, flag_reason, source_ref FROM rfp_questions WHERE id = ?",
+    )
+    .get(existing.id) as PrevRow;
+
+  // Guard first: nothing is saved if the text tries to give the AI orders.
+  const verdict = guard({
+    agent: "rfp",
+    kind: "rfp_human_fix",
+    label: `Human fix saved for Q${existing.number} (approved by ${who})`,
+    actor: who,
+    untrustedText: [clean, questionText],
+    sources: [{ title: `fix:${who}`, ref: `fix:${who}` }],
+    undo: { kind: "rfp_human_fix", payload: { questionId: existing.id, prev, memoryId: null } satisfies FixUndoPayload },
+  });
+  if (verdict.decision !== "allow") {
+    const blocked = new Error(verdict.reasons[0] ?? "This fix was stopped by the guard layer.");
+    blocked.name = "GuardBlocked"; // the API route turns this into a 422 instead of a 500
+    throw blocked;
+  }
+
   db.prepare(
     `UPDATE rfp_questions
      SET human_answer = ?, status = 'filled', confidence = 1, flag_reason = NULL, source_ref = ?
      WHERE id = ?`,
   ).run(clean, `fix:${who}`, existing.id);
 
-  const questionText = existing.question.replace(/\|/g, "/").replace(/\s+/g, " ").trim();
   // The row is already saved. If Meko is unreachable (or Demo Mode has no
   // recorded fixture for this write), keep going rather than failing the fix.
   let mem: { success: boolean; memoryId?: string; fallback?: boolean } = {
@@ -636,19 +701,11 @@ export async function humanFix(
     );
   }
 
-  emitEvent({
-    id: newEventId(),
-    timestamp: new Date().toISOString(),
-    agent: "rfp",
-    action: `Human fix saved for Q${existing.number} (approved by ${who})`,
-    status: "done",
-    confidence: 1,
-    sources: [{ title: `fix:${who}`, ref: `fix:${who}` }],
-    traceId: newEventId(),
-    undoable: false,
-  });
+  // Now that the memory id is known, store it so undo can delete the memory too.
+  const memoryId = mem.memoryId && MEMORY_ID.test(mem.memoryId) ? mem.memoryId : null;
+  recordUndo(verdict.eventId, "rfp_human_fix", { questionId: existing.id, prev, memoryId } satisfies FixUndoPayload);
 
   const row = getRow(existing.id);
   if (!row) throw new Error("Row vanished after update");
-  return { row, memoryId: mem.memoryId, fallback: mem.fallback ?? false };
+  return { row, memoryId: mem.memoryId, fallback: mem.fallback ?? false, eventId: verdict.eventId };
 }

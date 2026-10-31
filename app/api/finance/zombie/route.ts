@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { findZombieSaas } from "@/lib/zombie";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // GET /api/finance/zombie -> ZombieReport, or { status: "error", message }
 export async function GET() {

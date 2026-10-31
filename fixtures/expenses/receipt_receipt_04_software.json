@@ -6,8 +6,8 @@
     "invoice_number": "CC-INV-993071",
     "expense_type": "software",
     "items": [
-      "Subscription",
-      "IGST @ 18%"
+      "description\": \"Subscription\", \"amount\": 2000.00",
+      "description\": \"IGST @ 18%\", \"amount\": 360.00"
     ],
     "subtotal": 2000,
     "gst": 360,
@@ -18,7 +18,7 @@
     "city": "Bengaluru",
     "travel_class": null,
     "trip_type": "unknown",
-    "confidence": 1
+    "confidence": 0.98
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }
