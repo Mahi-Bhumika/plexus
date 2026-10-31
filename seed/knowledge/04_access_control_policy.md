@@ -1,17 +1,18 @@
-# Nimbus Labs Access Control Policy
+# Access Control Policy (Nimbus Labs)
 
-**Document owner:** Karan Malhotra · **Version:** 2.2 · **Last reviewed:** 1 Oct 2026
+**Document owner:** Karan Malhotra, Engineering Manager · **Version:** 2.1 · **Last reviewed:** 22 Aug 2026
 
-## Principles
-Access is granted on a least-privilege basis and tied to a person's role. Every grant has a named approver and is recorded in the audit log.
+## Purpose and scope
+This policy defines how Nimbus Labs grants, reviews and removes access to internal systems, customer data and third-party tools. It covers all employees, interns and contractors.
 
-## Role-based access
-Access to internal tools is defined by role: Founder, Engineering Manager, Engineer, Intern. A role template lists which applications each role may have and at what risk level.
+## Principle of least privilege
+Everyone has access only to the systems they need for their current work. Default access on day one is restricted to email, company chat and the documentation wiki.
 
 ## Risk levels and approvals
 - **Low risk** applications (for example design and note-taking tools) are approved automatically if the requester's role allows them.
 - **Medium risk** applications need approval from the person's manager.
 - **High risk** applications, including AWS production, need approval from the **Engineering Manager**.
+- If the Engineering Manager is the requester, approval escalates to the Founder. No one may approve their own request.
 
 ## Production access
 Production access is **just-in-time**. A grant lasts **a maximum of 8 hours** and then expires automatically. Interns are not eligible for production access.

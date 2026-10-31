@@ -2,7 +2,7 @@
 
 | Person | Role | Slack handle | Manager | Can approve |
 | --- | --- | --- | --- | --- |
-| Riya Sharma | Founder and CEO | @riya | none | Everything; final approver for finance over Rs 25,000 |
+| Riya Sharma | Founder | @riya | none | Everything; final approver for finance over Rs 25,000 |
 | Karan Malhotra | Engineering Manager | @karan | Riya | High-risk access (AWS production), medium-risk access for engineers and interns, expenses up to Rs 25,000 |
 | Meera Iyer | Software Engineer (joined Mon 26 Oct 2026) | @meera | Karan | Nothing |
 | Arjun Verma | Engineering Intern (joined Mon 19 Oct 2026) | @arjun | Karan | Nothing |
