@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { undoAction } from "@/lib/guard";
-import "@/agents/actionswarm";
 // Importing the agents registers their undo handlers (side effect). Add one line per agent that has undoable actions.
+import "@/agents/actionswarm";
 import "@/agents/rfp";
 import "@/agents/access";
+import "@/agents/expense-approval";
+import "@/agents/saas-cancel";
 
 export const runtime = "nodejs";
 

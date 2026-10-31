@@ -1,6 +1,8 @@
 import { getDb } from "@/lib/db";
 import { getSavedClaims, type ExpenseResult } from "@/agents/expenses";
 import { guard, registerUndoHandler } from "@/lib/guard";
+import { emitEvent, newEventId } from "@/lib/events";
+import { approvalBlocks, approvalTarget, financeChannel, postSlack, type SlackResult } from "@/lib/slack";
 
 // Expense approval. The expense agent only recommends (status, allowed amount, approver);
 // this is the action where a person approves, so it goes through the guard and can be undone.
@@ -72,6 +74,28 @@ function resolveApprover(input: string): string | null {
   return PEOPLE.find((p) => p.toLowerCase().startsWith(first)) ?? null;
 }
 
+
+function eligibleApprover(claim: ExpenseResult, approverInput: string): string {
+  const approver = resolveApprover(approverInput);
+  if (!approver) throw new ApprovalError("Unknown approver. Use Karan Malhotra or Riya Sharma.");
+  if (!claim.approver) throw new ApprovalError("No approver is assigned to this claim yet (no matching card transaction).");
+  if (approver === claim.claimant) throw new ApprovalError("Nobody can approve their own claim.", 403);
+  if (approver !== claim.approver) throw new ApprovalError(`Only ${claim.approver} can approve this claim.`, 403);
+  return approver;
+}
+
+function findClaim(claimId: string): ExpenseResult {
+  const claim = getSavedClaims().find((c) => c.id === claimId);
+  if (!claim) throw new ApprovalError(`No claim with id ${claimId}`, 404);
+  return claim;
+}
+
+function assertApprovable(claim: ExpenseResult): void {
+  const blocking = claim.issues.find((i) => NEVER_APPROVABLE.has(i.code));
+  if (blocking) throw new ApprovalError(`This claim cannot be approved: ${blocking.message}`);
+  if (claim.extractionError || claim.total == null) throw new ApprovalError("This claim cannot be approved: the receipt could not be read.");
+}
+
 registerUndoHandler("expense_approve", (raw) => {
   const p = raw as { claimId: string };
   ensureTable();
@@ -83,22 +107,15 @@ export async function approveClaim(
   approverInput: string,
   mode: ApproveMode = "allowed",
 ): Promise<{ approval: Approval; eventId: string }> {
-  const claim: ExpenseResult | undefined = getSavedClaims().find((c) => c.id === claimId);
-  if (!claim) throw new ApprovalError(`No claim with id ${claimId}`, 404);
+  const claim = findClaim(claimId);
   if (getApproval(claimId)) throw new ApprovalError("This claim is already approved. Undo it first to change it.", 409);
 
-  const blocking = claim.issues.find((i) => NEVER_APPROVABLE.has(i.code));
-  if (blocking) throw new ApprovalError(`This claim cannot be approved: ${blocking.message}`);
-  if (claim.extractionError || claim.total == null) throw new ApprovalError("This claim cannot be approved: the receipt could not be read.");
+  assertApprovable(claim);
 
-  const amount = mode === "full" ? claim.total : (claim.allowedAmount ?? claim.approvedAmount ?? 0);
+  const amount = mode === "full" ? (claim.total as number) : (claim.allowedAmount ?? claim.approvedAmount ?? 0);
   if (!(amount > 0)) throw new ApprovalError("Nothing to approve: the allowed amount is Rs 0.");
 
-  const approver = resolveApprover(approverInput);
-  if (!approver) throw new ApprovalError("Unknown approver. Use Karan Malhotra or Riya Sharma.");
-  if (!claim.approver) throw new ApprovalError("No approver is assigned to this claim yet (no matching card transaction).");
-  if (approver === claim.claimant) throw new ApprovalError("Nobody can approve their own claim.", 403);
-  if (approver !== claim.approver) throw new ApprovalError(`Only ${claim.approver} can approve this claim.`, 403);
+  const approver = eligibleApprover(claim, approverInput);
 
   const ex = claim.extraction;
   const label = `Expense approved: ${ex?.merchant ?? claim.file} ${inr(amount)} (by ${approver}${mode === "full" && amount > (claim.allowedAmount ?? 0) ? ", excess signed off" : ""})`;
@@ -128,4 +145,68 @@ export async function approveClaim(
     .run(approval.claim_id, approval.approver, approval.amount, approval.mode, approval.approved_at, approval.event_id);
 
   return { approval, eventId: verdict.eventId };
+}
+
+// Reject: the routed approver says no. Logged to the feed; nothing is stored on the claim.
+export async function rejectClaim(claimId: string, approverInput: string): Promise<{ eventId: string }> {
+  const claim = findClaim(claimId);
+  if (getApproval(claimId)) throw new ApprovalError("This claim is already approved. Undo it first.", 409);
+  const approver = eligibleApprover(claim, approverInput);
+  const eventId = newEventId();
+  emitEvent({
+    id: eventId,
+    timestamp: new Date().toISOString(),
+    agent: "finance",
+    action: `Expense rejected: ${claim.extraction?.merchant ?? claim.file} ${claim.total != null ? inr(claim.total) : ""} (by ${approver})`,
+    status: "flagged",
+    confidence: 1,
+    sources: [{ title: claim.file, ref: claim.file }],
+    traceId: newEventId(),
+    undoable: false,
+  });
+  return { eventId };
+}
+
+// Ask the routed approver on Slack: a DM with buttons to them, and a notice in #finance.
+export async function requestExpenseApproval(
+  claimId: string,
+): Promise<{ eventId: string; approver: string; slack: { dm: SlackResult; finance: SlackResult } }> {
+  const claim = findClaim(claimId);
+  if (getApproval(claimId)) throw new ApprovalError("This claim is already approved.", 409);
+  assertApprovable(claim);
+  if (!claim.approver) throw new ApprovalError("No approver is assigned to this claim yet (no matching card transaction).");
+
+  const ex = claim.extraction;
+  const merchant = ex?.merchant ?? claim.file;
+  const total = claim.total as number;
+  const allowed = claim.allowedAmount ?? total;
+  const overLimit = allowed < total;
+
+  const verdict = guard({
+    agent: "finance",
+    kind: "expense_approve_request",
+    label: `Approval requested: ${merchant} ${inr(total)}`,
+    amount: total,
+    actor: claim.claimant,
+    untrustedText: [ex?.merchant, ex?.invoice_number, ex?.city, ...(ex?.items.map((i) => i.description) ?? [])],
+    sources: [{ title: claim.file, ref: claim.file }],
+  });
+  if (verdict.decision === "block") throw new ApprovalError(verdict.reasons[0] ?? "Stopped by the guard layer.");
+
+  const lines = [
+    `${merchant}, ${inr(total)}${claim.claimant ? ` (claimed by ${claim.claimant})` : ""}`,
+    overLimit ? `Policy allows ${inr(allowed)}.` : "Within policy.",
+    ...claim.issues.slice(0, 2).map((i) => `• ${i.message}`),
+  ];
+  const text = `Expense approval needed: ${merchant} ${inr(total)}`;
+  const dm = await postSlack(
+    approvalTarget(claim.approver),
+    text,
+    approvalBlocks({ title: "Expense approval needed", lines, value: { kind: "expense", id: claim.id }, fullAmountButton: overLimit }),
+  );
+  const finance = await postSlack(
+    financeChannel(),
+    `Receipt ${claim.file} (${merchant}, ${inr(total)}) is ${claim.status === "ok" ? "within policy" : claim.status}. Approval requested from ${claim.approver}.`,
+  );
+  return { eventId: verdict.eventId, approver: claim.approver, slack: { dm, finance } };
 }
