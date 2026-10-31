@@ -1,0 +1,7 @@
+[
+  {
+    "id": "885a536f-c53f-4850-badb-82a18ce1e8d2",
+    "text": "RFP_FIX | Please confirm that all copies of our policyholder data, including disaster recovery replicas, remain inside India. | Customer data is stored in India by default (AWS Mumbai), but disaster recovery copies are held in Singapore. Customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing. | Riya Sharma",
+    "score": 0.4011486947136378
+  }
+]

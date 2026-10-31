@@ -1,7 +1,12 @@
 [
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Onboarding and Offboarding Procedure > Offboarding\n\nThe manager notifies HR on or before the last working day.All access is revoked within 4 hours of the person's exit time.Shared secrets that the person had access to are rotated within 2 business days.The company laptop is returned, and the device is wiped within 3 business days.Offboarding is recorded in the audit log and checked in the next quarterly access review.",
-    "ref": "45c81808-35f9-4411-aa34-bbd01f32bc2e"
+    "content": "Fallback: if Slack buttons fail, use the Approve button on the dashboard and say so.\n\n6. ACCOUNTABILITY: 2:15 to 2:40 - MAHI\n\nOn screen: Audit tab, open the AWS grant. Click through prompt, sources, confidence, approver. Click Undo.\n\n\"Every action leaves a trace. This AWS grant: the exact prompt, the sources, the confidence, who approved it. And if we get something wrong, one click. [click Undo] Access reversed, and that's logged too. Most agent demos show you what they can do. We show you what they did, and how to take it back.\"\n\nCamera tip: record the undo live at least once in rehearsal. It is the easiest step to fake by accident.\n\n7. ASK ANYTHING: 2:40 to 2:52: BHUMIKA\n\nOn screen: press Cmd+K, type \"Catch me up on Meridian, last 4 days.\"\n\n\"Last thing. I press Cmd+K and ask: catch me up on Meridian. A briefing in seconds, every line sourced, and it only shows what my role is allowed to see.\"",
+    "ref": "14f65634-7325-478b-93d8-c6203927b4dc"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "5. ACCESS WITH A HUMAN IN THE LOOP: 1:45 to 2:15 - BHUMIKA\n\nOn screen: Access tab. Type \"I need Figma.\" Then \"I need AWS production access.” Pick up the phone, tap Approve.\n\n\"Now Meera, our new hire, asks for Figma. Low risk, granted instantly. She asks for AWS production. High risk. It goes to Karan, her manager, on his phone. [tap Approve] Only now is access granted. Fast where it's safe, human where it matters.\"",
+    "ref": "a62ba9f4-6639-401f-abef-6341ea9c2fcf"
   }
 ]

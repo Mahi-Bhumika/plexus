@@ -1,0 +1,7 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > Network and application security\n\nProduction runs in private subnets; only the load balancer is internet-facing.A web application firewall filters all inbound traffic.Every code change is peer-reviewed by at least one other engineer before it can be merged.Static code analysis and dependency scanning run on every pull request.",
+    "ref": "50726915-4ae0-458b-8169-4ff925e0b3ff"
+  }
+]

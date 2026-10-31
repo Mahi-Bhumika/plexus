@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "11",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "12",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "13",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "14",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "15",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "16",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "17",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "18",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "19",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "20",
+      "answer": "Low-risk access is granted instantly, while high-risk access (such as AWS production) requires manager approval (e.g., via a phone tap to approve).",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "ref:a62ba9f4-6639-401f-abef-6341ea9c2fcf"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

@@ -1,37 +1,17 @@
 [
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Overview\n\nNimbus Labs completed a SOC 2 Type II examination covering the Nimbus Ledger Sync platform. The audit period ran from 1 January 2026 to 30 June 2026. The final report was issued on 14 August 2026 by the independent auditor Harlow & Pike LLP.",
-    "ref": "eff21748-439d-4d96-8485-14875765ffa9"
+    "content": "PLEXUS CLAIMS TO AVOID AND HONESTY RULES. Do NOT claim: SOC 2 or DPDP compliance (say \"designed for DPDP alignment; SOC 2 is the first milestone once enterprise pilots begin\"); zero data retention today (ZDR is an agreement arranged with the provider for production; the demo runs on Gemini's free tier whose data terms may allow training on prompts, so drop ZDR from the pitch); \"never stored\" (our own tables store data; only say the model provider's retention is a separate matter); any productivity percentages or stats we did not measure (cut \"40% of the workweek\", \"15 hours per employee per week\", \"pays for itself on Day 1\", \"95%\", \"under 60 seconds\" unless measured); unverified competitor limits (check Copilot, Glean, ServiceNow, Coupa, Loopio, Zluri pages first); a made-up market size. Say plainly what is built live versus simulated (Zombie SaaS and SSO logs seeded; Jira-style tickets on our own board; Slack real if time) before judges ask. Prompt injection is not solved industry-wide; do not call it bulletproof. Prefer quoting our own measured numbers (e.g. \"50 questions in X seconds, Y auto-answered, Z flagged; precision of auto-filled answers W%\"). Differentiation line: each incumbent covers a slice inside its own suite; Plexus is the neutral, vendor-agnostic layer with one shared memory and one approval and audit layer across departments. Business model: per-seat for small and mid teams, department-level pilots then enterprise contracts for large companies, usage-based for heavy automation; land with the RFP wedge.",
+    "ref": "4ad12710-857e-43fc-ad55-64548c2bd116"
   },
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Sharing the report\n\nThe full report is available to customers and prospects under a signed NDA. Requests go to security@nimbuslabs.example and are answered within 3 business days. A bridge letter covering the period from 1 July 2026 to the date of request can be issued on demand.",
-    "ref": "a3f0839a-226e-4130-ac13-9c1133d117ff"
+    "content": "AURA piece Meko construct What it gives the demo SOC 2 reports, Knowledge (uploaded Indexed and searchable with no pipeline code. whitepapers, policies PDFs, markdown, text) Human fixes a Memory promoted to The next questionnaire fills that cell red-flagged RFP answer | shared knowledge automatically. This is your learning-loop moment. Audit log, undo, why did | Decision traces Every action shows prompt, plan, sources and it do that outcome. This is your trust layer. Catch-Me-Up briefing Conversations and One agent summarizes what the others did. memory ActionSwarm hands Shared memory across __| The next agent inherits the reasoning, not only work to IT and Finance agents the result. agents Intern vs founder search | One datapack per role, Needs a check: confirm datapack sharing with sharing levels supports this before promising it.\n\nMeko does not read Excel, post Slack buttons, parse receipts or draw your dashboard. Those stay in your code.\n\nArchitecture",
+    "ref": "90f59989-6f21-47d0-950e-b09a91d88b1d"
   },
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
-    "ref": "95dd8646-f9af-47e9-8a3f-c79f0c4da25b"
-  },
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Privacy Note > Certifications\n\nNimbus Labs holds a SOC 2 Type II report. It does not yet hold ISO 27001 certification; certification is planned for 2027.",
-    "ref": "bc963c62-cf2d-4b99-9685-316b0ae95a9b"
-  },
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Privacy Note > Certifications\n\nNimbus Labs holds a SOC 2 Type II report. It does not yet hold ISO 27001 certification; certification is planned for 2027.",
-    "ref": "ca9f5574-dda5-491f-88f8-cccf9b0cdb1c"
-  },
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Next examination\n\nThe next Type II audit period begins 1 July 2026 and runs for 12 months.",
-    "ref": "006d9868-479d-46ad-9484-3bcd2e5c4e50"
-  },
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Scope boundaries\n\nThe report covers the production platform hosted on AWS (Mumbai primary, Singapore disaster recovery), the corporate identity provider and the ticketing system. It does not cover customer-operated systems.",
-    "ref": "f5193f2c-98eb-416c-b120-e88f38fc2aad"
+    "content": "Synthetic sample data (a fake SOC 2 summary, the 50-question RFP sheet, a kickoff transcript, receipts, SaaS billing and login tables) is data rather than code, but only generate it tonight if an organizer says prep is allowed. Otherwise it is the first hour on Saturday.\n\nSaturday to Sunday timeline\n\nThe Driver builds the agents while the Producer builds data, interface and deck in parallel, both stop at a 3 AM freeze, and the last 6.5 hours go to sleep and rehearsal.\n\nBuild runs to a 3 AM freeze, then sleep and rehearsal\n\nAssumes hacking starts Saturday 11:00; shift every bar if the real start differs",
+    "ref": "afda2718-0e5f-43db-922a-963f91c03301"
   }
 ]

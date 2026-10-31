@@ -1,12 +1,12 @@
 [
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
-    "ref": "5914e523-910a-4177-965a-3947429a9719"
+    "content": "Section: Plexus build plan: Fri 12 PM to Sun 10:30 AM > Friday > 12:30 to 2:30: Accounts and installs (in parallel)\n\nMahi\n\nGemini API key from Google AI Studio. Note the per-minute and per-day limits for each model shown there. Check Google's data terms and write down whether free-tier prompts may be used for training. This is why the pitch has no zero-data-retention claim.Install Node 20 or newer, pnpm, Git and Docker Desktop, plus your editor. Run  for the n8n image.Set up a backup free AI editor, in case this chat hits its message limit.In Meko: open the  datapack, check that the five memories are there, upload the build plan PDF to the knowledge base, and look at how \"learnings\" get promoted to shared knowledge.\n\nBhumika\n\nCreate a second Gemini API key under your own account. Two keys give you a spare when one hits its limit.Create a free Slack workspace called Nimbus Labs with channels , ,  and . Create a Slack app with socket mode and interactivity on, bot scopes for posting and reading messages, and an incoming webhook for . Save the tokens. Time box: 45 minutes. If the buttons aren't working by then, the dashboard Approve button is the plan.Install OBS or another screen recorder and test that it records screen and microphone.Open Excalidraw and Google Slides. Check the free limits of anything else you plan to use for the deck.Install the Slack mobile app on your phone. Test that your phone camera works for the receipt demo.\n\nDone when: , ,  and  all work on both laptops, both Gemini keys answer a test prompt in AI Studio, and Slack shows a test webhook post.",
+    "ref": "480098f6-4461-49df-b5c8-c1cf8cc24338"
   },
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
-    "ref": "adba155f-0f87-448e-8d59-bbd626735652"
+    "content": "The idea re-aimed at Meko\n\nPitch AURA as a team of specialist agents that share one memory, so what one agent learns, every agent knows. That is exactly what Meko sells, and it replaces three things you would otherwise hand-build: the vector store, the learning loop and the audit log.",
+    "ref": "044c098f-a711-4e18-832f-1abe34de8233"
   }
 ]

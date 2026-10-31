@@ -144,18 +144,17 @@ export function RfpGrid({
 
     if (!questionnaireId.startsWith("mock")) {
       try {
-        await fetch(`/api/rfp/${questionnaireId}`, {
+        await fetch("/api/rfp/fix", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             questionId: currentQ.id,
-            humanAnswer: drawer.humanAnswer || currentQ.answer,
-            status: "filled",
-            approvedBy: approverName,
+            answer: drawer.humanAnswer || currentQ.answer,
+            approver: approverName,
           }),
         });
       } catch (e) {
-        console.error("Failed to sync approval", e);
+        console.error("Failed to sync approval to /api/rfp/fix", e);
       }
     }
   }
@@ -177,16 +176,17 @@ export function RfpGrid({
 
     if (!questionnaireId.startsWith("mock")) {
       try {
-        await fetch(`/api/rfp/${questionnaireId}`, {
+        await fetch("/api/rfp/fix", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             questionId: currentQ.id,
-            humanAnswer: drawer.humanAnswer,
+            answer: drawer.humanAnswer,
+            approver: "Human Override",
           }),
         });
       } catch (e) {
-        console.error("Failed to submit fix", e);
+        console.error("Failed to submit fix to /api/rfp/fix", e);
       }
     }
 

@@ -57,8 +57,8 @@ export type ActiveGrant = {
   app: string;
   risk: "Low" | "Medium" | "High";
   approver: string;
-  grantedAt: number; // timestamp in ms
-  maxDurationHours: number; // 8 for prod, 24 for others
+  grantedAt: number;
+  maxDurationHours: number;
 };
 
 export type AccessAuditRow = {
@@ -73,26 +73,44 @@ export type AccessAuditRow = {
   canUndo?: boolean;
 };
 
-const INITIAL_ACTIVE_GRANTS: ActiveGrant[] = [
-  {
-    id: "grant_1",
-    requesterName: "Meera Iyer",
-    app: "Figma",
-    risk: "Low",
-    approver: "Auto-approved (Policy)",
-    grantedAt: Date.now() - 36 * 60 * 1000, // 36m ago
-    maxDurationHours: 24,
-  },
-  {
-    id: "grant_2",
-    requesterName: "Karan Malhotra",
-    app: "AWS Production",
-    risk: "High",
-    approver: "Riya Sharma (Founder)",
-    grantedAt: Date.now() - 14 * 60 * 1000, // 14m ago
-    maxDurationHours: 8,
-  },
-];
+// Built on the client after mount so Date.now() is never read during prerender.
+function makeInitialGrants(base: number): ActiveGrant[] {
+  return [
+    {
+      id: "grant_1",
+      requesterName: "Meera Iyer",
+      app: "Figma",
+      risk: "Low",
+      approver: "Auto-approved (Policy)",
+      grantedAt: base - 36 * 60 * 1000,
+      maxDurationHours: 24,
+    },
+    {
+      id: "grant_2",
+      requesterName: "Karan Malhotra",
+      app: "AWS Production",
+      risk: "High",
+      approver: "Riya Sharma (Founder)",
+      grantedAt: base - 14 * 60 * 1000,
+      maxDurationHours: 8,
+    },
+  ];
+}
+
+// Backend stores approver_id (e.g. "karan"); show the person's name instead.
+function approverLabel(raw: string | null | undefined): string {
+  if (!raw) return "—";
+  const person = REQUESTERS.find((p) => p.id === raw.toLowerCase());
+  if (!person) return raw;
+  if (person.role === "Founder") return `${person.name} (Founder)`;
+  if (person.role === "Engineering Manager") return `${person.name} (Eng Manager)`;
+  return person.name;
+}
+
+// Find the person behind a display name like "Karan Malhotra (Eng Manager)".
+function personForName(display: string): Requester | undefined {
+  return REQUESTERS.find((p) => display.startsWith(p.name));
+}
 
 const INITIAL_MOCK_AUDIT: AccessAuditRow[] = [
   {
@@ -133,7 +151,7 @@ function formatTime(timestamp: string): string {
 
 export default function AccessPage() {
   const [mounted, setMounted] = useState(false);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
 
   // Request Form State
   const [selectedRequesterId, setSelectedRequesterId] = useState("meera");
@@ -141,7 +159,7 @@ export default function AccessPage() {
   const [justification, setJustification] = useState("Need access for upcoming sprint tasks.");
 
   // Access Requests, Active Grants & Audit Log State
-  const [activeGrants, setActiveGrants] = useState<ActiveGrant[]>(INITIAL_ACTIVE_GRANTS);
+  const [activeGrants, setActiveGrants] = useState<ActiveGrant[]>([]);
   const [auditRows, setAuditRows] = useState<AccessAuditRow[]>(INITIAL_MOCK_AUDIT);
   const [actionSuccessBanner, setActionSuccessBanner] = useState<string | null>(null);
 
@@ -149,11 +167,78 @@ export default function AccessPage() {
   const pendingRequests = auditRows.filter((row) => row.decision === "pending_approval");
 
   useEffect(() => {
+    // Client-only: real time, seed grants and the countdown tick all start after mount.
+    const start = Date.now();
     setMounted(true);
-    // Live countdown interval for production JIT countdown
-    const timer = setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
+    setNow(start);
+    setActiveGrants((prev) => (prev.length > 0 ? prev : makeInitialGrants(start)));
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+
+    // Initial fetch from real /api/access backend
+    fetch("/api/access")
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json() as Promise<{
+          requests: Array<{
+            id: string;
+            user_id: string;
+            app: string;
+            risk: "Low" | "Medium" | "High";
+            status: "granted" | "denied" | "pending_approval" | "undone";
+            approver_id: string;
+            requested_at: string;
+            decided_at: string | null;
+            user_name: string | null;
+            user_role: string | null;
+          }>;
+        }>;
+      })
+      .then((data) => {
+        if (data.requests && data.requests.length > 0) {
+          // Safety net: a row where the approver is the requester is stale/corrupt.
+          // Show it as denied by the guard and never turn it into a grant.
+          const isSelfApproved = (r: { user_id: string; approver_id: string }) =>
+            !!r.approver_id && r.user_id.toLowerCase() === r.approver_id.toLowerCase();
+
+          const backendRows: AccessAuditRow[] = data.requests.map((r) => {
+            const selfApproved = isSelfApproved(r);
+            return {
+              id: r.id,
+              timestamp: r.requested_at,
+              requesterName: r.user_name || r.user_id,
+              app: r.app,
+              risk: r.risk,
+              decision: selfApproved ? ("denied" as const) : r.status,
+              approver: selfApproved
+                ? "Policy Guard (self-approval blocked)"
+                : approverLabel(r.approver_id),
+              canUndo: !selfApproved && r.status === "granted",
+            };
+          });
+          setAuditRows(backendRows);
+
+          // Build active grants from granted requests
+          const backendGrants: ActiveGrant[] = data.requests
+            .filter((r) => r.status === "granted" && !isSelfApproved(r))
+            .map((r) => ({
+              id: `grant_${r.id}`,
+              requesterName: r.user_name || r.user_id,
+              app: r.app,
+              risk: r.risk,
+              approver: approverLabel(r.approver_id),
+              grantedAt: new Date(r.decided_at || r.requested_at).getTime(),
+              maxDurationHours: r.risk === "High" ? 8 : 24,
+            }));
+          if (backendGrants.length > 0) {
+            setActiveGrants(backendGrants);
+          }
+        }
+      })
+      .catch((err) => {
+        // Fallback to local initial state if backend DB has no rows yet
+        console.log("Using initial access audit state", err);
+      });
+
     return () => clearInterval(timer);
   }, []);
 
@@ -162,7 +247,6 @@ export default function AccessPage() {
     setTimeout(() => setActionSuccessBanner(null), 4000);
   }
 
-  // Calculate live remaining lease time (e.g. 7:46)
   function getRemainingTime(grant: ActiveGrant): string {
     const totalMs = grant.maxDurationHours * 60 * 60 * 1000;
     const elapsedMs = now - grant.grantedAt;
@@ -178,9 +262,7 @@ export default function AccessPage() {
     return `${hours}h ${String(minutes).padStart(2, "0")}m`;
   }
 
-  // Determine legitimate approver according to Nimbus Labs Policy hierarchy
   function resolveApprover(requester: Requester, policy: PolicyRule): { approver: string; eligible: boolean; reason?: string } {
-    // 1. Role Eligibility Check
     if (policy.app === "Payroll Tool" && requester.role !== "Founder") {
       return { approver: "Riya Sharma", eligible: false, reason: "Payroll Tool is Founder-only (Riya Sharma)." };
     }
@@ -188,7 +270,6 @@ export default function AccessPage() {
       return { approver: "Policy Rule", eligible: false, reason: "Interns are not eligible for Production access." };
     }
 
-    // 2. Self-approval prevention
     if (requester.id === "karan") {
       return { approver: "Riya Sharma (Founder)", eligible: true };
     }
@@ -197,7 +278,6 @@ export default function AccessPage() {
       return { approver: "Self (Founder)", eligible: true };
     }
 
-    // For Meera and Arjun:
     if (policy.risk === "High") {
       return { approver: "Karan Malhotra (Eng Manager)", eligible: true };
     }
@@ -208,8 +288,7 @@ export default function AccessPage() {
     return { approver: "Auto-approved (Policy)", eligible: true };
   }
 
-  // Handle new access submission
-  function handleRequestSubmit(e: React.FormEvent) {
+  async function handleRequestSubmit(e: React.FormEvent) {
     e.preventDefault();
     const policy = ACCESS_POLICIES.find((p) => p.app.toLowerCase() === selectedApp.toLowerCase()) || {
       app: selectedApp,
@@ -223,7 +302,6 @@ export default function AccessPage() {
     const newId = `req_${Date.now()}`;
     const newTimestamp = new Date().toISOString();
 
-    // Ineligible request -> Auto-denied by policy guard
     if (!resolution.eligible) {
       const row: AccessAuditRow = {
         id: newId,
@@ -241,7 +319,24 @@ export default function AccessPage() {
       return;
     }
 
-    // High or Medium Risk -> Gated by appropriate authority (Never self-approved)
+    // Call backend API /api/access
+    try {
+      await fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: selectedRequester.id,
+          userName: selectedRequester.name,
+          app: policy.app,
+          risk: policy.risk,
+          justification,
+          approverId: resolution.approver,
+        }),
+      });
+    } catch (err) {
+      console.warn("Backend /api/access sync error:", err);
+    }
+
     if (policy.risk === "High" || policy.risk === "Medium") {
       const row: AccessAuditRow = {
         id: newId,
@@ -257,7 +352,6 @@ export default function AccessPage() {
       setAuditRows([row, ...auditRows]);
       triggerNotice(`Gated: ${policy.app} request submitted. Awaiting approval from ${resolution.approver}.`);
     } else {
-      // Low risk -> Auto approved
       const row: AccessAuditRow = {
         id: newId,
         timestamp: newTimestamp,
@@ -271,7 +365,6 @@ export default function AccessPage() {
       };
       setAuditRows([row, ...auditRows]);
 
-      // Add to Active Grants
       const grant: ActiveGrant = {
         id: `grant_${Date.now()}`,
         requesterName: selectedRequester.name,
@@ -287,11 +380,29 @@ export default function AccessPage() {
     }
   }
 
-  // Demo Scenarios
-  function simulateMeeraFigma() {
+  // Fast Demo Scenarios (also calls backend API)
+  async function simulateMeeraFigma() {
     setSelectedRequesterId("meera");
     setSelectedApp("Figma");
     setJustification("Need editor access for payment review.");
+
+    try {
+      await fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: "meera",
+          userName: "Meera Iyer",
+          app: "Figma",
+          risk: "Low",
+          justification: "Need editor access for payment review.",
+          approverId: "Auto-approved (Policy)",
+        }),
+      });
+    } catch (err) {
+      console.warn("/api/access error", err);
+    }
+
     const row: AccessAuditRow = {
       id: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -319,10 +430,28 @@ export default function AccessPage() {
     triggerNotice("Simulation: Meera requested Figma → Auto-granted instantly!");
   }
 
-  function simulateMeeraAwsProd() {
+  async function simulateMeeraAwsProd() {
     setSelectedRequesterId("meera");
     setSelectedApp("AWS Production");
     setJustification("Urgent JIT access to inspect payment gateway webhook error.");
+
+    try {
+      await fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: "meera",
+          userName: "Meera Iyer",
+          app: "AWS Production",
+          risk: "High",
+          justification: "Urgent JIT access to inspect payment gateway webhook error.",
+          approverId: "Karan Malhotra (Eng Manager)",
+        }),
+      });
+    } catch (err) {
+      console.warn("/api/access error", err);
+    }
+
     const row: AccessAuditRow = {
       id: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -338,10 +467,28 @@ export default function AccessPage() {
     triggerNotice("Simulation: Meera requested AWS Prod → Gated, awaiting Karan's approval!");
   }
 
-  function simulateKaranAwsProd() {
+  async function simulateKaranAwsProd() {
     setSelectedRequesterId("karan");
     setSelectedApp("AWS Production");
     setJustification("Scheduled database maintenance on Meridian prod cluster.");
+
+    try {
+      await fetch("/api/access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: "karan",
+          userName: "Karan Malhotra",
+          app: "AWS Production",
+          risk: "High",
+          justification: "Scheduled database maintenance on Meridian prod cluster.",
+          approverId: "Riya Sharma (Founder)",
+        }),
+      });
+    } catch (err) {
+      console.warn("/api/access error", err);
+    }
+
     const row: AccessAuditRow = {
       id: `req_${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -357,8 +504,31 @@ export default function AccessPage() {
     triggerNotice("Simulation: Karan requested AWS Prod → Escalated to Riya Sharma (Founder) to prevent self-approval!");
   }
 
-  function handleApprovalDecision(id: string, decision: "granted" | "denied", approverName: string) {
+  async function handleApprovalDecision(id: string, decision: "granted" | "denied", approverName: string) {
     const targetReq = auditRows.find((r) => r.id === id);
+
+    // Segregation of duties: nobody can approve their own request.
+    const requesterPerson = targetReq ? personForName(targetReq.requesterName) : undefined;
+    const approverPerson = personForName(approverName);
+    if (decision === "granted" && requesterPerson && approverPerson && requesterPerson.id === approverPerson.id) {
+      triggerNotice(`Blocked: ${requesterPerson.name} cannot approve their own request.`);
+      return;
+    }
+
+    // Call backend API /api/access/decide
+    try {
+      await fetch("/api/access/decide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id,
+          decision,
+          approverName,
+        }),
+      });
+    } catch (err) {
+      console.warn("Backend /api/access/decide error:", err);
+    }
 
     setAuditRows((prev) =>
       prev.map((row) => {
@@ -366,7 +536,7 @@ export default function AccessPage() {
           return {
             ...row,
             decision,
-            approver: `${approverName} (Approved via Guard)`,
+            approver: `${approverName} (${decision === "denied" ? "Denied" : "Approved"} by Guard)`,
             canUndo: decision === "granted",
           };
         }
@@ -394,12 +564,24 @@ export default function AccessPage() {
     );
   }
 
-  // Revoke an active grant and record an audit row
-  function handleRevokeGrant(grantId: string) {
+  async function handleRevokeGrant(grantId: string) {
     const grant = activeGrants.find((g) => g.id === grantId);
     if (!grant) return;
 
     setActiveGrants((prev) => prev.filter((g) => g.id !== grantId));
+
+    try {
+      await fetch("/api/access/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: grant.id.replace("grant_", ""),
+          reason: "Active grant revoked early via dashboard Undo",
+        }),
+      });
+    } catch (err) {
+      console.warn("Backend /api/access/revoke error:", err);
+    }
 
     const auditRow: AccessAuditRow = {
       id: `rev_${Date.now()}`,
@@ -417,11 +599,20 @@ export default function AccessPage() {
     triggerNotice(`Revocation Complete: ${grant.app} grant for ${grant.requesterName} was revoked and logged.`);
   }
 
-  // Undo granted access from the audit table
-  function handleUndo(id: string) {
+  async function handleUndo(id: string) {
     const row = auditRows.find((r) => r.id === id);
     if (row) {
       setActiveGrants((prev) => prev.filter((g) => !(g.requesterName === row.requesterName && g.app === row.app)));
+    }
+
+    try {
+      await fetch("/api/access/revoke", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, reason: "Manual Undo from Decision Audit table" }),
+      });
+    } catch (err) {
+      console.warn("Backend /api/access/revoke error:", err);
     }
 
     setAuditRows((prev) =>
@@ -628,7 +819,7 @@ export default function AccessPage() {
         </div>
       </div>
 
-      {/* FIX 4b: Active Grants Card (Directly Under Form) */}
+      {/* Active Grants Card */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -666,7 +857,7 @@ export default function AccessPage() {
                 activeGrants.map((grant) => {
                   const isHigh = grant.risk === "High";
                   const grantedTimeStr = mounted ? formatTime(new Date(grant.grantedAt).toISOString()) : "--:--";
-                  const remainingStr = mounted ? getRemainingTime(grant) : "--:--";
+                  const remainingStr = mounted && now > 0 ? getRemainingTime(grant) : "--:--";
 
                   return (
                     <tr key={grant.id} className="hover:bg-emerald-950/20 transition-colors">

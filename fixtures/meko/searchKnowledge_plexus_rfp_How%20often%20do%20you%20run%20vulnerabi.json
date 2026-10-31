@@ -1,7 +1,7 @@
 [
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Security Whitepaper > Vulnerability management\n\nAuthenticated vulnerability scans of production run weekly.Patch deadlines from the date a vulnerability is confirmed: critical within 72 hours, high within 14 days, medium within 60 days.An external penetration test is performed once a year by CertiNova. The most recent test was in March 2026. It found no critical issues and two medium issues, both fixed within 21 days. A summary letter is shared under NDA.",
-    "ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    "content": "Record and replay. Save every real Meko and Gemini response as JSON, then add a Demo Mode switch that replays them if Wi-Fi or limits fail.\n\nCommit and tag. Commit every 30 to 45 minutes. Tag a safe build at 11 PM Saturday and the freeze build at 3 AM Sunday.\n\nMeasure while testing. Run each demo flow three times and write down times and counts. The Producer hand-checks the 50 RFP answers so you can quote a real accuracy figure.\n\nNever edit the frozen build. After 3 AM Sunday only fix crashes, and only in a branch you can discard.\n\nPitch deck, demo script and rehearsal\n\nThe Producer builds the deck Saturday evening with blank number slots, fills them from real test runs Sunday morning, and the pair rehearses at least four times before 10:30 AM.\n\nDeck (8 slides, 3 to 4 minutes of talking)\n\n1. The person and the problem: a sales engineer at Nimbus Labs gets a 50-question security form from Meridian Bank.",
+    "ref": "59b67bb2-67df-4078-8422-b59df26c3721"
   }
 ]

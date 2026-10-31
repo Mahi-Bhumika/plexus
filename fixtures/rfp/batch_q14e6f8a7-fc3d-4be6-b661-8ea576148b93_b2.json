@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "21",
+      "answer": "The company laptop is returned, and the device is wiped within 3 business days of an employee's exit.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "45c81808-35f9-4411-aa34-bbd01f32bc2e"
+    },
+    {
+      "id": "22",
+      "answer": "All access is revoked within 4 hours of the person's exit time.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "45c81808-35f9-4411-aa34-bbd01f32bc2e"
+    },
+    {
+      "id": "23",
+      "answer": "Yes, a web application firewall filters all inbound traffic.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "50726915-4ae0-458b-8169-4ff925e0b3ff"
+    },
+    {
+      "id": "24",
+      "answer": "When a bank forwards a request from an individual, Nimbus Labs responds to the bank within 15 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "99ffa279-944e-4923-a475-9339e7420d9d"
+    },
+    {
+      "id": "25",
+      "answer": "Riya Sharma is the named privacy lead.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "52021c47-5d17-4d02-9830-da909d4e13e0"
+    },
+    {
+      "id": "26",
+      "answer": "Nimbus Labs designs Nimbus Ledger Sync for alignment with India's Digital Personal Data Protection (DPDP) Act, 2023, but this is a design goal and not a certification or compliance statement.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "20cbe048-4499-4551-b220-3b7078c7174f"
+    },
+    {
+      "id": "27",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "28",
+      "answer": "Passwords must be at least 14 characters. Administrator accounts must use hardware security keys in addition to passwords, and shared accounts are not permitted.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "c679f90f-b290-45c4-a2bf-9b24ee5f7340"
+    },
+    {
+      "id": "29",
+      "answer": "The latest tabletop drill took place on 4 June 2026.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6fd8f6ef-8a0d-4e88-abfa-094ad0249d5f"
+    },
+    {
+      "id": "30",
+      "answer": "A customer administrator can request early deletion in writing. Nimbus Labs confirms completion by email within 10 business days of the request.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "e50d6acf-6cbd-4f67-98b8-858264fa060f"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

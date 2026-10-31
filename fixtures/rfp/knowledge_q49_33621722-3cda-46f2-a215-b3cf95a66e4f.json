@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Demo order (about 3 minutes, tuned to Meko's strengths)\n\nDrop in the Meridian RFP sheet; cells fill, a few turn red.\n\nFix one red cell as a human; run a second questionnaire and show that cell now fills itself. Say: what one agent learns, every agent knows.\n\nUpload the kickoff transcript; tasks, a Slack post and an email draft stream into the feed. Include the planted injection line and show it blocked.\n\n4. A new hire asks for Figma (instant) and AWS production (manager approval).\n\n5. Open the audit screen and click one action to show its trace: prompt, sources, confidence, undo.\n\n6. Cmd+K: Catch me up on Meridian. Then, if built, the receipt and Zombie SaaS tabs in 15 seconds.\n\nClaims to avoid: any SOC 2 or DPDP compliance claim, zero data retention, \"never stored\", and productivity percentages you did not measure.",
+    "ref": "5f724839-0f8e-4166-9d47-332065d8ac73"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Plexus build plan: Fri 12 PM to Sun 10:30 AM > Demo order (3 minutes)\n\nDrop in the Meridian sheet. Cells fill, a few turn red.Fix one red cell as a human. Run the second questionnaire and show the cell fills itself: \"what one agent learns, every agent knows.\"Upload the kickoff transcript. Tasks, a Slack post and an email draft appear in the feed, and the planted injection line is blocked.Meera asks for Figma (instant) and AWS production (Karan approves on the phone).Open the audit screen and show one action's trace: prompt, sources, confidence, undo.Cmd+K: \"Catch me up on Meridian.\" Then receipt and Zombie SaaS in 15 seconds if they are built.",
+    "ref": "a44ba083-0213-48ad-bd85-8b71c830972e"
+  }
+]

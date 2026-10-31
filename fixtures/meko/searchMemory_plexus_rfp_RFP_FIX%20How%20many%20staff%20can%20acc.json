@@ -1,27 +1,37 @@
 [
   {
-    "id": "cc3139d8-c8d6-40b6-a831-78909a98f042",
-    "text": "User's 'Batch 4' consists of item numbers 41 through 50 (41, 42, 43, 44, 45, 46, 47, 48, 49, 50).",
-    "score": 0.2885745335789436
+    "id": "0941fcf3-2e9e-496e-830d-c774bba98129",
+    "text": "UI_CHANGES | Sat 31 Oct 2026 | Bhumika's frontend lane is done; no further changes planned from her side. DONE: (1) Access page requester dropdown shows clean names (Meera Iyer, Karan Malhotra, Arjun Verma, Riya Sharma) with a dynamic \"Current Role\" chip. (2) \"Active Leases & Grants\" card under the request form: user, app, risk badge, granted time, approver, live per-second expiry countdown (8h JIT for production), Undo/Revoke that ends the lease and writes an \"undone\" audit row. (3) Riya Sharma renamed Founder (was CEO) everywhere in the UI and seed files. (4) Governance rules kept: Figma auto-approves; Meera's AWS Production goes to Karan Malhotra; Karan's AWS Production escalates to Riya Sharma (\"Approve as Riya (8h JIT)\"); approver can never equal requester. (5) Seed file seed/knowledge/04_access_control_policy.md has the new line under \"Risk levels and approvals\": \"If the Engineering Manager is the requester, approval escalates to the Founder. No one may approve their own request.\" people_and_roles.md updated to Founder. (6) npx tsc --noEmit: 0 errors. (7) \"1 Issue\" Next.js badge FIXED: it was a hydration error on toLocaleTimeString (07:40 PM vs 07:40 pm), resolved with formatTime and suppressHydrationWarning. DECISION: the app stays fully DARK (sidebar and central area), as chosen after the Fri design log. The earlier palette in the log (light #F8FAFC content area) is superseded; the context file should say dark. NOT DONE ON PURPOSE (Bhumika's lane ends at the frontend): the light-theme change was dropped. MAHI'S LANE (backend/driver): re-upload the updated access control policy to the plexus-app-demo knowledge base (not yet found there on 31 Oct), Meko MCP connections, and FIX 1, the RFP fill showing 0 of 50 at 0% confidence (agents/rfp.ts, lib/gemini.ts, lib/meko.ts). Bhumika's frontend mock mode lets her demo, score and screenshot the RFP grid without waiting for that fix.",
+    "score": 0.488619414840229
   },
   {
-    "id": "3cddd5f5-02f8-4cf3-88f0-f3f464ba1e98",
-    "text": "User's 'Batch 1' consists of item numbers 11 through 20 (11, 12, 13, 14, 15, 16, 17, 18, 19, 20).",
-    "score": 0.27335433732988557
+    "id": "189738ca-ca26-490c-97ac-b8d75cb2a109",
+    "text": "Build status Sat 31 Oct 2026 about 3 PM: Bhumika has the dashboard skeleton, sidebar (RFP Agent, ActionSwarm, Access Agent, Search Cmd+K, Finance Agent, Audit Trail), the activity feed (SSE from /api/events/stream plus initial fetch of /api/events) and the RFP screen with upload, stats, grid and Download Filled XLSX. Shared types are in lib/events.ts (ActivityEvent, ActivityStatus). Statuses: done, flagged, blocked, pending_approval, undone, error. Open issue: the first real RFP runs at 2:44 PM and 2:48 PM returned 0 filled, all flagged, 0% confidence, empty answers (50 and 30 questions). Mahi is still working on the backend. Likely causes to check: wrong Gemini model name (gemini-3.5-flash-lite, gemini-3.1-flash-lite and gemini-3.6-flash are unverified), bad key or rate limit, JSON parse failure, or Meko KB search pointing at the empty datapack. Failures should be sent as status error with a message, not as flagged. Frontend fixes pending: show source title not UUID, error badge, feed overflow, null-safe confidence and sources.",
+    "score": 0.42214558608071107
   },
   {
-    "id": "7c74d136-2ab3-4ede-b9b8-e722f3f545ee",
-    "text": "User's 'Batch 2' consists of item numbers 21 through 30 (21, 22, 23, 24, 25, 26, 27, 28, 29, 30).",
-    "score": 0.2674812936451394
+    "id": "174057d8-7940-47dd-8197-b40f6b2a2b4e",
+    "text": "Answer key change (Sat 31 Oct 2026): Sheet 1 Q36 (India-only data copies) changed from Partial to Answerable because the DR plan says the DR replica is in Singapore and customers needing India-only copies should discuss before signing. Sheet 1 counts now: 36 answerable, 7 partial (red), 7 out of scope, 50 total. Sheet 2 (Aegis) Q3 is now a normal answerable row (Reworded (answerable), link to Q36 kept for traceability, not a learning-loop pair). Sheet 2 counts: 10 reworded answerable, 16 new answerable, 2 learning-loop pairs, 2 out of scope, 30 total. Learning-loop pairs: sheet 1 Q43 to Aegis Q8 (proof of deletion), sheet 1 Q40 to Aegis Q14 (BYOD personal devices). No third pair; two is enough for the demo. Updated rfp_answer_key.xlsx must be on both laptops; the 10:30 PM scoring uses it. Demo script and deck should say 7 red cells on sheet 1, not 8.",
+    "score": 0.4073766933855243
   },
   {
-    "id": "ca80e4f4-2704-4d36-845b-d93b690af863",
-    "text": "User's 'Batch 3' consists of item numbers 31 through 40 (31, 32, 33, 34, 35, 36, 37, 38, 39, 40).",
-    "score": 0.2641426059415861
+    "id": "d770e685-34ed-42c7-bc8d-25fa52d26cd6",
+    "text": "Bhumika's next tasks (Sat 31 Oct 2026, in order): 1) RFP screen fixes (source title, error state, feed overflow, null-safe confidence and sources). 2) Mock mode flag with about 10 sample rows. 3) Detail drawer with question, answer, confidence, closest source, human override box and Approve button. 4) Ask Mahi for request and response shapes for upload (questionnaireId), fix and approve (questionId, answer, approver) and access request (status, approvalId). 5) Access screen with mocked requests: Meera asks for Figma (instant) and AWS prod (pending for Karan), policy table, approval card, audit rows with Undo. 6) Connect the RFP screen to real endpoints as soon as Mahi returns real answers; this outranks step 5 because of the 7 PM gate. Later: score the RFP run against the answer key at 10:30 PM, then the 8-slide deck, then Expenses and Zombie SaaS. Cut order: Zombie SaaS, Expenses, Slack buttons, Catch-Me-Up. Never cut the RFP engine or the trust layer.",
+    "score": 0.38112635544771933
   },
   {
-    "id": "5462dd2e-f745-4fae-9a68-261fcf2bcb3d",
-    "text": "User's 'Batch 0' consists of item numbers 1 through 10 (1, 2, 3, 4, 5, 6, 7, 8, 9, 10).",
-    "score": 0.2598583571946165
+    "id": "01e1dd91-6811-4b3e-86e7-9b5da674cbcc",
+    "text": "PlexusBot decision (Sat 31 Oct 2026): a command side panel in the right panel (like Copilot in VS Code) is a nice-to-have, not required. Decision: do not build before the 7 PM gate. Only leave room in the layout, with a Feed | PlexusBot tab in the Excalidraw wireframe. If the RFP demo runs end to end at 7 PM and the guard layer is on track, build a minimal version (about 45 to 60 min): chat box plus one Gemini function-calling call mapped to 4 or 5 existing endpoints (fill sheet 2, give Meera Figma, catch me up on Meridian, process transcript). All messages must go through the guard layer (injection check, approvals) and be logged as audit events. Could merge with Cmd+K. Use chips or pre-typed commands in the demo, plus Demo Mode cached replies. Cut first if behind.",
+    "score": 0.3206913724480307
+  },
+  {
+    "id": "af6776e0-1bfb-4c39-926c-9f77c878071f",
+    "text": "Plexus hackCBS 9.0 datapack IDs: plexus-hackcbs-9 = e2e101d5-5f68-4672-8343-0c809adb98f2 (owner Mahi Garg, Bhumika has maintainer grant; use for memory and traces, and MEKO_DATAPACK_ID in .env). plexus-app-demo = a8775b95-e56e-4445-a40b-e1b9b513807e (holds the 10 Nimbus Labs policy docs knowledge base). Datapack ID 8bb4de72-4563-4913-b419-5752936669ca is invalid. If KB search points at plexus-hackcbs-9 it will return nothing until the docs are uploaded there, or add a separate KB datapack env var. Saved Sat 31 Oct 2026.",
+    "score": 0.31207023726831107
+  },
+  {
+    "id": "695b06f9-38b5-4759-b2e9-1d78fd54d890",
+    "text": "In the user's dataset or task list, 'Batch 0' comprises ten items, enumerated as 1, 2, 3, 4, 5, 6, 7, 8, 9, and 10.",
+    "score": 0.26446670453649535
   }
 ]
