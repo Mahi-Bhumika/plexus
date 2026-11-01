@@ -147,10 +147,12 @@ html.dark .bg-\[\#F3F4F6\],
 html.dark .bg-gray-100,
 html.dark .bg-neutral-100 {
   background-color: #162032 !important;
+  color: #F3F4F6 !important;
 }
 
 html.dark .border-\[\#E5E7EB\],
 html.dark .border-gray-200,
+html.dark .border-gray-300,
 html.dark .border-neutral-200,
 html.dark .border-attio-border,
 html.dark .border-border-subtle {
@@ -169,6 +171,15 @@ html.dark .text-slate-900,
 html.dark .text-gray-900,
 html.dark .text-txt-main {
   color: #F3F4F6 !important;
+}
+
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-neutral-800,
+html.dark .text-neutral-700 {
+  color: #E2E8F0 !important;
 }
 
 html.dark .text-gray-600,
@@ -199,35 +210,72 @@ html.dark kbd {
   color: #94A3B8 !important;
 }
 
+html.dark pre,
+html.dark code {
+  background-color: #090D16 !important;
+  color: #E2E8F0 !important;
+  border-color: #1E293B !important;
+}
+
 html.dark .shadow-sm,
 html.dark .shadow-xs,
 html.dark .shadow-2xs {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4) !important;
 }
 
-/* Status pill enhancements in dark */
-html.dark .bg-emerald-50 {
+/* Dark mode hover overrides so elements never turn into bright grey boxes */
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover,
+html.dark .hover\:bg-gray-200:hover,
+html.dark .hover\:bg-neutral-50:hover,
+html.dark .hover\:bg-neutral-100:hover,
+html.dark .hover\:bg-neutral-100\/80:hover,
+html.dark .hover\:bg-\[\#F9FAFB\]:hover,
+html.dark .hover\:bg-\[\#F3F4F6\]:hover,
+html.dark .hover\:bg-white:hover,
+html.dark .hover\:bg-white\/60:hover {
+  background-color: #1E293B !important;
+  color: #F3F4F6 !important;
+}
+
+html.dark .hover\:border-gray-300:hover,
+html.dark .hover\:border-gray-400:hover {
+  border-color: #334155 !important;
+}
+
+/* Status pill & alert card enhancements in dark mode - prevents muddy cement-grey boxes */
+html.dark [class*="bg-amber-50/"],
+html.dark [class*="bg-amber-100/"],
+html.dark .bg-amber-50,
+html.dark .bg-amber-100 {
+  background-color: rgba(217, 119, 6, 0.15) !important;
+  border-color: rgba(217, 119, 6, 0.35) !important;
+}
+
+html.dark [class*="bg-red-50/"],
+html.dark [class*="bg-red-100/"],
+html.dark [class*="bg-rose-50/"],
+html.dark [class*="bg-rose-100/"],
+html.dark .bg-red-50,
+html.dark .bg-red-100,
+html.dark .bg-rose-50,
+html.dark .bg-rose-100 {
+  background-color: rgba(225, 29, 72, 0.15) !important;
+  border-color: rgba(225, 29, 72, 0.35) !important;
+}
+
+html.dark [class*="bg-emerald-50/"],
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100 {
   background-color: rgba(5, 150, 105, 0.15) !important;
   border-color: rgba(5, 150, 105, 0.3) !important;
 }
 
-html.dark .bg-blue-50 {
+html.dark [class*="bg-blue-50/"],
+html.dark .bg-blue-50,
+html.dark .bg-blue-100 {
   background-color: rgba(59, 91, 253, 0.15) !important;
   border-color: rgba(59, 91, 253, 0.3) !important;
-}
-
-html.dark .bg-amber-50,
-html.dark .bg-amber-100 {
-  background-color: rgba(217, 119, 6, 0.15) !important;
-  border-color: rgba(217, 119, 6, 0.3) !important;
-}
-
-html.dark .bg-rose-50,
-html.dark .bg-rose-100,
-html.dark .bg-red-50,
-html.dark .bg-red-100 {
-  background-color: rgba(225, 29, 72, 0.15) !important;
-  border-color: rgba(225, 29, 72, 0.3) !important;
 }
 
 @layer base {

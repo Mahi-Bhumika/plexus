@@ -69,9 +69,9 @@ function statusBadgeText(r: ExpenseResult): string {
 }
 
 function badgeClasses(status: "ok" | "violation" | "review"): string {
-  if (status === "ok") return "bg-emerald-50 text-emerald-700 border-emerald-200";
-  if (status === "violation") return "bg-red-100 text-red-800 border-red-200";
-  return "bg-amber-100 text-amber-800 border-amber-200";
+  if (status === "ok") return "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50";
+  if (status === "violation") return "bg-red-100 dark:bg-rose-950/40 text-red-800 dark:text-rose-400 border-red-200 dark:border-rose-900/50";
+  return "bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border-amber-200 dark:border-amber-900/50";
 }
 
 function toClaim(r: ExpenseResult): ClaimItem {
@@ -479,7 +479,7 @@ export default function FinancePage() {
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-6 pb-20 flex flex-col space-y-4">
       {/* Top Command & Telemetry Bar */}
-      <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white p-4 rounded-xl border border-[#E5E7EB] shadow-xs">
+      <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#3B5BFD]">
@@ -538,7 +538,7 @@ export default function FinancePage() {
             type="button"
             onClick={handleTriggerReconcile}
             disabled={isSyncing}
-            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 border border-[#E5E7EB] font-mono text-xs px-3 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer"
+            className="flex items-center gap-1.5 bg-white dark:bg-[#162032] hover:bg-gray-50 dark:hover:bg-[#1E293B] text-gray-700 dark:text-gray-200 border border-[#E5E7EB] dark:border-[#1E293B] font-mono text-xs px-3 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer"
           >
             <span
               className={`material-symbols-outlined text-[16px] text-emerald-600 ${
@@ -555,7 +555,7 @@ export default function FinancePage() {
             type="button"
             onClick={handleExportAudit}
             disabled={isExporting}
-            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 border border-[#E5E7EB] font-mono text-xs px-3 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 bg-white dark:bg-[#162032] hover:bg-gray-50 dark:hover:bg-[#1E293B] text-gray-700 dark:text-gray-200 border border-[#E5E7EB] dark:border-[#1E293B] font-mono text-xs px-3 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
           >
             <span
               className={`material-symbols-outlined text-[16px] text-gray-500 ${
@@ -571,7 +571,7 @@ export default function FinancePage() {
           <button
             type="button"
             onClick={scrollToRules}
-            className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-[#3B5BFD] border border-[#E5E7EB] font-mono text-xs px-3 py-1.5 rounded-lg shadow-2xs transition-all ml-auto xl:ml-0 cursor-pointer"
+            className="flex items-center gap-1.5 bg-gray-100 dark:bg-[#162032] hover:bg-gray-200 dark:hover:bg-[#1E293B] text-[#3B5BFD] dark:text-blue-400 border border-[#E5E7EB] font-mono text-xs px-3 py-1.5 rounded-lg shadow-2xs transition-all ml-auto xl:ml-0 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">rule</span>
             <span>Policy Rules Sheet</span>
@@ -582,12 +582,12 @@ export default function FinancePage() {
       {/* Metric Gauges Bento */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Total Scanned */}
-        <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] flex flex-col justify-between shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] text-gray-500 uppercase tracking-wider font-semibold">
               Total Receipts
             </span>
-            <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200 font-mono text-[10px]">
+            <span className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[#162032] text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-[#1E293B] font-mono text-[10px]">
               {totals.receiptsCount} uploaded
             </span>
           </div>
@@ -599,13 +599,13 @@ export default function FinancePage() {
               <span className="material-symbols-outlined text-[14px]">check</span> All read clearly
             </span>
           </div>
-          <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="mt-2.5 h-1 w-full bg-gray-100 dark:bg-[#162032] rounded-full overflow-hidden">
             <div className="h-full bg-[#3B5BFD] rounded-full w-full"></div>
           </div>
         </div>
 
         {/* Card 2: Reconciled & Approved */}
-        <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] flex flex-col justify-between shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] text-emerald-700 uppercase tracking-wider font-semibold">
               Ready to Pay
@@ -620,7 +620,7 @@ export default function FinancePage() {
             </span>
             <span className="font-mono text-xs text-gray-500">{approvedPct}% of total</span>
           </div>
-          <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="mt-2.5 h-1 w-full bg-gray-100 dark:bg-[#162032] rounded-full overflow-hidden">
             <div
               className="h-full bg-emerald-500 rounded-full"
               style={{ width: `${approvedPct}%` }}
@@ -629,7 +629,7 @@ export default function FinancePage() {
         </div>
 
         {/* Card 3: Violations & Flags */}
-        <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] flex flex-col justify-between shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] text-red-600 uppercase tracking-wider font-semibold">
               Needs Your Look
@@ -644,7 +644,7 @@ export default function FinancePage() {
             </span>
             <span className="font-mono text-xs text-red-600">On hold</span>
           </div>
-          <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="mt-2.5 h-1 w-full bg-gray-100 dark:bg-[#162032] rounded-full overflow-hidden">
             <div
               className="h-full bg-red-500 rounded-full"
               style={{ width: `${flaggedPct}%` }}
@@ -653,7 +653,7 @@ export default function FinancePage() {
         </div>
 
         {/* Card 4: Unmatched Corporate Transactions */}
-        <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] flex flex-col justify-between shadow-xs relative overflow-hidden">
+        <div className="bg-white dark:bg-[#0F172A] p-4 rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[10px] text-amber-700 uppercase tracking-wider font-semibold">
               Missing Receipts
@@ -670,7 +670,7 @@ export default function FinancePage() {
               ₹{totals.unmatchedTotal.toLocaleString("en-IN")} total without bill
             </span>
           </div>
-          <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+          <div className="mt-2.5 h-1 w-full bg-gray-100 dark:bg-[#162032] rounded-full overflow-hidden">
             <div
               className="h-full bg-amber-500 rounded-full"
               style={{ width: `${unmatchedPct}%` }}
@@ -681,15 +681,15 @@ export default function FinancePage() {
 
       {/* Zombie SaaS Alert (if data available) */}
       {zombieReport && zombieReport.tools.length > 0 && (
-        <section className="bg-white rounded-xl border border-amber-200 p-4 shadow-xs">
-          <div className="flex items-center justify-between pb-2 border-b border-amber-100">
+        <section className="bg-white dark:bg-[#0F172A] rounded-xl border border-amber-200 dark:border-amber-900/40 p-4 shadow-xs">
+          <div className="flex items-center justify-between pb-2 border-b border-amber-100 dark:border-amber-900/30">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[20px] text-amber-600">
+              <span className="material-symbols-outlined text-[20px] text-amber-600 dark:text-amber-400">
                 warning
               </span>
               <div>
-                <h3 className="text-xs font-semibold text-[#111827]">Zombie SaaS Detected</h3>
-                <p className="font-mono text-[11px] text-gray-500">
+                <h3 className="text-xs font-semibold text-[#111827] dark:text-[#F3F4F6]">Zombie SaaS Detected</h3>
+                <p className="font-mono text-[11px] text-gray-500 dark:text-gray-400">
                   {zombieReport.tools.length} tool{zombieReport.tools.length !== 1 ? "s" : ""} with
                   no logins in {zombieReport.thresholdDays}+ days — ₹
                   {zombieReport.monthlyWasteInr.toLocaleString("en-IN")}/mo potential waste (₹
@@ -702,16 +702,16 @@ export default function FinancePage() {
             {zombieReport.tools.slice(0, 6).map((t) => (
               <div
                 key={t.tool}
-                className="p-2.5 rounded-lg bg-amber-50/50 border border-amber-100 flex items-center justify-between"
+                className="p-2.5 rounded-lg bg-amber-50/50 dark:bg-[#131C2E] border border-amber-200/70 dark:border-amber-900/40 flex items-center justify-between"
               >
                 <div>
-                  <span className="text-xs font-semibold text-[#111827]">{t.tool}</span>
-                  <p className="font-mono text-[10px] text-gray-500">
+                  <span className="text-xs font-semibold text-[#111827] dark:text-[#F3F4F6]">{t.tool}</span>
+                  <p className="font-mono text-[10px] text-gray-500 dark:text-gray-400">
                     {t.days_idle != null ? `${t.days_idle}d idle` : "No logins on record"}
                     {t.owner ? ` · ${t.owner}` : ""}
                   </p>
                 </div>
-                <span className="font-mono text-xs font-bold text-amber-700">
+                <span className="font-mono text-xs font-bold text-amber-700 dark:text-amber-400">
                   ₹{t.monthly_cost_inr.toLocaleString("en-IN")}/mo
                 </span>
               </div>
@@ -723,8 +723,8 @@ export default function FinancePage() {
       {/* Live Pipeline Split Workstation */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         {/* LEFT WORKBENCH (7 cols): Processed Expense Claims */}
-        <div className="lg:col-span-7 flex flex-col bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
-          <div className="p-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
+        <div className="lg:col-span-7 flex flex-col bg-white dark:bg-[#0F172A] rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] shadow-xs overflow-hidden">
+          <div className="p-4 bg-[#F9FAFB] dark:bg-[#131C2E] border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-[#3B5BFD]">
                 receipt_long
@@ -767,15 +767,15 @@ export default function FinancePage() {
                 key={claim.id}
                 className={`p-4 rounded-lg border transition-colors ${
                   claim.status === "violation"
-                    ? "bg-red-50/30 border-red-200"
+                    ? "bg-red-50/30 dark:bg-[#191118] border-red-200 dark:border-rose-900/50"
                     : claim.status === "review"
-                    ? "bg-amber-50/40 border-amber-200"
-                    : "bg-[#F9FAFB] border-[#E5E7EB] hover:border-gray-300"
+                    ? "bg-amber-50/40 dark:bg-[#1A1610] border-amber-200 dark:border-amber-900/50"
+                    : "bg-[#F9FAFB] dark:bg-[#131C2E] border-[#E5E7EB] dark:border-[#1E293B] hover:border-gray-300 dark:hover:border-gray-600"
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs font-bold text-[#3B5BFD]">
+                    <span className="font-mono text-xs font-bold text-[#3B5BFD] dark:text-blue-400">
                       #{claim.id}
                     </span>
                     <span
@@ -790,48 +790,50 @@ export default function FinancePage() {
                       </span>
                       {claim.statusBadge}
                     </span>
-                    <span className="font-mono text-xs text-gray-500">{claim.category}</span>
+                    <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{claim.category}</span>
                   </div>
                   <div className="text-right">
                     <span
                       className={`font-mono text-base font-bold ${
-                        claim.status === "violation" ? "text-red-700" : "text-[#111827]"
+                        claim.status === "violation"
+                          ? "text-red-700 dark:text-rose-400"
+                          : "text-[#111827] dark:text-[#F3F4F6]"
                       }`}
                     >
                       ₹{claim.amount.toLocaleString("en-IN")}
                     </span>
                     {claim.unit && (
-                      <span className="font-mono text-xs text-gray-500">{claim.unit}</span>
+                      <span className="font-mono text-xs text-gray-500 dark:text-gray-400">{claim.unit}</span>
                     )}
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-600 gap-1 pt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-600 dark:text-gray-300 gap-1 pt-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[#111827] font-medium">{claim.vendor}</span>
-                    <span className="text-gray-300">·</span>
-                    <span className="text-emerald-700 font-mono text-[11px] font-medium">
+                    <span className="text-[#111827] dark:text-[#F3F4F6] font-medium">{claim.vendor}</span>
+                    <span className="text-gray-300 dark:text-gray-600">·</span>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-mono text-[11px] font-medium">
                       {claim.details}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 font-mono text-[11px]">
-                    <span className="text-gray-600 bg-white border border-[#E5E7EB] px-1.5 py-0.5 rounded">
+                    <span className="text-gray-600 dark:text-gray-300 bg-white dark:bg-[#162032] border border-[#E5E7EB] dark:border-[#1E293B] px-1.5 py-0.5 rounded">
                       {claim.cardName}
                     </span>
-                    <span className="text-emerald-700 font-medium">{claim.approverText}</span>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-medium">{claim.approverText}</span>
                   </div>
                 </div>
 
                 {claim.alertMsg && (
                   <div
-                    className={`mt-2 p-2.5 rounded-lg bg-white border flex items-start justify-between gap-2 shadow-2xs ${
-                      claim.status === "violation" ? "border-red-200" : "border-amber-200"
+                    className={`mt-2 p-2.5 rounded-lg bg-white dark:bg-[#0B101D] border flex items-start justify-between gap-2 shadow-2xs ${
+                      claim.status === "violation" ? "border-red-200 dark:border-rose-900/50" : "border-amber-200 dark:border-amber-900/50"
                     }`}
                   >
                     <div className="flex items-start gap-1.5">
                       <span
                         className={`material-symbols-outlined text-[16px] mt-0.5 ${
-                          claim.status === "violation" ? "text-red-600" : "text-amber-600"
+                          claim.status === "violation" ? "text-red-600 dark:text-rose-400" : "text-amber-600 dark:text-amber-400"
                         }`}
                       >
                         report_problem
@@ -839,19 +841,19 @@ export default function FinancePage() {
                       <div>
                         <p
                           className={`font-mono text-xs font-medium ${
-                            claim.status === "violation" ? "text-red-700" : "text-amber-800"
+                            claim.status === "violation" ? "text-red-700 dark:text-rose-400" : "text-amber-800 dark:text-amber-400"
                           }`}
                         >
                           {claim.alertMsg}
                         </p>
-                        <p className="text-xs text-gray-600">{claim.alertSub}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{claim.alertSub}</p>
                       </div>
                     </div>
                     {claim.alertBtn && (
                       <button
                         type="button"
                         onClick={() => showToast("Action Dispatched", claim.alertMsg || "")}
-                        className="px-2 py-1 rounded bg-white hover:bg-gray-50 text-gray-800 border border-[#E5E7EB] font-mono text-[11px] whitespace-nowrap shadow-2xs cursor-pointer font-medium"
+                        className="px-2 py-1 rounded bg-white dark:bg-[#162032] hover:bg-gray-50 dark:hover:bg-[#1E293B] text-gray-800 dark:text-gray-200 border border-[#E5E7EB] dark:border-[#1E293B] font-mono text-[11px] whitespace-nowrap shadow-2xs cursor-pointer font-medium"
                       >
                         {claim.alertBtn}
                       </button>
@@ -864,8 +866,8 @@ export default function FinancePage() {
         </div>
 
         {/* RIGHT WORKBENCH (5 cols): Corporate Card Feed */}
-        <div className="lg:col-span-5 flex flex-col bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
-          <div className="p-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
+        <div className="lg:col-span-5 flex flex-col bg-white dark:bg-[#0F172A] rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] shadow-xs overflow-hidden">
+          <div className="p-4 bg-[#F9FAFB] dark:bg-[#131C2E] border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-emerald-600">
                 credit_card
@@ -885,10 +887,10 @@ export default function FinancePage() {
             </div>
           </div>
 
-          <div className="divide-y divide-gray-100 p-2 space-y-1.5 max-h-[700px] overflow-y-auto">
+          <div className="divide-y divide-gray-100 dark:divide-[#1E293B] p-2 space-y-1.5 max-h-[700px] overflow-y-auto">
             {feed.length === 0 && (
               <div className="text-center py-12">
-                <span className="material-symbols-outlined text-[32px] text-gray-300">
+                <span className="material-symbols-outlined text-[32px] text-gray-300 dark:text-gray-600">
                   credit_card_off
                 </span>
                 <p className="text-sm text-gray-400 mt-2">No card transactions loaded.</p>
@@ -899,24 +901,24 @@ export default function FinancePage() {
                 key={txn.id}
                 className={`p-2.5 rounded-lg border transition-colors ${
                   !txn.matched && !txn.isIncidental
-                    ? "bg-amber-50/30 border-amber-200"
+                    ? "bg-amber-50/30 dark:bg-[#1A1610] border-amber-200 dark:border-amber-900/50"
                     : txn.isIncidental
-                    ? "bg-[#F9FAFB] border-[#E5E7EB]"
-                    : "hover:bg-[#F9FAFB] border-transparent hover:border-[#E5E7EB]"
+                    ? "bg-[#F9FAFB] dark:bg-[#131C2E] border-[#E5E7EB] dark:border-[#1E293B]"
+                    : "hover:bg-[#F9FAFB] dark:hover:bg-[#131C2E] border-transparent hover:border-[#E5E7EB] dark:hover:border-[#1E293B]"
                 }`}
               >
                 <div className="flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-gray-400">{txn.date}</span>
-                      <span className="text-xs font-semibold text-[#111827]">{txn.vendor}</span>
+                      <span className="text-xs font-semibold text-[#111827] dark:text-[#F3F4F6]">{txn.vendor}</span>
                     </div>
-                    <p className="font-mono text-[11px] text-gray-500">{txn.cardInfo}</p>
+                    <p className="font-mono text-[11px] text-gray-500 dark:text-gray-400">{txn.cardInfo}</p>
                   </div>
                   <div className="text-right">
                     <span
                       className={`font-mono text-sm font-semibold ${
-                        !txn.matched ? "text-amber-700" : "text-[#111827]"
+                        !txn.matched ? "text-amber-700 dark:text-amber-400" : "text-[#111827] dark:text-[#F3F4F6]"
                       }`}
                     >
                       ₹{txn.amount.toLocaleString("en-IN")}
@@ -939,8 +941,8 @@ export default function FinancePage() {
                 </div>
 
                 {!txn.matched && !txn.isIncidental && (
-                  <div className="mt-2 pt-2 flex items-center justify-between border-t border-amber-100">
-                    <span className="font-mono text-[11px] text-gray-500">Auto-reminder sent</span>
+                  <div className="mt-2 pt-2 flex items-center justify-between border-t border-amber-100 dark:border-amber-900/40">
+                    <span className="font-mono text-[11px] text-gray-500 dark:text-gray-400">Auto-reminder sent</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -986,7 +988,7 @@ export default function FinancePage() {
             ))}
           </div>
 
-          <div className="p-2.5 bg-[#F9FAFB] border-t border-[#E5E7EB] flex items-center justify-between text-gray-500 font-mono text-[11px]">
+          <div className="p-2.5 bg-[#F9FAFB] dark:bg-[#131C2E] border-t border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between text-gray-500 font-mono text-[11px]">
             <span className="flex items-center gap-1">
               <span className="material-symbols-outlined text-[15px] text-emerald-600">
                 verified_user
@@ -1001,7 +1003,7 @@ export default function FinancePage() {
       {/* Slide-out Policy Rules Sheet */}
       <section
         id="policy-rules-panel"
-        className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-xs transition-all duration-300"
+        className="bg-white dark:bg-[#0F172A] rounded-xl border border-[#E5E7EB] dark:border-[#1E293B] p-4 shadow-xs transition-all duration-300"
       >
         <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
           <div className="flex items-center gap-2">
@@ -1021,7 +1023,7 @@ export default function FinancePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 pt-3">
-          <div className="p-3 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex flex-col justify-between">
+          <div className="p-3 rounded-lg bg-[#F9FAFB] dark:bg-[#131C2E] border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">
@@ -1036,7 +1038,7 @@ export default function FinancePage() {
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex flex-col justify-between">
+          <div className="p-3 rounded-lg bg-[#F9FAFB] dark:bg-[#131C2E] border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">
@@ -1053,7 +1055,7 @@ export default function FinancePage() {
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex flex-col justify-between">
+          <div className="p-3 rounded-lg bg-[#F9FAFB] dark:bg-[#131C2E] border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">
@@ -1072,7 +1074,7 @@ export default function FinancePage() {
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex flex-col justify-between">
+          <div className="p-3 rounded-lg bg-[#F9FAFB] dark:bg-[#131C2E] border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">
@@ -1091,7 +1093,7 @@ export default function FinancePage() {
             </p>
           </div>
 
-          <div className="p-3 rounded-lg bg-[#F9FAFB] border border-[#E5E7EB] flex flex-col justify-between">
+          <div className="p-3 rounded-lg bg-[#F9FAFB] dark:bg-[#131C2E] border border-[#E5E7EB] dark:border-[#1E293B] flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">

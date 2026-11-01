@@ -1,7 +1,7 @@
 {
   "success": true,
   "data": {
-    "merchant": "Saffron & Salt",
+    "merchant": "SAFFRON & SALT",
     "date": "2026-10-26",
     "invoice_number": "20871",
     "expense_type": "meal",
@@ -22,7 +22,7 @@
     "city": "Mumbai",
     "travel_class": null,
     "trip_type": "unknown",
-    "confidence": 0.98
+    "confidence": 0.95
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

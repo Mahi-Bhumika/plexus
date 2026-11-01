@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#3B5BFD"/>
+    </linearGradient>
+    <linearGradient id="hair" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2D1B36"/>
+      <stop offset="100%" stop-color="#181020"/>
+    </linearGradient>
+    <linearGradient id="suit" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="64" cy="64" r="64" fill="url(#bg)"/>
+
+  <!-- Back Hair (Long volume) -->
+  <path d="M34 50 C32 30, 96 30, 94 50 C94 84, 88 94, 86 100 L42 100 C40 94, 34 84, 34 50 Z" fill="url(#hair)"/>
+
+  <!-- Shoulders & Blazer -->
+  <path d="M18 128 C18 104, 40 94, 64 94 C88 94, 110 104, 110 128 Z" fill="url(#suit)"/>
+  <!-- Blouse V-neck -->
+  <polygon points="50,96 64,118 78,96" fill="#F8FAFC"/>
+  <!-- Necklace chain & pendant -->
+  <path d="M55 98 Q64 110 73 98" fill="none" stroke="#F59E0B" stroke-width="1.5"/>
+  <circle cx="64" cy="106" r="2.5" fill="#F59E0B"/>
+
+  <!-- Neck -->
+  <path d="M53 74 L53 96 C57 99, 71 99, 75 96 L75 74 Z" fill="#EAB308"/>
+
+  <!-- Head / Face -->
+  <ellipse cx="64" cy="58" rx="22" ry="24" fill="#FDE047"/>
+
+  <!-- Hair front style (parted sleek style) -->
+  <path d="M42 48 C46 32, 82 32, 86 48 C80 40, 70 38, 64 38 C56 38, 48 42, 42 48 Z" fill="url(#hair)"/>
+  <path d="M42 48 C40 60, 44 74, 46 80 C43 72, 43 56, 45 50 Z" fill="url(#hair)"/>
+  <path d="M86 48 C88 60, 84 74, 82 80 C85 72, 85 56, 83 50 Z" fill="url(#hair)"/>
+
+  <!-- Eyebrows -->
+  <path d="M47 48 Q53 45 58 48" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round"/>
+  <path d="M70 48 Q75 45 81 48" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Eyes & Lashes -->
+  <ellipse cx="53" cy="54" rx="4" ry="4.5" fill="#1E293B"/>
+  <circle cx="54.5" cy="52.5" r="1.5" fill="#FFFFFF"/>
+  <ellipse cx="75" cy="54" rx="4" ry="4.5" fill="#1E293B"/>
+  <circle cx="76.5" cy="52.5" r="1.5" fill="#FFFFFF"/>
+
+  <!-- Small gold earrings -->
+  <circle cx="41" cy="62" r="2.5" fill="#F59E0B"/>
+  <circle cx="87" cy="62" r="2.5" fill="#F59E0B"/>
+
+  <!-- Nose -->
+  <path d="M63 56 L62 64 L66 64" fill="none" stroke="#CA8A04" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Warm confident smile -->
+  <path d="M56 70 Q64 78 72 70" fill="#E11D48" stroke="#BE123C" stroke-width="1"/>
+  <path d="M57 70 Q64 73 71 70" fill="#FFFFFF"/>
+</svg>

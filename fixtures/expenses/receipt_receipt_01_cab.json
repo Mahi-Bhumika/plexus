@@ -6,7 +6,12 @@
     "invoice_number": "ZC-2610-48213",
     "expense_type": "local_travel",
     "items": [
-      null
+      "description\": \"Base fare",
+      "amount\": 800.00",
+      "description\": \"CGST @ 2.5%",
+      "amount\": 20.00",
+      "description\": \"SGST @ 2.5%",
+      "amount\": 20.00"
     ],
     "subtotal": null,
     "gst": 40,

@@ -1,22 +1,35 @@
 {
   "success": true,
   "data": {
-    "summary": "Meridian Bank and Nimbus Labs kicked off a pilot project for UPI reconciliation using Nimbus Ledger Sync, targeting a go-live date of November 30, 2026. The teams agreed on a phased approach limited strictly to UPI for phase one and outlined necessary security, technical, and procurement steps.",
+    "summary": "Meridian Bank and Nimbus Labs kicked off the Nimbus Ledger Sync pilot to automate UPI settlements reconciliation. The meeting established a strict go-live target of November 30, 2026, limited phase one to UPI only, and outlined the required procurement and technical prerequisites including sandboxes, mapping documents, and security questionnaires.",
     "decisions": [
-      "Pilot go-live date is set for Monday 30 November 2026.",
-      "Phase one scope is strictly limited to UPI reconciliation.",
-      "Customer-managed encryption keys are not supported; keys are managed by Nimbus in AWS KMS."
+      "The pilot go-live date is set for Monday 30 November 2026.",
+      "Phase one is strictly limited to UPI reconciliation only, leaving NEFT and IMPS for phase two."
     ],
     "action_items": [
       {
-        "title": "title"
+        "title": "{\"title\":\"Send standard mutual NDA to Neha Kapoor\",\"assignee\":\"Riya Sharma\",\"due\":\"2026-11-04\",\"confidence\":1.0,\"quote\":\"And the NDA will be with Neha by Wednesday 4 November.\"}"
+      },
+      {
+        "title": "{\"title\":\"Set up sandbox environment and send API credentials\",\"assignee\":\"Karan\",\"due\":\"2026-11-06\",\"confidence\":1.0,\"quote\":\"I will set up the sandbox environment and send API credentials to Vikram's team by Friday 6 November.\"}"
+      },
+      {
+        "title": "{\"title\":\"Provide IP ranges for UPI feed allowlisting\",\"assignee\":null,\"due\":\"2026-11-10\",\"confidence\":0.6,\"quote\":\"In return, my team will give you the IP ranges we need allowlisted for the UPI feed. I will send those by Tuesday 10 November.\"}"
+      },
+      {
+        "title": "{\"title\":\"Write mapping document for Meridian and Nimbus fields\",\"assignee\":\"Meera\",\"due\":\"2026-11-16\",\"confidence\":1.0,\"quote\":\"I will write a mapping document that says which Meridian field feeds which Nimbus field. I can have that to you by Monday 16 November.\"}"
+      },
+      {
+        "title": "{\"title\":\"Nominate two analysts for user acceptance testing\",\"assignee\":null,\"due\":\"2026-11-13\",\"confidence\":0.6,\"quote\":\"For testing, I will nominate two analysts from my team for user acceptance testing. I will send you their names by Friday 13 November.\"}"
+      },
+      {
+        "title": "{\"title\":\"Prepare anonymised sample transaction files\",\"assignee\":\"Arjun\",\"due\":\"2026-11-12\",\"confidence\":1.0,\"quote\":\"Arjun, our intern, is not here today, but he will prepare anonymised sample transaction files from the layout you gave us. Let's say by Thursday 12 November.\"}"
+      },
+      {
+        "title": "{\"title\":\"Set up Meera's accounts\",\"assignee\":\"Karan\",\"due\":\"2026-10-26\",\"confidence\":1.0,\"quote\":\"Karan will sort that out.\"}"
       }
     ],
-    "follow_up_email": {
-      "to": "client",
-      "subject": "Follow-up: Kickoff decisions and next steps",
-      "body": "Neha Kapoor"
-    }
+    "follow_up_email": null
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

@@ -160,71 +160,19 @@ export default function DashboardLayout({
       <CommandPalette />
 
       {/* TOP BAR SHELL */}
-      <header className="fixed top-0 left-0 right-0 h-14 z-50 bg-white/90 dark:bg-[#0C1222]/90 backdrop-blur-xl border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between px-4 sm:px-5 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-200">
-        {/* Brand + Workspace Switcher */}
-        <div className="flex items-center gap-3">
-          <Link href="/finance" className="flex items-center gap-2 pr-2 group">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-[#3B5BFD] to-indigo-600 flex items-center justify-center text-white shadow-sm ring-1 ring-black/5">
-              <span className="material-symbols-outlined text-[15px] font-bold">hub</span>
-            </div>
-            <span className="font-semibold text-sm tracking-tight text-[#111827] dark:text-[#F3F4F6]">
-              Plexus
-            </span>
-          </Link>
-          <div className="h-3.5 w-px bg-[#E5E7EB] dark:bg-[#1E293B]"></div>
-
-          {/* Workspace pill */}
-          <button
-            type="button"
-            className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#F3F4F6] dark:bg-[#162032] hover:bg-[#E5E7EB]/80 dark:hover:bg-[#1F2C44] border border-[#E5E7EB] dark:border-[#1E293B] text-xs transition-all group cursor-pointer"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></span>
-            <span className="text-[#111827] dark:text-[#F3F4F6] font-medium text-xs">
-              Nimbus Labs
-            </span>
-            <span className="text-gray-400 dark:text-gray-500 text-[10px]">×</span>
-            <span className="text-gray-600 dark:text-gray-400 text-xs truncate max-w-[140px] sm:max-w-[180px]">
-              Meridian Pilot
-            </span>
-            <span className="material-symbols-outlined text-[14px] text-gray-400 dark:text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 ml-0.5">
-              unfold_more
-            </span>
-          </button>
-        </div>
-
-        {/* Center Segmented Pill Navigation */}
-        <nav className="hidden lg:flex items-center p-0.5 rounded-lg bg-[#F3F4F6] dark:bg-[#162032] border border-[#E5E7EB] dark:border-[#1E293B] shadow-inner">
-          {TOP_NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`px-3 py-1 rounded-md text-xs transition-all ${
-                isActiveHref(item.href)
-                  ? "bg-white dark:bg-[#0F172A] text-[#111827] dark:text-[#F3F4F6] font-semibold shadow-sm border border-[#E5E7EB] dark:border-[#1E293B]"
-                  : "text-gray-600 dark:text-gray-400 hover:text-[#111827] dark:hover:text-[#F3F4F6] hover:bg-white/60 dark:hover:bg-[#1E293B]/60 font-medium"
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Right utility controls */}
-        <div className="flex items-center gap-2.5">
-          {/* Search Cmd+K */}
-          <div
-            onClick={openCmdK}
-            className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#F3F4F6] dark:bg-[#162032] border border-[#E5E7EB] dark:border-[#1E293B] hover:border-gray-400 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs transition-all cursor-pointer group shadow-sm"
-          >
-            <span className="material-symbols-outlined text-[15px] text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">
-              search
-            </span>
-            <span className="font-normal text-xs">Search documents, or catch me up...</span>
-            <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0F172A] text-gray-500 dark:text-gray-400 text-[10px] font-mono border border-[#E5E7EB] dark:border-[#1E293B] font-medium shadow-2xs">
-              ⌘K
-            </kbd>
+      <header className="fixed top-0 left-0 right-0 h-14 z-50 bg-white/90 dark:bg-[#0C1222]/90 backdrop-blur-xl border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between px-4 sm:px-6 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-200">
+        {/* Brand: Logo and Project Name */}
+        <Link href="/finance" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#3B5BFD] to-indigo-600 flex items-center justify-center text-white shadow-sm ring-1 ring-black/5">
+            <span className="material-symbols-outlined text-[18px] font-bold">hub</span>
           </div>
+          <span className="font-bold text-base tracking-tight text-[#111827] dark:text-[#F3F4F6]">
+            Plexus
+          </span>
+        </Link>
 
+        {/* Right utility controls: Theme toggle + Profile with mock image */}
+        <div className="flex items-center gap-3">
           {/* DARK MODE TOGGLE BUTTON */}
           <button
             type="button"
@@ -238,29 +186,14 @@ export default function DashboardLayout({
             </span>
           </button>
 
-          {/* Measured feed round-trip time */}
-          <div
-            title="Round-trip time of the last activity feed request"
-            className={`flex items-center gap-1.5 px-2 py-1 rounded-md border shadow-sm ${
-              feedOk
-                ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
-                : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
-            }`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${feedOk ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}></span>
-            <span className="font-mono text-[11px] font-medium">
-              {feedOk ? (latency !== null ? `${latency}ms` : "…") : "offline"}
-            </span>
-          </div>
-
-          {/* User avatar */}
-          <div className="flex items-center gap-2 pl-1.5 border-l border-[#E5E7EB] dark:border-[#1E293B] cursor-pointer group">
+          {/* User Profile: Riya Sharma */}
+          <div className="flex items-center gap-2.5 pl-3 border-l border-[#E5E7EB] dark:border-[#1E293B] cursor-pointer group">
             <img
               alt="Riya Sharma"
-              className="w-7 h-7 rounded-full object-cover ring-1 ring-gray-300 dark:ring-gray-700 group-hover:ring-[#3B5BFD] transition-all"
-              src="https://lh3.googleusercontent.com/aida/AEtjO1UHeE2eBPhwDEksGQ4SIxnG3lPXwGbgRxMn6Rhtt5wKfMjt-wHZbly94nFFWlsxOYJWq_NlqpyxS5UvRLzPa5DlvrtoNYXfJjVtutvNmEekPeoAb-BDtsUGPyN7b69A-D3JdDqloJI9FCEiITgiLVqwqEQGutML7x48WJ3c4N714i7ynPReh854qj0IOoob5CcXVCwQoOif1PD34h8H9zihbRshSlUC0GaZ4XHzP8Q"
+              className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-[#3B5BFD] transition-all bg-indigo-50 dark:bg-indigo-950"
+              src="/riya-sharma.svg"
             />
-            <div className="hidden md:flex flex-col text-left">
+            <div className="flex flex-col text-left">
               <span className="text-xs font-semibold text-[#111827] dark:text-[#F3F4F6] leading-tight group-hover:text-[#3B5BFD]">
                 Riya Sharma
               </span>
