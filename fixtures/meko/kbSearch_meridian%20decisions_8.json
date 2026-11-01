@@ -1,0 +1,22 @@
+[
+  {
+    "id": "de1b9a9b-536a-40d8-83e4-20d96aea4661",
+    "chunk_text": "Document: Meridian pilot notes, Thu 29 Oct 2026\nSection: Meridian pilot notes: Thursday 29 October 2026\n\nWritten by: Karan Malhotra\n\nFirst weekly status call held at 4 PM. Neha's team sent the invite, so the open question from Tuesday is closed.Meera found a column in Meridian's sample file that is not in the specification: remitter VPA. Meridian confirmed it is optional. Decision: the field is mapped as optional and will not block ingestion.Meridian legal signed the NDA late in the evening.Riya started preparing the SOC 2 report package for Vikram Rao. Under our process the report goes out within 3 business days of a signed NDA.Questionnaire work: the team is answering from the policy documents and will send it by the due date, Fri 6 Nov.",
+    "document_id": "942da7a1-6daf-4b54-893a-7f040d885580",
+    "metadata_filters": {},
+    "distance": 0.5598693533614802,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.6430144767895383
+  },
+  {
+    "id": "c88a35a4-a801-40b5-9154-5147b548ff6a",
+    "chunk_text": "Document: Meridian pilot notes, Thu 29 Oct 2026\nSection: Meridian pilot notes: Thursday 29 October 2026\n\nWritten by: Karan Malhotra\n\nFirst weekly status call held at 4 PM. Neha's team sent the invite, so the open question from Tuesday is closed.Meera found a column in Meridian's sample file that is not in the specification: remitter VPA. Meridian confirmed it is optional. Decision: the field is mapped as optional and will not block ingestion.Meridian legal signed the NDA late in the evening.Riya started preparing the SOC 2 report package for Vikram Rao. Under our process the report goes out within 3 business days of a signed NDA.Questionnaire work: the team is answering from the policy documents and will send it by the due date, Fri 6 Nov.",
+    "document_id": "942da7a1-6daf-4b54-893a-7f040d885580",
+    "metadata_filters": {},
+    "distance": 0.5598693533614802,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.6430144767895383
+  }
+]

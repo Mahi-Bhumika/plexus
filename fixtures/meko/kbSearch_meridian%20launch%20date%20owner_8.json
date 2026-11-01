@@ -1,0 +1,31 @@
+[
+  {
+    "id": "ed9fd9c2-597a-4a7a-909e-b77e2e5dbe5a",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners\n\nGo-live: Monday 30 November 2026Scope: phase one is UPI reconciliation only. NEFT and IMPS are phase two.Delivery owner: Karan MalhotraExecutive sponsor: Riya SharmaIntegration lead: Meera IyerMeridian sponsor: Sanjay Desai, Head of Payments OperationsWeekly status call: Thursdays, 4 PMGo/no-go review: Thursday 26 November 2026",
+    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "metadata_filters": {},
+    "distance": 0.36637274487710103,
+    "match_type": "hybrid",
+    "rank": 0.078242466,
+    "rerank_score": 0.9998393912526722
+  },
+  {
+    "id": "38b030ed-6d52-4436-a537-bbb9f3b15083",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners > Key dates\n\nDate: Fri 6 Nov; Milestone: Sandbox credentials (done early), security questionnaire due\nDate: Mon 9 Nov; Milestone: Pilot pricing due to Neha Kapoor\nDate: Tue 10 Nov; Milestone: Meridian IP ranges for allowlist\nDate: Thu 12 Nov; Milestone: Anonymised sample files ready\nDate: Fri 13 Nov; Milestone: UAT analysts confirmed (done early)\nDate: Mon 16 Nov; Milestone: Field mapping document\nDate: Thu 26 Nov; Milestone: Go/no-go review\nDate: Mon 30 Nov; Milestone: Go-live",
+    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "metadata_filters": {},
+    "distance": 0.3296824402179176,
+    "match_type": "hybrid",
+    "rank": 0.08223293,
+    "rerank_score": 0.9996320975590617
+  },
+  {
+    "id": "8a967c02-bdad-4685-b361-9b65fa3522e9",
+    "chunk_text": "Document: Meridian pilot notes, Fri 30 Oct 2026\nSection: Meridian pilot notes: Friday 30 October 2026\n\nWritten by: Karan Malhotra\n\nKaran issued sandbox API credentials to Vikram Rao's team, one week ahead of the 6 Nov date.Riya sent the SOC 2 Type II report to Vikram under the signed NDA.Vikram asked where Meridian's data will be held. Answer: primary in AWS Mumbai, disaster recovery replica in Singapore. He wants this in writing. Riya will include it in the written questionnaire answers.Still waiting on Meridian: IP ranges for the allowlist (due Tue 10 Nov).Next week: questionnaire due Fri 6 Nov, pilot pricing due Mon 9 Nov, Arjun's sample files due Thu 12 Nov, Meera's mapping document due Mon 16 Nov.",
+    "document_id": "3efc4fae-79a2-4aae-a6af-4ea715de0e36",
+    "metadata_filters": {},
+    "distance": 0.41154496584491396,
+    "match_type": "semantic",
+    "rerank_score": 0.3092833948451149
+  }
+]

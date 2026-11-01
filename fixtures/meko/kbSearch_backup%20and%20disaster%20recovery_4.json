@@ -1,0 +1,92 @@
+[
+  {
+    "id": "27560314-f845-44db-87c1-a93529f1b012",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Recovery objectives\n\nRecovery Point Objective (RPO): 1 hour. At most one hour of data can be lost.Recovery Time Objective (RTO): 4 hours. Service is restored within four hours of a declared disaster.",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.43727304676522805,
+    "match_type": "hybrid",
+    "rank": 0.07317641,
+    "rerank_score": 0.9994497802740141
+  },
+  {
+    "id": "aeef6476-2e53-401f-b8b2-a464cc08c3ab",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Backups\n\nAutomated daily snapshots of the production database.Snapshots are retained for 35 days.Continuous transaction-log shipping supports the one-hour RPO.All backups are encrypted with AES-256.",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.3647554921559899,
+    "match_type": "hybrid",
+    "rank": 0.068110354,
+    "rerank_score": 0.999441164894583
+  },
+  {
+    "id": "b958dd36-f4be-4c3f-84fc-a1c9eca5c567",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Responsibilities\n\nThe Engineering Manager owns the plan. The on-call engineer declares a disaster and the founder is informed within 30 minutes.",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.4308228780138268,
+    "match_type": "hybrid",
+    "rank": 0.065858774,
+    "rerank_score": 0.9992372657426793
+  },
+  {
+    "id": "7348afeb-6cf8-4fe8-aa37-4a6df670a12a",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Disaster recovery site\n\nProduction runs in AWS Mumbai (ap-south-1). A cross-region replica is maintained in Singapore (ap-southeast-1) and can be promoted to primary during a regional failure.",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.4662486320075563,
+    "match_type": "hybrid",
+    "rank": 0.070924826,
+    "rerank_score": 0.9989770096711922
+  },
+  {
+    "id": "39b07e10-29f3-47a5-8933-35ae3f514957",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Note on data location\n\nBecause the disaster recovery replica is in Singapore, customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing.",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.4510457919603966,
+    "match_type": "hybrid",
+    "rank": 0.070924826,
+    "rerank_score": 0.9989557448876655
+  },
+  {
+    "id": "ebd514a5-798d-4cf9-a919-b8c523295f85",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Testing\n\nRestores are tested every quarter. The most recent restore test was on 12 September 2026 and was completed in 2 hours 40 minutes, within the 4-hour RTO. Results are reviewed by the Engineering Manager and filed in the evidence folder.",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.5697785169744118,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.9987709892713785
+  },
+  {
+    "id": "98ebbc55-fd2f-4e5a-8602-a0c406c75176",
+    "chunk_text": "Section: Nimbus Labs Backup and Disaster Recovery Plan\n\nDocument owner: Karan Malhotra · Version: 1.8 · Last reviewed: 15 Sep 2026",
+    "document_id": "3575921f-b76f-4276-859b-598d77a018c4",
+    "metadata_filters": {},
+    "distance": 0.44495446529168003,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.9983241485872968
+  },
+  {
+    "id": "7ecb9ace-5aea-42e9-aebf-37290b239427",
+    "chunk_text": "Section: Nimbus Labs Privacy Note > Data location\n\nCustomer data is stored in India by default (AWS Mumbai). Disaster recovery copies are held in Singapore, as described in the backup plan.",
+    "document_id": "8fa5bdc9-733b-4cc3-925f-6aaace921790",
+    "metadata_filters": {},
+    "distance": 0.6133460802323785,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.9521266249861902
+  },
+  {
+    "id": "de93bb67-8b92-4705-adbf-6e43865353c5",
+    "chunk_text": "Section: Nimbus Labs Privacy Note > Data location\n\nCustomer data is stored in India by default (AWS Mumbai). Disaster recovery copies are held in Singapore, as described in the backup plan.",
+    "document_id": "8fa5bdc9-733b-4cc3-925f-6aaace921790",
+    "metadata_filters": {},
+    "distance": 0.6133460802323785,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.9521266249861902
+  }
+]

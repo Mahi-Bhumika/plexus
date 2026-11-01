@@ -1,4 +1,5 @@
 import type { CardTxn, ExpenseReport, ExpenseResult } from "@/agents/expenses";
+import type { ZombieReport } from "@/lib/zombie";
 
 async function parse<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null);
@@ -18,4 +19,4 @@ export const getCardFeed = () =>
   fetch("/api/finance/card-feed", { cache: "no-store" }).then((r) => parse<{ asOf: string; txns: CardTxn[] }>(r));
 
 export const getZombie = () =>
-  fetch("/api/finance/zombie", { cache: "no-store" }).then((r) => parse<unknown>(r));
+  fetch("/api/finance/zombie", { cache: "no-store" }).then((r) => parse<ZombieReport>(r));

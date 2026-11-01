@@ -1,0 +1,62 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "answer": "Nimbus Labs holds a current SOC 2 Type II attestation for the Nimbus Ledger Sync platform. The audit period ran from 1 January 2026 to 30 June 2026, and the final report was issued on 14 August 2026 by Harlow & Pike LLP.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "eff21748-439d-4d96-8485-14875765ffa9"
+    },
+    {
+      "id": "2",
+      "answer": "Yes, TLS certificates are issued by a public certificate authority and renewed automatically 30 days before they expire.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "cc074e66-9623-4098-aa02-84ac43439745"
+    },
+    {
+      "id": "4",
+      "answer": "Yes, customer administrators can connect their own SAML 2.0 identity provider to Nimbus Ledger Sync.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "161ce703-5354-4cb1-b88d-360362d10227"
+    },
+    {
+      "id": "5",
+      "answer": "Yes, account numbers and UPI identifiers are additionally encrypted at the field level before they are written to the database, ensuring they remain protected even in database exports.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "a5fa08e9-5804-4275-85f3-defd5b6692e9"
+    },
+    {
+      "id": "6",
+      "answer": "After a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days, and backups containing that data expire on their normal 35-day cycle so the last copy is gone no later than 35 days after production deletion.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "5b30de01-e9fe-4807-aebd-8409fd9e0334"
+    },
+    {
+      "id": "7",
+      "answer": "In an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "a93ace6c-1790-45f6-beac-1af4a810da7e"
+    },
+    {
+      "id": "8",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "10",
+      "answer": "An external penetration test is performed once a year by CertiNova. The most recent test was in March 2026, which found no critical issues and two medium issues, both fixed within 21 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

@@ -2,9 +2,8 @@
 
 // File: components/command-palette.tsx
 // Mount once in app/(dashboard)/layout.tsx:  <CommandPalette />
-// Anything can open it with: window.dispatchEvent(new Event("plexus:open-search"))
-// Mock mode first. Wiring point: replace DOCS + `rows` with the search endpoint,
-// and BRIEFING with the Catch-Me-Up response.
+// Open it from anywhere: window.dispatchEvent(new CustomEvent("plexus:open-search", { detail: { query, role } }))
+// Live data: GET /api/search (search and browse) and POST /api/search/catchup (briefing).
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
@@ -14,197 +13,47 @@ import { CornerDownLeft, FileText, Lock, Search, Sparkles, X } from "lucide-reac
 type Role = "intern" | "founder";
 type Mode = "search" | "briefing";
 
-interface Doc {
+interface Hit {
   id: string;
   title: string;
-  kind: string;
-  date?: string;
-  minRole: Role;
-  body: string;
-  tags: string[];
+  snippet: string;
+  doc: string;
+  documentId: string;
+  matchType: string;
+  date?: string | null;
+  flagged?: boolean;
+}
+interface Point {
+  text: string;
+  source: number;
+}
+interface Brief {
+  topic: string;
+  days: number;
+  window: { from: string; to: string; days: number } | null;
+  points: Point[];
+  results: Hit[];
+  note: string | null;
+  briefingMode: string | null;
+  briefingNote: string | null;
+  hidden: number;
 }
 
-type Row = { kind: "catchup" } | { kind: "doc"; doc: Doc; locked: boolean };
+type Row = { kind: "catchup" } | { kind: "hit"; hit: Hit } | { kind: "locked"; count: number };
 
 const ROLES: { id: Role; label: string }[] = [
   { id: "intern", label: "Intern (Arjun)" },
   { id: "founder", label: "Founder (Riya)" },
 ];
 
-const DOCS: Doc[] = [
-  {
-    id: "n-27",
-    title: "Meridian pilot notes",
-    kind: "Project notes",
-    date: "27 Oct",
-    minRole: "intern",
-    tags: ["meridian", "kickoff", "soc 2", "sub-processor"],
-    body: "Kickoff follow-ups sent. Meridian asked for the SOC 2 Type II report and the sub-processor list. Karan will share the report under NDA.",
-  },
-  {
-    id: "n-28",
-    title: "Meridian pilot notes",
-    kind: "Project notes",
-    date: "28 Oct",
-    minRole: "intern",
-    tags: ["meridian", "access", "meera", "figma", "aws"],
-    body: "Meera is set up on Slack and Google Workspace. Figma was auto-approved. Her AWS production request went to Karan for approval.",
-  },
-  {
-    id: "n-29",
-    title: "Meridian pilot notes",
-    kind: "Project notes",
-    date: "29 Oct",
-    minRole: "intern",
-    tags: ["meridian", "india", "singapore", "replica", "data location"],
-    body: "Vikram Rao asked about India-only data copies. The disaster recovery replica is in Singapore, so this needs to be agreed before signing.",
-  },
-  {
-    id: "n-30",
-    title: "Meridian pilot notes",
-    kind: "Project notes",
-    date: "30 Oct",
-    minRole: "intern",
-    tags: ["meridian", "uat", "test plan", "go-live"],
-    body: "UPI pilot test plan outlined. The UAT environment owner is still open. Go-live target is unchanged at Monday 30 November.",
-  },
-  {
-    id: "launch",
-    title: "Meridian launch plan",
-    kind: "Plan",
-    date: "26 Oct",
-    minRole: "intern",
-    tags: ["launch", "go-live", "date", "owner", "meridian"],
-    body: "Nimbus Ledger Sync pilot for Meridian's UPI reconciliation. Go-live: Monday 30 November 2026. Delivery owner: Karan Malhotra. Sponsor at Meridian: Sanjay Desai.",
-  },
-  {
-    id: "roadmap",
-    title: "Product roadmap Q4",
-    kind: "Roadmap",
-    minRole: "intern",
-    tags: ["roadmap", "q4", "reconciliation", "upi"],
-    body: "Q4 focus: UPI reconciliation for the Meridian pilot, audit export, and reliability work on the reconciliation engine.",
-  },
-  {
-    id: "pricing",
-    title: "Pricing sheet",
-    kind: "Pricing",
-    minRole: "intern",
-    tags: ["pricing", "pilot", "tier", "cost"],
-    body: "The pilot tier is a flat monthly fee. The production tier is priced per million reconciled transactions. Exact rates are in the sheet.",
-  },
-  {
-    id: "onboarding",
-    title: "New hire onboarding guide",
-    kind: "Guide",
-    minRole: "intern",
-    tags: ["onboarding", "new hire", "training", "laptop"],
-    body: "Complete security awareness training within 7 days of joining. Laptops come with MDM and disk encryption. Request extra access through the access request process.",
-  },
-  {
-    id: "slack",
-    title: "Slack export: #eng-tasks",
-    kind: "Slack export (JSON)",
-    minRole: "intern",
-    tags: ["slack", "eng-tasks", "export", "messages"],
-    body: "Task posts and approvals from the engineering channel. Includes the Meridian kickoff action items and access approvals.",
-  },
-  {
-    id: "salary",
-    title: "Salary sheet",
-    kind: "Founder only",
-    minRole: "founder",
-    tags: ["salary", "compensation", "pay", "bands"],
-    body: "Compensation bands by role and review dates. Confidential. Contents are not shown in this demo.",
-  },
-  {
-    id: "soc2",
-    title: "SOC 2 Type II summary",
-    kind: "Policy",
-    minRole: "intern",
-    tags: ["soc 2", "audit", "report", "nda", "security"],
-    body: "Audit period 1 January to 30 June 2026, report issued 14 August 2026 by Harlow & Pike LLP. The full report is shared under NDA within 3 business days of a request to security@nimbuslabs.example.",
-  },
-  {
-    id: "backup",
-    title: "Backup and recovery plan",
-    kind: "Policy",
-    minRole: "intern",
-    tags: ["backup", "recovery", "singapore", "replica", "rpo", "rto", "india"],
-    body: "RPO 1 hour, RTO 4 hours. Production is in Mumbai with a cross-region replica in Singapore. Customers who need all copies kept in India should discuss this before signing.",
-  },
-  {
-    id: "access",
-    title: "Access control policy",
-    kind: "Policy",
-    minRole: "intern",
-    tags: ["access", "approval", "production", "just-in-time", "aws"],
-    body: "Low-risk apps are approved automatically. High-risk apps such as AWS production need the Engineering Manager. Production access lasts at most 8 hours. Interns are not eligible.",
-  },
-];
-
-const BY_ID: Record<string, Doc> = Object.fromEntries(DOCS.map((d) => [d.id, d]));
-
-const ANSWERS: { test: RegExp; text: string; cites: string[] }[] = [
-  {
-    test: /go.?live|launch|30 nov/,
-    text: "Meridian go-live is Monday 30 November 2026. Karan Malhotra owns delivery.",
-    cites: ["launch"],
-  },
-  {
-    test: /india|singapore|replica|disaster|data location/,
-    text: "Production data is stored in India by default, but the disaster recovery replica is in Singapore. Meridian raised this on 29 Oct and it needs to be agreed before signing.",
-    cites: ["backup", "n-29"],
-  },
-  {
-    test: /soc ?2|audit report|nda/,
-    text: "The SOC 2 Type II report is shared under NDA within 3 business days of a request.",
-    cites: ["soc2"],
-  },
-];
-
-const BRIEFING: { text: string; cite: string }[] = [
-  {
-    cite: "n-27",
-    text: "27 Oct: kickoff follow-ups went out. Meridian wants the SOC 2 Type II report and the sub-processor list.",
-  },
-  {
-    cite: "n-28",
-    text: "28 Oct: Meera has Slack and Google Workspace. Figma was auto-approved and AWS production went to Karan.",
-  },
-  {
-    cite: "n-29",
-    text: "29 Oct: Meridian asked about India-only copies. The DR replica is in Singapore, so it needs agreeing before signing.",
-  },
-  {
-    cite: "n-30",
-    text: "30 Oct: UPI test plan outlined. The UAT environment still has no owner. Go-live is unchanged.",
-  },
-];
-
+const CATCHUP_RE = /catch\s*me\s*up/i;
 const STOP = new Set(["the", "me", "up", "on", "of", "a", "an", "in", "to", "and", "is", "what", "when", "who", "for"]);
-
-const canRead = (doc: Doc, role: Role) => doc.minRole === "intern" || role === "founder";
 
 function toWords(q: string): string[] {
   return q
     .toLowerCase()
     .split(/\s+/)
     .filter((w) => w.length > 1 && !STOP.has(w));
-}
-
-function score(doc: Doc, words: string[], locked: boolean): number {
-  const title = doc.title.toLowerCase();
-  const tags = doc.tags.join(" ").toLowerCase();
-  // Locked documents are matched on title and tags only, so their contents never leak.
-  const body = locked ? "" : doc.body.toLowerCase();
-  let s = 0;
-  for (const w of words) {
-    if (title.includes(w)) s += 3;
-    if (tags.includes(w)) s += 2;
-    if (body.includes(w)) s += 1;
-  }
-  return s;
 }
 
 function snippet(body: string, words: string[]): string {
@@ -262,18 +111,33 @@ export default function CommandPalette() {
   const [role, setRole] = useState<Role>("intern");
   const [active, setActive] = useState(0);
   const [mode, setMode] = useState<Mode>("search");
-  const [pinned, setPinned] = useState<string | null>(null);
+  const [pinned, setPinned] = useState<string | null>(null); // a hit id, or "locked"
+  const [hits, setHits] = useState<Hit[]>([]);
+  const [hidden, setHidden] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [brief, setBrief] = useState<Brief | null>(null);
+  const [briefLoading, setBriefLoading] = useState(false);
+  const [autoBrief, setAutoBrief] = useState(false);
   const openRef = useRef(false);
+  const searchReq = useRef(0);
+  const briefReq = useRef(0);
 
   useEffect(() => {
     openRef.current = open;
   }, [open]);
 
-  const openPalette = useCallback(() => {
-    setQuery("");
+  const openPalette = useCallback((prefill?: string, prefillRole?: string) => {
+    setQuery(prefill ?? "");
+    if (prefillRole === "intern" || prefillRole === "founder") setRole(prefillRole);
     setActive(0);
     setMode("search");
     setPinned(null);
+    setBrief(null);
+    setHits([]);
+    setHidden(0);
+    setError(null);
+    setAutoBrief(!!prefill && CATCHUP_RE.test(prefill));
     setOpen(true);
   }, []);
 
@@ -285,7 +149,10 @@ export default function CommandPalette() {
         else openPalette();
       }
     };
-    const onOpen = () => openPalette();
+    const onOpen = (e: Event) => {
+      const d = (e as CustomEvent<{ query?: string; role?: string } | undefined>).detail;
+      openPalette(d?.query, d?.role);
+    };
     window.addEventListener("keydown", onKey);
     window.addEventListener("plexus:open-search", onOpen);
     return () => {
@@ -294,39 +161,96 @@ export default function CommandPalette() {
     };
   }, [openPalette]);
 
+  // Live search (debounced while typing). An empty query lists one passage per document.
+  useEffect(() => {
+    if (!open || mode !== "search") return;
+    const id = ++searchReq.current;
+    const ctrl = new AbortController();
+    const q = query.trim();
+    const t = setTimeout(async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const url = `/api/search?role=${role}&limit=8${q ? `&mode=search&q=${encodeURIComponent(q)}` : ""}`;
+        const res = await fetch(url, { signal: ctrl.signal });
+        const data = await res.json().catch(() => ({}));
+        if (id !== searchReq.current) return;
+        if (!res.ok || data?.status === "error") throw new Error(data?.message ?? `API returned ${res.status}`);
+        setHits(data.results ?? []);
+        setHidden(data.hidden ?? 0);
+      } catch (e) {
+        if (ctrl.signal.aborted) return;
+        if (id === searchReq.current) setError(e instanceof Error ? e.message : "Search failed");
+      } finally {
+        if (id === searchReq.current) setLoading(false);
+      }
+    }, q ? 250 : 0);
+    return () => {
+      clearTimeout(t);
+      ctrl.abort();
+    };
+  }, [open, mode, query, role]);
+
+  const runBriefing = useCallback(async (q: string, r: Role) => {
+    const id = ++briefReq.current;
+    setMode("briefing");
+    setPinned(null);
+    setBriefLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/search/catchup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: r, query: CATCHUP_RE.test(q) ? q : "Catch me up on Meridian" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (id !== briefReq.current) return;
+      if (!res.ok || data?.status === "error") throw new Error(data?.message ?? `API returned ${res.status}`);
+      setBrief({
+        topic: data.topic ?? "Meridian",
+        days: data.days ?? 4,
+        window: data.window ?? null,
+        points: data.points ?? [],
+        results: data.results ?? [],
+        note: data.note ?? null,
+        briefingMode: data.briefingMode ?? null,
+        briefingNote: data.briefingNote ?? null,
+        hidden: data.hidden ?? 0,
+      });
+    } catch (e) {
+      if (id === briefReq.current) setError(e instanceof Error ? e.message : "Briefing failed");
+    } finally {
+      if (id === briefReq.current) setBriefLoading(false);
+    }
+  }, []);
+
+  // Opened with "Catch me up ..." (for example from the Search page button): run the briefing straight away.
+  useEffect(() => {
+    if (open && autoBrief) {
+      setAutoBrief(false);
+      runBriefing(query, role);
+    }
+  }, [open, autoBrief, query, role, runBriefing]);
+
   const words = useMemo(() => toWords(query), [query]);
 
   const rows = useMemo<Row[]>(() => {
     const out: Row[] = [];
-    const q = query.toLowerCase();
-    if (words.length === 0 || /catch|brief|meridian/.test(q)) out.push({ kind: "catchup" });
-    const pool = DOCS.map((doc) => ({ doc, locked: !canRead(doc, role) }));
-    if (words.length === 0) {
-      pool.slice(0, 7).forEach((p) => out.push({ kind: "doc", ...p }));
-      return out;
-    }
-    pool
-      .map((p) => ({ ...p, s: score(p.doc, words, p.locked) }))
-      .filter((p) => p.s > 0)
-      .sort((a, b) => b.s - a.s)
-      .slice(0, 6)
-      .forEach((p) => out.push({ kind: "doc", doc: p.doc, locked: p.locked }));
+    if (words.length === 0 || /catch|brief|meridian/i.test(query)) out.push({ kind: "catchup" });
+    hits.forEach((hit) => out.push({ kind: "hit", hit }));
+    if (role !== "founder" && hidden > 0) out.push({ kind: "locked", count: hidden });
     return out;
-  }, [query, words, role]);
+  }, [query, words, hits, hidden, role]);
 
-  const answer = useMemo(() => {
-    if (words.length < 2) return null;
-    const q = query.toLowerCase();
-    const hit = ANSWERS.find((a) => a.test.test(q));
-    if (!hit) return null;
-    if (!hit.cites.every((id) => canRead(BY_ID[id], role))) return null;
-    return hit;
-  }, [query, words, role]);
-
+  const pool = useMemo(() => [...hits, ...(brief?.results ?? [])], [hits, brief]);
   const activeRow = rows[Math.min(active, Math.max(rows.length - 1, 0))];
-  const previewId = pinned ?? (activeRow && activeRow.kind === "doc" ? activeRow.doc.id : null);
-  const preview = previewId ? BY_ID[previewId] : null;
-  const previewLocked = preview ? !canRead(preview, role) : false;
+  const previewLocked = pinned === "locked" || (pinned === null && activeRow?.kind === "locked");
+  const preview: Hit | null =
+    pinned && pinned !== "locked"
+      ? (pool.find((h) => h.id === pinned) ?? null)
+      : pinned === null && activeRow?.kind === "hit"
+        ? activeRow.hit
+        : null;
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Escape") {
@@ -344,24 +268,29 @@ export default function CommandPalette() {
       e.preventDefault();
       setPinned(null);
       setActive((a) => Math.max(a - 1, 0));
-    } else if (e.key === "Enter" && activeRow?.kind === "catchup") {
+    } else if (e.key === "Enter" && activeRow) {
       e.preventDefault();
-      setMode("briefing");
-      setPinned(null);
+      if (activeRow.kind === "catchup") runBriefing(query, role);
+      else if (activeRow.kind === "hit") setPinned(activeRow.hit.id);
+      else setPinned("locked");
     }
   };
 
-  const cite = (id: string, n: number) => (
-    <button
-      key={id}
-      type="button"
-      onClick={() => setPinned(id)}
-      className="mx-0.5 rounded border border-indigo-400/40 px-1 font-mono text-[10px] text-indigo-300 hover:bg-indigo-400/10"
-      title={BY_ID[id].title + (BY_ID[id].date ? ", " + BY_ID[id].date : "")}
-    >
-      {n}
-    </button>
-  );
+  const cite = (n: number) => {
+    const src = brief?.results[n - 1];
+    if (!src) return null;
+    return (
+      <button
+        key={n}
+        type="button"
+        onClick={() => setPinned(src.id)}
+        className="mx-0.5 rounded border border-indigo-400/40 px-1 font-mono text-[10px] text-indigo-300 hover:bg-indigo-400/10"
+        title={src.doc + (src.date ? ", " + src.date : "")}
+      >
+        {n}
+      </button>
+    );
+  };
 
   if (!open) return null;
 
@@ -376,7 +305,7 @@ export default function CommandPalette() {
       aria-label="Search"
     >
       <div
-        className="w-full max-w-3xl overflow-hidden rounded-xl border border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-900 dark:text-slate-100 shadow-2xl"
+        className="w-full max-w-3xl overflow-hidden rounded-xl border border-[#E5E7EB] dark:border-slate-800 bg-white dark:bg-[#0c1424] text-slate-900 dark:text-slate-100 shadow-2xl"
         onKeyDown={onKeyDown}
       >
         {/* Input */}
@@ -392,7 +321,7 @@ export default function CommandPalette() {
               setMode("search");
             }}
             placeholder="Search documents, or try: catch me up on Meridian"
-            className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none"
           />
           <button
             type="button"
@@ -416,6 +345,7 @@ export default function CommandPalette() {
                   setRole(r.id);
                   setActive(0);
                   setPinned(null);
+                  if (mode === "briefing") runBriefing(query, r.id);
                 }}
                 className={`rounded px-2.5 py-1 text-xs ${
                   role === r.id ? "bg-[#5046E5] text-white" : "text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200"
@@ -442,41 +372,48 @@ export default function CommandPalette() {
                 <div className="mt-3 flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-[#5046E5]" />
                   <h2 className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                    Meridian, last 4 days (27 to 30 Oct)
+                    {brief ? `${brief.topic}, last ${brief.days} days` : "Catch me up"}
+                    {brief?.window ? ` (${brief.window.from} to ${brief.window.to})` : ""}
                   </h2>
+                  {brief?.briefingMode === "extractive" && <Tag tone="amber">extractive</Tag>}
                 </div>
-                <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
-                  {BRIEFING.map((b, i) => (
-                    <li key={b.cite}>
-                      {b.text}
-                      {cite(b.cite, i + 1)}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-4 rounded border border-[#E5E7EB] dark:border-slate-800 bg-[#F9FAFB] dark:bg-[#0b1120] p-3 text-xs text-slate-400">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">Open items: </span>
-                  UAT environment owner, India-only copies agreement.
-                </div>
-                <p className="mt-3 text-[11px] text-slate-500">
-                  Built from {BRIEFING.length} sources. Select a number to read one.
-                </p>
+
+                {briefLoading && <p className="mt-4 text-sm text-slate-500">Reading the knowledge base…</p>}
+                {error && !briefLoading && <p className="mt-4 text-sm text-rose-400">Briefing failed: {error}</p>}
+
+                {brief && !briefLoading && (
+                  <>
+                    {brief.points.length > 0 ? (
+                      <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
+                        {brief.points.map((p, i) => (
+                          <li key={i}>
+                            {p.text}
+                            {cite(p.source)}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-3 text-[13px] leading-relaxed text-slate-500">
+                        {brief.note ?? "Nothing to brief on yet."}
+                      </p>
+                    )}
+                    {brief.points.length > 0 && brief.briefingNote && (
+                      <p className="mt-3 text-[11px] text-amber-400">{brief.briefingNote}</p>
+                    )}
+                    <p className="mt-3 text-[11px] text-slate-500">
+                      Built from {brief.results.length} source{brief.results.length === 1 ? "" : "s"}.
+                      {brief.points.length > 0 ? " Select a number to read one." : ""}
+                      {brief.hidden > 0 && role !== "founder" ? ` ${brief.hidden} restricted hidden for ${role}.` : ""}
+                    </p>
+                  </>
+                )}
               </div>
             ) : (
               <div className="py-1">
-                {answer && (
-                  <div className="m-3 rounded-lg border border-indigo-400/30 bg-indigo-400/5 p-3">
-                    <div className="flex items-center gap-1.5 text-[11px] text-indigo-300">
-                      <Sparkles className="h-3.5 w-3.5" />
-                      Answer
-                    </div>
-                    <p className="mt-1 text-[13px] leading-relaxed text-slate-200">
-                      {answer.text}
-                      {answer.cites.map((id, i) => cite(id, i + 1))}
-                    </p>
-                  </div>
-                )}
+                {loading && rows.length <= 1 && <p className="px-4 py-3 text-xs text-slate-500">Searching…</p>}
+                {error && <p className="px-4 py-3 text-xs text-rose-400">Search failed: {error}</p>}
 
-                {rows.length === 0 && (
+                {!loading && !error && rows.length === 0 && (
                   <p className="px-4 py-8 text-center text-sm text-slate-500">
                     No matches. Try a project, a person or a policy name.
                   </p>
@@ -487,17 +424,19 @@ export default function CommandPalette() {
                   const base = `flex w-full items-start gap-3 border-l-2 px-4 py-2.5 text-left ${
                     isActive ? "border-[#5046E5] bg-[#5046E5]/15" : "border-transparent hover:bg-gray-100/80 dark:hover:bg-slate-800/40"
                   }`;
+                  const hover = () => {
+                    setActive(i);
+                    setPinned(null);
+                  };
+
                   if (row.kind === "catchup") {
                     return (
                       <button
                         key="catchup"
                         type="button"
                         className={base}
-                        onMouseEnter={() => {
-                          setActive(i);
-                          setPinned(null);
-                        }}
-                        onClick={() => setMode("briefing")}
+                        onMouseEnter={hover}
+                        onClick={() => runBriefing(query, role)}
                       >
                         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#5046E5]" />
                         <div>
@@ -507,36 +446,53 @@ export default function CommandPalette() {
                       </button>
                     );
                   }
-                  const { doc, locked } = row;
+
+                  if (row.kind === "locked") {
+                    return (
+                      <button
+                        key="locked"
+                        type="button"
+                        className={base}
+                        onMouseEnter={hover}
+                        onClick={() => setPinned("locked")}
+                      >
+                        <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-sm text-slate-900 dark:text-slate-100">
+                              {row.count} restricted result{row.count > 1 ? "s" : ""} hidden
+                            </span>
+                            <Tag tone="amber">Founder only</Tag>
+                          </div>
+                          <div className="mt-0.5 text-xs text-slate-500">You do not have access to these documents.</div>
+                        </div>
+                      </button>
+                    );
+                  }
+
+                  const { hit } = row;
+                  const primary = hit.title === "Untitled" ? hit.doc : hit.title;
                   return (
                     <button
-                      key={doc.id}
+                      key={hit.id}
                       type="button"
                       className={base}
-                      onMouseEnter={() => {
-                        setActive(i);
-                        setPinned(null);
-                      }}
-                      onClick={() => setPinned(doc.id)}
+                      onMouseEnter={hover}
+                      onClick={() => setPinned(hit.id)}
                     >
-                      {locked ? (
-                        <Lock className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
-                      ) : (
-                        <FileText className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
-                      )}
+                      <FileText className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="truncate text-sm text-slate-900 dark:text-slate-100">
-                            {highlight(doc.title, words)}
+                            {highlight(primary, words)}
                           </span>
-                          {doc.date && <span className="font-mono text-[11px] text-slate-500">{doc.date}</span>}
-                          {locked && <Tag tone="amber">Founder only</Tag>}
+                          {hit.date && <span className="font-mono text-[11px] text-slate-500">{hit.date}</span>}
+                          {hit.flagged && <Tag tone="amber">flagged</Tag>}
                         </div>
                         <div className="mt-0.5 line-clamp-2 text-xs text-slate-500">
-                          {locked
-                            ? "You do not have access to this document."
-                            : highlight(snippet(doc.body, words), words)}
+                          {highlight(snippet(hit.snippet, words), words)}
                         </div>
+                        <div className="mt-0.5 truncate font-mono text-[10px] text-slate-500">{hit.doc}</div>
                       </div>
                     </button>
                   );
@@ -547,35 +503,38 @@ export default function CommandPalette() {
 
           {/* Preview */}
           <div className="hidden overflow-y-auto p-4 md:block">
-            {preview ? (
-              previewLocked ? (
-                <div>
-                  <Lock className="h-5 w-5 text-amber-400" />
-                  <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">{preview.title}</h3>
-                  <p className="mt-1 text-[13px] text-slate-400">
-                    This document is limited to the founder. Interns cannot read it.
-                  </p>
-                  <Link
-                    href="/access"
-                    onClick={() => setOpen(false)}
-                    className="mt-3 inline-block rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-800"
-                  >
-                    Request access
-                  </Link>
+            {previewLocked ? (
+              <div>
+                <Lock className="h-5 w-5 text-amber-400" />
+                <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">Restricted documents</h3>
+                <p className="mt-1 text-[13px] text-slate-400">
+                  These documents are limited to the founder. Interns cannot read them.
+                </p>
+                <Link
+                  href="/access"
+                  onClick={() => setOpen(false)}
+                  className="mt-3 inline-block rounded-md border border-slate-700 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-800"
+                >
+                  Request access
+                </Link>
+              </div>
+            ) : preview ? (
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Tag>{preview.matchType}</Tag>
+                  {preview.date && <span className="font-mono text-[11px] text-slate-500">{preview.date}</span>}
+                  {preview.flagged && <Tag tone="amber">flagged</Tag>}
                 </div>
-              ) : (
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Tag>{preview.kind}</Tag>
-                    {preview.date && <span className="font-mono text-[11px] text-slate-500">{preview.date}</span>}
-                  </div>
-                  <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">{preview.title}</h3>
-                  <p className="mt-2 text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
-                    {highlight(preview.body, words)}
-                  </p>
-                  <p className="mt-3 break-all font-mono text-[11px] text-slate-500">source: doc/{preview.id}</p>
-                </div>
-              )
+                <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-100">
+                  {preview.title === "Untitled" ? preview.doc : preview.title}
+                </h3>
+                <p className="mt-2 whitespace-pre-wrap text-[13px] leading-relaxed text-slate-700 dark:text-slate-300">
+                  {highlight(preview.snippet, words)}
+                </p>
+                <p className="mt-3 break-all font-mono text-[11px] text-slate-500">
+                  source: {preview.doc} · {(preview.documentId || preview.id).slice(0, 8)}
+                </p>
+              </div>
             ) : (
               <p className="text-xs text-slate-500">Select a result to preview it and see its source.</p>
             )}
@@ -599,9 +558,10 @@ export default function CommandPalette() {
               <Kbd>Esc</Kbd> close
             </span>
           </div>
-          <span>Sample data. Role limits are applied in app code.</span>
+          <span>Live from the Meko knowledge base. Role limits are applied in app code.</span>
         </div>
       </div>
     </div>
   );
 }
+``

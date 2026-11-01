@@ -1,6 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import type { ExpenseResult, CardTxn } from "@/agents/expenses";
+import type { ZombieReport } from "@/lib/zombie";
+import { getSavedReceipts, runReceipts, getCardFeed, getZombie } from "@/lib/finance-client";
+
+// ── Helpers: transform API shapes into display shapes ────────────────────
 
 type ClaimItem = {
   id: string;
@@ -20,86 +25,77 @@ type ClaimItem = {
   alertBtn?: string;
 };
 
-const INITIAL_CLAIMS: ClaimItem[] = [
-  {
-    id: "REC-109",
-    category: "Lodging · Mumbai",
-    vendor: "Taj Lands End, Mumbai",
-    amount: 8400,
-    unit: " / night",
-    status: "ok",
-    statusBadge: "OK - Auto Approved",
-    badgeCls: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    details: "Limit ₹9,000 metro",
-    cardName: "Card: Axis Corp #4891",
-    approverText: "Approver: Auto (L4)",
-  },
-  {
-    id: "REC-112",
-    category: "Team Meals",
-    vendor: "Team Dinner at Bombay Canteen",
-    amount: 7200,
-    unit: " (4 covers)",
-    status: "violation",
-    statusBadge: "VIOLATION - Meal Cap",
-    badgeCls: "bg-red-100 text-red-800 border-red-200",
-    details: "Per-head: ₹1,800 (Cap ₹1,500)",
-    cardName: "Card: Axis Corp #4891",
-    approverText: "Approver: Karan",
-    alertMsg:
-      "Dinner bill exceeded the ₹1,500 per person limit by ₹300 per head (Total extra: ₹1,200).",
-    alertSub: "Sent to Karan Malhotra for review.",
-    alertBtn: "Review Details",
-  },
-  {
-    id: "REC-115",
-    category: "Aviation · Domestic",
-    vendor: "Indigo Airlines (DEL ➔ BOM)",
-    amount: 9450,
-    unit: " (Economy)",
-    status: "review",
-    statusBadge: "REVIEW - Flight Cap",
-    badgeCls: "bg-amber-100 text-amber-800 border-amber-200",
-    details: "Limit ₹8,000 (Excess +₹1,450)",
-    subdetails: "Cardholder: Meera Iyer",
-    cardName: "Card: HDFC Corp #1029",
-    approverText: "Approver: Riya Sharma",
-    alertMsg: "Flight ticket cost ₹9,450 (limit is ₹8,000).",
-    alertSub: "Needs approval from Riya.",
-    alertBtn: "Send to Riya",
-  },
-  {
-    id: "REC-118",
-    category: "Client Relations",
-    vendor: "Dinner with Meridian Bank (Sanjay Desai)",
-    amount: 14200,
-    status: "review",
-    statusBadge: "REVIEW - Note Required",
-    badgeCls: "bg-amber-100 text-amber-800 border-amber-200",
-    details: "Attendees: 3 Meridian, 2 Nimbus",
-    cardName: "Card: Axis Corp #4891",
-    approverText: "Approver: Riya Sharma",
-    alertMsg:
-      "Client dinners over ₹10,000 need a brief note explaining the business purpose.",
-    alertSub: "Awaiting quick note from: Riya Sharma",
-    alertBtn: "Add Note",
-  },
-  {
-    id: "REC-121",
-    category: "Ground Transport",
-    vendor: "Uber Premier ride · Airport to BKC",
-    amount: 1680,
-    status: "violation",
-    statusBadge: "VIOLATION - Ride Limit",
-    badgeCls: "bg-red-100 text-red-800 border-red-200",
-    details: "Cap ₹1,500 (Exceeded by ₹180)",
-    cardName: "Card: Personal Reimbursement",
-    approverText: "Payroll Deduction",
-    alertMsg: "Cab cost was ₹180 over the standard ride budget.",
-    alertSub: "Deduct ₹180 difference from upcoming salary, or request waiver.",
-    alertBtn: "Deduct ₹180",
-  },
-];
+function categoryLabel(r: ExpenseResult): string {
+  const typeMap: Record<string, string> = {
+    local_travel: "Ground Transport",
+    auto_rickshaw: "Ground Transport",
+    domestic_flight: "Aviation · Domestic",
+    train: "Rail",
+    hotel: `Lodging${r.extraction?.city ? ` · ${r.extraction.city}` : ""}`,
+    meal: "Meals",
+    team_lunch: "Team Meals",
+    software: "Software",
+    office_supplies: "Office Supplies",
+    client_entertainment: "Client Relations",
+    other: "Other",
+  };
+  return typeMap[r.type ?? "other"] ?? "Other";
+}
+
+function statusBadgeText(r: ExpenseResult): string {
+  if (r.status === "ok") return "OK - Auto Approved";
+  const firstViolation = r.issues.find((i) => i.severity === "violation");
+  if (r.status === "violation" && firstViolation) {
+    const code = firstViolation.code;
+    if (code === "over_limit") return "VIOLATION - Over Limit";
+    if (code === "duplicate_invoice") return "VIOLATION - Duplicate";
+    if (code === "late_claim") return "VIOLATION - Late Claim";
+    if (code === "needs_written_approval") return "VIOLATION - Needs Approval";
+    if (code === "possible_injection") return "VIOLATION - Blocked";
+    if (code === "flight_class") return "VIOLATION - Class Policy";
+    if (code === "no_total") return "VIOLATION - No Total";
+    return "VIOLATION";
+  }
+  const firstWarning = r.issues[0];
+  if (firstWarning?.code === "low_confidence") return "REVIEW - Low Confidence";
+  if (firstWarning?.code === "no_card_match") return "REVIEW - No Card Match";
+  return "REVIEW - Needs Check";
+}
+
+function badgeClasses(status: "ok" | "violation" | "review"): string {
+  if (status === "ok") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "violation") return "bg-red-100 text-red-800 border-red-200";
+  return "bg-amber-100 text-amber-800 border-amber-200";
+}
+
+function toClaim(r: ExpenseResult): ClaimItem {
+  const firstIssue = r.issues.find((i) => i.severity === "violation") ?? r.issues[0];
+  return {
+    id: r.id,
+    category: categoryLabel(r),
+    vendor: r.extraction?.merchant ?? r.file,
+    amount: r.total ?? 0,
+    status: r.status,
+    statusBadge: statusBadgeText(r),
+    badgeCls: badgeClasses(r.status),
+    details:
+      r.allowedAmount != null && r.total != null && r.allowedAmount < r.total
+        ? `Limit ₹${r.allowedAmount.toLocaleString("en-IN")} (Excess +₹${(r.total - r.allowedAmount).toLocaleString("en-IN")})`
+        : r.allowedAmount != null
+          ? `Limit ₹${r.allowedAmount.toLocaleString("en-IN")}`
+          : "",
+    cardName: r.card ? `Card: matched (${r.card.matchedBy})` : "No card match",
+    approverText: r.approver ? `Approver: ${r.approver}` : "Approver: unassigned",
+    alertMsg: firstIssue ? firstIssue.message : undefined,
+    alertSub:
+      firstIssue && r.approver
+        ? `Sent to ${r.approver} for review.`
+        : firstIssue
+          ? "Needs manual review."
+          : undefined,
+    alertBtn: r.status !== "ok" ? "Review Details" : undefined,
+  };
+}
 
 type CardTxnItem = {
   id: string;
@@ -113,85 +109,201 @@ type CardTxnItem = {
   isIncidental?: boolean;
 };
 
-const INITIAL_CARD_FEED: CardTxnItem[] = [
-  {
-    id: "txn-1",
-    date: "29 Oct",
-    vendor: "Taj Hotels Mumbai",
-    cardInfo: "Axis Corp #4891 · Karan Malhotra",
-    amount: 8400,
-    matched: true,
-    statusBadge: "Matched with Receipt ✓",
-  },
-  {
-    id: "txn-2",
-    date: "29 Oct",
-    vendor: "Bombay Canteen",
-    cardInfo: "Axis Corp #4891 · Karan Malhotra",
-    amount: 7200,
-    matched: true,
-    statusBadge: "Matched with Receipt ✓",
-  },
-  {
-    id: "txn-3",
-    date: "28 Oct",
-    vendor: "Indigo Air Domestic",
-    cardInfo: "HDFC Corp #1029 · Meera Iyer",
-    amount: 9450,
-    matched: true,
-    statusBadge: "Matched with Receipt ✓",
-  },
-  {
-    id: "txn-4",
-    date: "27 Oct",
-    vendor: "Amazon India (Office cables)",
-    cardInfo: "Axis Corp #4891 · Karan Malhotra",
-    amount: 3200,
-    matched: false,
-    statusBadge: "Needs receipt · 12 days left",
-  },
-  {
-    id: "txn-5",
-    date: "26 Oct",
-    vendor: "Blue Tokai Coffee",
-    cardInfo: "HDFC Corp #7741 · Arjun Verma",
-    amount: 680,
-    matched: false,
-    statusBadge: "Unmatched · 11d left",
-    isIncidental: true,
-  },
-];
+function toCardItem(
+  txn: CardTxn,
+  matchedIds: Set<string>,
+  daysLeftMap?: Map<string, number>,
+): CardTxnItem {
+  const matched = matchedIds.has(txn.txn_id) || !!txn.receipt_ref;
+  const d = new Date(txn.date);
+  const dateStr = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  const daysLeft = daysLeftMap?.get(txn.txn_id);
+  return {
+    id: txn.txn_id,
+    date: dateStr,
+    vendor: txn.merchant,
+    cardInfo: `${txn.card_holder}`,
+    amount: txn.amount_inr,
+    matched,
+    statusBadge: matched
+      ? "Matched with Receipt ✓"
+      : daysLeft != null
+        ? `Needs receipt · ${daysLeft}d left`
+        : "Unmatched",
+    daysLeft: daysLeft ?? undefined,
+    isIncidental: !matched && txn.amount_inr < 1000,
+  };
+}
+
+// ── Page component ───────────────────────────────────────────────────────
 
 export default function FinancePage() {
-  const [claims] = useState<ClaimItem[]>(INITIAL_CLAIMS);
-  const [feed] = useState<CardTxnItem[]>(INITIAL_CARD_FEED);
+  // Data state
+  const [claims, setClaims] = useState<ClaimItem[]>([]);
+  const [feed, setFeed] = useState<CardTxnItem[]>([]);
+  const [totals, setTotals] = useState<{
+    claimed: number;
+    approved: number;
+    violations: number;
+    needsReview: number;
+    receiptsCount: number;
+    unmatchedCount: number;
+    unmatchedTotal: number;
+  }>({ claimed: 0, approved: 0, violations: 0, needsReview: 0, receiptsCount: 0, unmatchedCount: 0, unmatchedTotal: 0 });
+  const [zombieReport, setZombieReport] = useState<ZombieReport | null>(null);
+
+  // UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [toast, setToast] = useState<{ title: string; desc: string; type: string } | null>(
-    null,
-  );
+  const [toast, setToast] = useState<{ title: string; desc: string; type: string } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [waiveIncidental, setWaiveIncidental] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const showToast = (title: string, desc: string, type = "secondary") => {
     setToast({ title, desc, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleTriggerReconcile = () => {
+  // Load saved data on mount
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [receiptsRes, cardRes] = await Promise.all([
+        getSavedReceipts(),
+        getCardFeed(),
+      ]);
+
+      const receipts = receiptsRes.receipts ?? [];
+      const txns = cardRes.txns ?? [];
+
+      // Build matched txn IDs from receipts
+      const matchedIds = new Set<string>();
+      for (const r of receipts) {
+        if (r.card?.txn_id) matchedIds.add(r.card.txn_id);
+      }
+
+      // Claims from receipts
+      setClaims(receipts.map(toClaim));
+
+      // Card feed items
+      const cardItems = txns.map((t) => toCardItem(t, matchedIds));
+      setFeed(cardItems);
+
+      // Totals
+      const claimed = receipts.reduce((s, r) => s + (r.total ?? 0), 0);
+      const approved = receipts.reduce((s, r) => s + (r.approvedAmount ?? 0), 0);
+      const violations = receipts.filter((r) => r.status === "violation").length;
+      const needsReview = receipts.filter((r) => r.status === "review").length;
+      const unmatched = cardItems.filter((c) => !c.matched);
+      setTotals({
+        claimed,
+        approved,
+        violations,
+        needsReview,
+        receiptsCount: receipts.length,
+        unmatchedCount: unmatched.length,
+        unmatchedTotal: unmatched.reduce((s, c) => s + c.amount, 0),
+      });
+
+      // Also load zombie report (non-blocking)
+      getZombie()
+        .then((z) => setZombieReport(z))
+        .catch(() => {}); // silently ignore if zombie data not loaded
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Scan receipts: POST to run the expense pipeline
+  const handleScanReceipts = async () => {
+    try {
+      setIsScanning(true);
+      setIsModalOpen(false);
+      showToast(
+        "Scanning Receipts",
+        "Processing all receipts through OCR + policy checks...",
+        "primary",
+      );
+
+      const report = await runReceipts();
+
+      // Build matched set from results
+      const matchedIds = new Set<string>();
+      for (const r of report.receipts) {
+        if (r.card?.txn_id) matchedIds.add(r.card.txn_id);
+      }
+
+      // Build daysLeft map from unmatched transactions
+      const daysLeftMap = new Map<string, number>();
+      for (const u of report.unmatchedTransactions) {
+        daysLeftMap.set(u.txn_id, u.daysLeft);
+      }
+
+      setClaims(report.receipts.map(toClaim));
+
+      // Re-fetch card feed to get the full list
+      const cardRes = await getCardFeed();
+      const cardItems = (cardRes.txns ?? []).map((t) =>
+        toCardItem(t, matchedIds, daysLeftMap),
+      );
+      setFeed(cardItems);
+
+      const unmatched = cardItems.filter((c) => !c.matched);
+      setTotals({
+        claimed: report.totals.claimed,
+        approved: report.totals.approved,
+        violations: report.totals.violations,
+        needsReview: report.totals.needsReview,
+        receiptsCount: report.receipts.length,
+        unmatchedCount: unmatched.length,
+        unmatchedTotal: unmatched.reduce((s, c) => s + c.amount, 0),
+      });
+
+      showToast(
+        "Scan Complete",
+        `Processed ${report.receipts.length} receipts. ${report.totals.violations} violations, ${report.totals.needsReview} need review.`,
+        "secondary",
+      );
+    } catch (err) {
+      showToast(
+        "Scan Failed",
+        err instanceof Error ? err.message : String(err),
+        "error",
+      );
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleTriggerReconcile = async () => {
     setIsSyncing(true);
     showToast(
       "Sync In Progress",
-      "Polling Meridian Bank SFTP feed for 15-day settlement logs...",
+      "Re-loading card feed and matching against claims...",
       "primary",
     );
-    setTimeout(() => {
-      setIsSyncing(false);
+    try {
+      await loadData();
       showToast(
         "Reconciliation Complete",
-        "Matched 8 claims against Axis & HDFC statements. 0 slippage.",
+        `Matched ${claims.filter((c) => c.cardName.includes("matched")).length} claims against card statements.`,
         "secondary",
       );
-    }, 1200);
+    } catch {
+      showToast("Reconciliation Failed", "Could not reload data.", "error");
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const handleExportAudit = () => {
@@ -210,6 +322,40 @@ export default function FinancePage() {
       setTimeout(() => el.classList.remove("ring-2", "ring-[#3B5BFD]"), 1200);
     }
   };
+
+  const okCount = claims.filter((c) => c.status === "ok").length;
+  const approvedPct = totals.claimed > 0 ? Math.round((totals.approved / totals.claimed) * 100) : 0;
+  const flaggedTotal = totals.claimed - totals.approved;
+  const flaggedCount = totals.violations + totals.needsReview;
+  const flaggedPct = totals.claimed > 0 ? Math.round((flaggedTotal / totals.claimed) * 100) : 0;
+  const unmatchedPct = feed.length > 0 ? Math.round((totals.unmatchedCount / feed.length) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 py-20 flex flex-col items-center gap-4">
+        <span className="material-symbols-outlined text-[32px] text-[#3B5BFD] animate-spin">
+          sync
+        </span>
+        <p className="text-sm text-gray-500 font-mono">Loading finance data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 py-20 flex flex-col items-center gap-4">
+        <span className="material-symbols-outlined text-[32px] text-red-500">error</span>
+        <p className="text-sm text-red-600 font-mono">{error}</p>
+        <button
+          type="button"
+          onClick={loadData}
+          className="px-4 py-2 rounded-lg bg-[#3B5BFD] text-white text-xs font-semibold cursor-pointer"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-6 pb-20 flex flex-col space-y-4">
@@ -244,7 +390,7 @@ export default function FinancePage() {
             </span>
             <span className="text-gray-300">/</span>
             <span>
-              Synced: <strong className="text-[#111827]">Just now</strong>
+              Receipts: <strong className="text-[#111827]">{totals.receiptsCount}</strong>
             </span>
           </div>
         </div>
@@ -254,12 +400,13 @@ export default function FinancePage() {
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 bg-[#3B5BFD] hover:bg-[#2549ED] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+            disabled={isScanning}
+            className="flex items-center gap-1.5 bg-[#3B5BFD] hover:bg-[#2549ED] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-[16px]">
-              document_scanner
+            <span className={`material-symbols-outlined text-[16px] ${isScanning ? "animate-spin" : ""}`}>
+              {isScanning ? "sync" : "document_scanner"}
             </span>
-            <span>Scan New Receipts</span>
+            <span>{isScanning ? "Scanning..." : "Scan New Receipts"}</span>
           </button>
           <button
             type="button"
@@ -306,12 +453,12 @@ export default function FinancePage() {
               Total Receipts
             </span>
             <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200 font-mono text-[10px]">
-              12 uploaded
+              {totals.receiptsCount} uploaded
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-[#111827] font-bold tracking-tight">
-              ₹78,450
+              ₹{totals.claimed.toLocaleString("en-IN")}
             </span>
             <span className="font-mono text-xs text-emerald-600 font-medium flex items-center gap-0.5">
               <span className="material-symbols-outlined text-[14px]">check</span> All
@@ -330,19 +477,19 @@ export default function FinancePage() {
               Ready to Pay
             </span>
             <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[10px]">
-              8 approved
+              {okCount} approved
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-emerald-700 font-bold tracking-tight">
-              ₹52,100
+              ₹{totals.approved.toLocaleString("en-IN")}
             </span>
-            <span className="font-mono text-xs text-gray-500">66% of total</span>
+            <span className="font-mono text-xs text-gray-500">{approvedPct}% of total</span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-emerald-500 rounded-full"
-              style={{ width: "66.4%" }}
+              style={{ width: `${approvedPct}%` }}
             ></div>
           </div>
         </div>
@@ -354,19 +501,19 @@ export default function FinancePage() {
               Needs Your Look
             </span>
             <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] font-medium">
-              4 flagged
+              {flaggedCount} flagged
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-red-600 font-bold tracking-tight">
-              ₹26,350
+              ₹{flaggedTotal.toLocaleString("en-IN")}
             </span>
             <span className="font-mono text-xs text-red-600">On hold</span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-red-500 rounded-full"
-              style={{ width: "33.6%" }}
+              style={{ width: `${flaggedPct}%` }}
             ></div>
           </div>
         </div>
@@ -383,18 +530,60 @@ export default function FinancePage() {
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-amber-700 font-bold tracking-tight">
-              3 Card Charges
+              {totals.unmatchedCount} Card Charges
             </span>
-            <span className="font-mono text-xs text-gray-500">₹3,880 total without bill</span>
+            <span className="font-mono text-xs text-gray-500">₹{totals.unmatchedTotal.toLocaleString("en-IN")} total without bill</span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-amber-500 rounded-full"
-              style={{ width: "25%" }}
+              style={{ width: `${unmatchedPct}%` }}
             ></div>
           </div>
         </div>
       </section>
+
+      {/* Zombie SaaS Alert (if data available) */}
+      {zombieReport && zombieReport.tools.length > 0 && (
+        <section className="bg-white rounded-xl border border-amber-200 p-4 shadow-xs">
+          <div className="flex items-center justify-between pb-2 border-b border-amber-100">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px] text-amber-600">
+                warning
+              </span>
+              <div>
+                <h3 className="text-xs font-semibold text-[#111827]">
+                  Zombie SaaS Detected
+                </h3>
+                <p className="font-mono text-[11px] text-gray-500">
+                  {zombieReport.tools.length} tool{zombieReport.tools.length !== 1 ? "s" : ""} with no logins
+                  in {zombieReport.thresholdDays}+ days — ₹{zombieReport.monthlyWasteInr.toLocaleString("en-IN")}/mo
+                  potential waste (₹{zombieReport.annualWasteInr.toLocaleString("en-IN")}/yr)
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-3">
+            {zombieReport.tools.slice(0, 6).map((t) => (
+              <div
+                key={t.tool}
+                className="p-2.5 rounded-lg bg-amber-50/50 border border-amber-100 flex items-center justify-between"
+              >
+                <div>
+                  <span className="text-xs font-semibold text-[#111827]">{t.tool}</span>
+                  <p className="font-mono text-[10px] text-gray-500">
+                    {t.days_idle != null ? `${t.days_idle}d idle` : "No logins on record"}
+                    {t.owner ? ` · ${t.owner}` : ""}
+                  </p>
+                </div>
+                <span className="font-mono text-xs font-bold text-amber-700">
+                  ₹{t.monthly_cost_inr.toLocaleString("en-IN")}/mo
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Live Pipeline Split Workstation */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -422,12 +611,22 @@ export default function FinancePage() {
                 type="button"
                 className="px-2 py-0.5 rounded-md bg-white border border-[#E5E7EB] text-[#111827] font-mono text-xs shadow-2xs font-medium"
               >
-                All (5 Claims)
+                All ({claims.length} Claims)
               </button>
             </div>
           </div>
 
           <div className="p-4 space-y-3 overflow-y-auto max-h-[700px]">
+            {claims.length === 0 && (
+              <div className="text-center py-12">
+                <span className="material-symbols-outlined text-[32px] text-gray-300">
+                  receipt_long
+                </span>
+                <p className="text-sm text-gray-400 mt-2">
+                  No expense claims yet. Click &quot;Scan New Receipts&quot; to process receipts.
+                </p>
+              </div>
+            )}
             {claims.map((claim) => (
               <article
                 key={claim.id}
@@ -535,7 +734,7 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* RIGHT WORKBENCH (5 cols): Meridian Pilot Corporate Card Feed */}
+        {/* RIGHT WORKBENCH (5 cols): Corporate Card Feed */}
         <div className="lg:col-span-5 flex flex-col bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
           <div className="p-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -558,6 +757,16 @@ export default function FinancePage() {
           </div>
 
           <div className="divide-y divide-gray-100 p-2 space-y-1.5 max-h-[700px] overflow-y-auto">
+            {feed.length === 0 && (
+              <div className="text-center py-12">
+                <span className="material-symbols-outlined text-[32px] text-gray-300">
+                  credit_card_off
+                </span>
+                <p className="text-sm text-gray-400 mt-2">
+                  No card transactions loaded.
+                </p>
+              </div>
+            )}
             {feed.map((txn) => (
               <div
                 key={txn.id}
@@ -609,7 +818,7 @@ export default function FinancePage() {
                 {!txn.matched && !txn.isIncidental && (
                   <div className="mt-2 pt-2 flex items-center justify-between border-t border-amber-100">
                     <span className="font-mono text-[11px] text-gray-500">
-                      Auto-reminder sent to Karan
+                      Auto-reminder sent
                     </span>
                     <button
                       type="button"
@@ -824,14 +1033,7 @@ export default function FinancePage() {
             </div>
 
             <div
-              onClick={() => {
-                setIsModalOpen(false);
-                showToast(
-                  "Batch Queued",
-                  "3 receipts queued for OCR extraction & rule evaluation",
-                  "primary",
-                );
-              }}
+              onClick={handleScanReceipts}
               className="p-8 rounded-xl bg-[#F9FAFB] hover:bg-gray-100 border-2 border-dashed border-gray-300 text-center cursor-pointer transition-colors space-y-2"
             >
               <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 text-[#3B5BFD] mx-auto flex items-center justify-center">
@@ -862,14 +1064,7 @@ export default function FinancePage() {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  showToast(
-                    "Batch Queued",
-                    "3 receipts queued for OCR extraction & rule evaluation",
-                    "primary",
-                  );
-                }}
+                onClick={handleScanReceipts}
                 className="px-4 py-1.5 rounded-lg bg-[#3B5BFD] text-white text-xs hover:bg-[#2549ED] shadow-sm flex items-center gap-1 font-medium cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[16px]">bolt</span>

@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Next examination\n\nThe next Type II audit period begins 1 July 2026 and runs for 12 months.",
+    "ref": "006d9868-479d-46ad-9484-3bcd2e5c4e50"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Overview\n\nNimbus Labs completed a SOC 2 Type II examination covering the Nimbus Ledger Sync platform. The audit period ran from 1 January 2026 to 30 June 2026. The final report was issued on 14 August 2026 by the independent auditor Harlow & Pike LLP.",
+    "ref": "eff21748-439d-4d96-8485-14875765ffa9"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
+    "ref": "95dd8646-f9af-47e9-8a3f-c79f0c4da25b"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Access Control Policy > Principles\n\nAccess is granted on a least-privilege basis and tied to a person's role. Every grant has a named approver and is recorded in the audit log.",
+    "ref": "7a3c9333-01b3-41dc-85be-89d36bc46a33"
+  }
+]
