@@ -2,6 +2,14 @@ import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 
+const bundled = path.join(process.cwd(), "plexus.db");
+const dbFile = process.env.VERCEL ? "/tmp/plexus.db" : bundled;
+
+if (process.env.VERCEL && !fs.existsSync(dbFile) && fs.existsSync(bundled)) {
+  fs.copyFileSync(bundled, dbFile);
+}
+// then open better-sqlite3 with dbFile
+
 let dbInstance: Database.Database | null = null;
 
 export function getDb(): Database.Database {
