@@ -1,21 +1,39 @@
 {
   "success": true,
   "data": {
-    "summary": "Meridian Bank and Nimbus Labs kicked off a pilot project for UPI reconciliation using Nimbus Ledger Sync, targeting a go-live date of November 30, 2026. The teams agreed on a phased approach limited strictly to UPI for phase one and outlined necessary security, technical, and procurement steps.",
+    "summary": "Meridian Bank and Nimbus Labs kicked off the Nimbus Ledger Sync pilot to automate UPI settlements reconciliation. The team agreed on a go-live date of November 30, 2026, limited to UPI reconciliation only. Key technical and administrative tasks were assigned to prepare the sandbox, security reviews, and data mappings.",
     "decisions": [
       "Pilot go-live date is set for Monday 30 November 2026.",
-      "Phase one scope is strictly limited to UPI reconciliation.",
+      "Phase one is limited to UPI reconciliation only, with NEFT and IMPS deferred to phase two.",
       "Customer-managed encryption keys are not supported; keys are managed by Nimbus in AWS KMS."
     ],
     "action_items": [
       {
-        "title": "title"
+        "title": "Send our standard mutual NDA to Neha"
+      },
+      {
+        "title": "Set up the sandbox environment and send API credentials"
+      },
+      {
+        "title": "Give the IP ranges we need allowlisted"
+      },
+      {
+        "title": "Write a mapping document that says which Meridian field feeds which Nimbus field"
+      },
+      {
+        "title": "Nominate two analysts from my team for user acceptance testing and send names"
+      },
+      {
+        "title": "Prepare anonymised sample transaction files from the layout you gave us"
+      },
+      {
+        "title": "Set up Meera's accounts"
       }
     ],
     "follow_up_email": {
-      "to": "client",
-      "subject": "Follow-up: Kickoff decisions and next steps",
-      "body": "Neha Kapoor"
+      "to": "Neha Kapoor",
+      "subject": "Follow-up: Meridian Bank x Nimbus Labs Project Kickoff",
+      "body": "Hi Neha,\n\nThanks for a productive kickoff meeting today. As agreed, we are targeting a go-live date of Monday 30 November 2026 for the UPI reconciliation pilot.\n\nAction items and next steps are currently being tracked on our side. We look forward to working together.\n\nBest regards,\nNimbus Labs"
     }
   },
   "modelUsed": "gemini-3.5-flash-lite"

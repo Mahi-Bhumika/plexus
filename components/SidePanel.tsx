@@ -4,10 +4,14 @@ import { useCallback, useRef, useState } from "react";
 import { ActivityFeed } from "@/components/ActivityFeed";
 import ChatPanel from "@/components/ChatPanel";
 
-// Replaces <ActivityFeed /> in your layout:  <SidePanel />
-// One card with two tabs, Activity and Chat. Both stay mounted (the inactive one is hidden),
-// so the feed keeps receiving live events and the chat keeps its history while you switch.
+// One full-height panel with two tabs, Activity and Chat. Both stay mounted (the inactive one is
+// hidden), so the feed keeps receiving live events and the chat keeps its history while you switch.
 // While you are on the Chat tab, new events add a count badge to the Activity tab.
+//
+// STOPGAP: ActivityFeed and ChatPanel are still styled dark-only, so their bodies get a color-flip
+// filter in light mode. Delete BODY_FIX once both files have proper light/dark classes.
+const BODY_FIX = "[filter:invert(1)_hue-rotate(180deg)] dark:[filter:none]";
+
 export default function SidePanel({
   role,
   defaultTab = "activity",
@@ -30,12 +34,18 @@ export default function SidePanel({
   }
 
   const tabClass = (active: boolean) =>
-    "relative flex-1 rounded-lg px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors " +
-    (active ? "bg-slate-800 text-zinc-100" : "text-zinc-500 hover:text-zinc-300");
+    "relative flex-1 rounded-md px-3 py-1.5 text-xs tracking-wide transition-all " +
+    (active
+      ? "bg-white dark:bg-[#0F172A] text-[#111827] dark:text-[#F3F4F6] font-semibold shadow-sm border border-[#E5E7EB] dark:border-[#1E293B]"
+      : "text-gray-600 dark:text-gray-400 hover:text-[#111827] dark:hover:text-[#F3F4F6] hover:bg-white/60 dark:hover:bg-[#1E293B]/60 font-medium border border-transparent");
 
   return (
-    <div className="flex flex-col h-full bg-[#090D16] border border-slate-800/80 rounded-2xl shadow-xl w-80 lg:w-96 text-zinc-100 flex-shrink-0 overflow-hidden">
-      <div role="tablist" aria-label="Side panel" className="flex gap-1 p-1.5 border-b border-slate-800/80 bg-[#070A12]/60">
+    <div className="flex flex-col h-full min-h-0 w-full bg-white dark:bg-[#0C1222] text-[#111827] dark:text-[#F3F4F6] transition-colors duration-200">
+      <div
+        role="tablist"
+        aria-label="Side panel"
+        className="shrink-0 flex gap-1 p-1.5 border-b border-[#E5E7EB] dark:border-[#1E293B] bg-[#F3F4F6] dark:bg-[#162032]"
+      >
         <button type="button" role="tab" aria-selected={tab === "activity"} onClick={() => select("activity")} className={tabClass(tab === "activity")}>
           Activity
           {unseen > 0 && (
@@ -49,10 +59,16 @@ export default function SidePanel({
         </button>
       </div>
 
-      <div className={tab === "activity" ? "flex-1 min-h-0 flex flex-col" : "hidden"}>
+      <div className={tab === "activity" ? `flex-1 min-h-0 flex flex-col ${BODY_FIX}` : "hidden"}>
         <ActivityFeed embedded onNewEvent={handleNewEvent} />
       </div>
-      <div className={tab === "chat" ? "flex-1 min-h-0 flex flex-col" : "hidden"}>
+      <div
+        className={
+          tab === "chat"
+            ? `flex-1 min-h-0 flex flex-col ${BODY_FIX} font-sans [&_*]:!text-xs [&_input]:!font-sans [&_select]:!font-sans [&_textarea]:!font-sans [&_button]:!font-sans`
+            : "hidden"
+        }
+      >
         <ChatPanel role={role} />
       </div>
     </div>

@@ -25,65 +25,6 @@ const TOP_NAV_ITEMS = [
   { name: "Zombie SaaS", href: "/audit" },
 ];
 
-type Tone = "emerald" | "blue" | "amber" | "gray";
-
-// Shape returned by GET /api/feed (ActivityEvent from lib/events.ts)
-type FeedEvent = {
-  id: string;
-  timestamp: string;
-  agent: string;
-  action: string;
-  status: string;
-  confidence?: number;
-  sources: { title: string; ref: string }[];
-  traceId: string;
-  undoable: boolean;
-};
-
-const AGENT_TONE: Record<string, Tone> = {
-  rfp: "blue",
-  actionswarm: "emerald",
-  access: "amber",
-  finance: "blue",
-  search: "blue",
-  guard: "gray",
-};
-const STATUS_TONE: Record<string, Tone> = {
-  done: "emerald",
-  flagged: "amber",
-  blocked: "amber",
-  pending_approval: "amber",
-  undone: "gray",
-  error: "amber",
-};
-const STATUS_LABEL: Record<string, string> = {
-  done: "Done",
-  flagged: "Flagged",
-  blocked: "Blocked",
-  pending_approval: "Needs approval",
-  undone: "Undone",
-  error: "Error",
-};
-
-function fmtTime(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return `${d.toTimeString().slice(0, 8)}.${String(d.getMilliseconds()).padStart(3, "0")}`;
-}
-
-const CONF_CLS: Record<Tone, string> = {
-  emerald: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800",
-  amber: "text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800",
-  blue: "text-[#3B5BFD] dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800",
-  gray: "text-gray-700 dark:text-gray-300 bg-[#F3F4F6] dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155]",
-};
-const RIGHT_CLS: Record<Tone, string> = {
-  emerald: "text-emerald-700 dark:text-emerald-400",
-  amber: "text-amber-700 dark:text-amber-400",
-  blue: "text-[#3B5BFD] dark:text-blue-400",
-  gray: "text-gray-600 dark:text-gray-400",
-};
-
 export default function DashboardLayout({
   children,
 }: {
@@ -91,7 +32,6 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isDark, setIsDark] = useState<boolean>(false);
-  const [events, setEvents] = useState<FeedEvent[]>([]);
   const [feedOk, setFeedOk] = useState<boolean>(true);
   const [latency, setLatency] = useState<number | null>(null);
 
@@ -110,17 +50,16 @@ export default function DashboardLayout({
     }
   }, []);
 
-  // Live activity feed: reads audit_events through GET /api/feed every 4 seconds.
+  // Health ping for the top-bar latency pill. The activity list itself lives in <SidePanel />.
   useEffect(() => {
     let stop = false;
     async function tick() {
       const t0 = performance.now();
       try {
-        const res = await fetch("/api/feed?limit=30", { cache: "no-store" });
+        const res = await fetch("/api/feed?limit=1", { cache: "no-store" });
         const data = await res.json();
         if (stop) return;
         if (!res.ok || data?.status === "error") throw new Error("feed error");
-        setEvents(data.events ?? []);
         setFeedOk(true);
         setLatency(Math.round(performance.now() - t0));
       } catch {
@@ -213,7 +152,8 @@ export default function DashboardLayout({
         {/* Right utility controls */}
         <div className="flex items-center gap-2.5">
           {/* Search Cmd+K */}
-          <div
+          <button
+            type="button"
             onClick={openCmdK}
             className="hidden xl:flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#F3F4F6] dark:bg-[#162032] border border-[#E5E7EB] dark:border-[#1E293B] hover:border-gray-400 dark:hover:border-gray-500 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs transition-all cursor-pointer group shadow-sm"
           >
@@ -224,7 +164,7 @@ export default function DashboardLayout({
             <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0F172A] text-gray-500 dark:text-gray-400 text-[10px] font-mono border border-[#E5E7EB] dark:border-[#1E293B] font-medium shadow-2xs">
               ⌘K
             </kbd>
-          </div>
+          </button>
 
           {/* DARK MODE TOGGLE BUTTON */}
           <button
@@ -330,76 +270,12 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      {/* ACTIVITY FEED + CHAT ASIDE */}
-      <aside className="fixed right-0 top-14 bottom-0 w-84 xl:w-96 bg-white dark:bg-[#0C1222] border-l border-[#E5E7EB] dark:border-[#1E293B] flex flex-col z-30 shadow-[-1px_0_4px_rgba(0,0,0,0.02)] transition-colors duration-200">
-        <div className="h-10 px-3.5 border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between bg-[#F9FAFB]/70 dark:bg-[#090D16]/70">
-          <div className="flex items-center gap-2">
-            <span className={`w-1.5 h-1.5 rounded-full ${feedOk ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}></span>
-            <span className="font-mono text-xs font-semibold text-[#111827] dark:text-[#F3F4F6] tracking-tight">
-              Shared Activity Feed
-            </span>
-            <span className="text-gray-400 dark:text-gray-500 text-[10px] font-mono">/stream</span>
-          </div>
-          <button
-            type="button"
-            className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors p-1 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[15px]">tune</span>
-          </button>
+      {/* RIGHT PANEL: one full-height window; SidePanel switches between Activity and Chat */}
+      <aside className="fixed right-0 top-14 bottom-0 w-84 xl:w-96 overflow-hidden bg-white dark:bg-[#0C1222] border-l border-[#E5E7EB] dark:border-[#1E293B] flex flex-col z-30 shadow-[-1px_0_4px_rgba(0,0,0,0.02)] transition-colors duration-200">
+        <div className="flex-1 min-h-0 flex flex-col">
+          <SidePanel />
         </div>
-
-        {/* Feed Events (live from audit_events) */}
-        <div className="flex-1 overflow-y-auto divide-y divide-[#E5E7EB] dark:divide-[#1E293B] font-mono text-xs">
-          {events.length === 0 && (
-            <div className="p-4 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
-              {feedOk
-                ? "No activity yet. Run an agent or a catch-up and it will appear here."
-                : "Could not reach /api/feed."}
-            </div>
-          )}
-          {events.map((e) => {
-            const tagTone = AGENT_TONE[e.agent] ?? "gray";
-            const rightTone = STATUS_TONE[e.status] ?? "gray";
-            const confTone: Tone = typeof e.confidence === "number" && e.confidence >= 0.9 ? "emerald" : "amber";
-            return (
-              <div key={e.id} className="p-3 hover:bg-[#F9FAFB] dark:hover:bg-[#162032]/40 transition-colors">
-                <div className="flex items-center justify-between text-gray-400 dark:text-gray-500 text-[10px]">
-                  <span>{fmtTime(e.timestamp)}</span>
-                  {typeof e.confidence === "number" && (
-                    <span className={`px-1 py-0.2 rounded font-medium ${CONF_CLS[confTone]}`}>
-                      c:{e.confidence.toFixed(2)}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center gap-1.5 pt-1">
-                  <span className={`px-1 py-0.2 rounded text-[9px] uppercase font-bold ${CONF_CLS[tagTone]}`}>
-                    {e.agent}
-                  </span>
-                  <span className="text-[#111827] dark:text-[#F3F4F6] truncate text-xs font-medium" title={e.action}>
-                    {e.action}
-                  </span>
-                </div>
-                <div className="text-gray-400 dark:text-gray-500 text-[10px] pt-1 flex justify-between">
-                  <span>tx:{e.traceId.replace(/^trc_/, "").slice(0, 13)}</span>
-                  <span className={`font-medium ${RIGHT_CLS[rightTone]}`}>{STATUS_LABEL[e.status] ?? e.status}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Footer */}
-        <div className="p-2.5 border-t border-[#E5E7EB] dark:border-[#1E293B] bg-[#F9FAFB]/70 dark:bg-[#090D16]/70 flex items-center justify-between font-mono text-[11px] text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1.5">
-            <span className={`w-1.5 h-1.5 rounded-full ${feedOk ? "bg-emerald-500" : "bg-amber-500"}`}></span>
-            {feedOk ? "Feed connected" : "Feed unreachable"}
-          </span>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500">{events.length} events</span>
-        </div>
-        <SidePanel />
       </aside>
-
     </div>
   );
 }
-``
