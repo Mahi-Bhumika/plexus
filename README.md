@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 Plexus
+# Plexus
 
 ### An AI operations team for startups, built on one shared memory.
 
@@ -20,7 +20,7 @@ Every agent shares what it learns. Every risky action asks a human first.
 
 ---
 
-## 🎯 The problem
+## The problem
 
 A small startup does the same boring, high-stakes work again and again, and every task lives in a different tool:
 
@@ -33,7 +33,7 @@ A small startup does the same boring, high-stakes work again and again, and ever
 
 The usual fix is one AI tool per task, with no shared memory and no safety net.
 
-## 💡 The idea
+## The idea
 
 1. **One memory for every agent.** Meko is the shared memory and knowledge layer, so a correction in one agent can be reused later.
 2. **A guard layer around every action.** Injection check, confidence gate, approval rule and undo.
@@ -41,7 +41,7 @@ The usual fix is one AI tool per task, with no shared memory and no safety net.
 
 ---
 
-## ⚙️ What it does
+## What it does
 
 | Agent | What it does | Human in the loop |
 | --- | --- | --- |
@@ -53,7 +53,7 @@ The usual fix is one AI tool per task, with no shared memory and no safety net.
 | **Finance Agent** | Reads receipts with Gemini vision, applies the expense policy, flags violations (duplicate cab, over-limit dinner, flight date mismatch) | A person decides on flagged items |
 | **Zombie SaaS Detector** | Joins billing with SSO logins to find paid tools with no logins in 30+ days, then request, approve or reject, and undo | The tool owner can't approve their own cancellation |
 
-### 📋 RFP Agent in detail
+### RFP Agent in detail
 
 - Answers in batches of 10 questions with a JSON schema, two batches at a time.
 - Each answer carries `coverage` (full, partial, none), a `confidence` from 0 to 1, and a source shown as the policy section title, for example "Nimbus Labs SOC 2 Type II Summary > Results".
@@ -71,7 +71,7 @@ The usual fix is one AI tool per task, with no shared memory and no safety net.
 - A person can **approve** a draft as-is or **fix** it with their own answer. Both record the approver's name.
 - The filled sheet exports as .xlsx, with red fill on every flagged or errored cell.
 
-### 🔁 Learning loop in detail
+### Learning loop in detail
 
 1. A person fixes a red cell. Plexus saves the fix on the row and writes it to Meko memory.
 2. On the next questionnaire, Meko memory search finds candidate fixes. A cheap rule drops any whose numbers differ, so a fix about AES-256 never reuses on AES-128.
@@ -80,7 +80,7 @@ The usual fix is one AI tool per task, with no shared memory and no safety net.
 
 Word overlap alone could not separate a real rewording from a different question that shares the same words, which is why a model judge makes this call.
 
-### 🔎 Search and Catch-Me-Up in detail
+### Search and Catch-Me-Up in detail
 
 - **Cmd+K** answers a question in one to three sentences with source documents and snippets.
 - **Catch-Me-Up** takes a topic and a window ("Meridian, last 4 days"), finds the documents dated inside the window, and writes a 2 to 4 sentence briefing plus cited points. Each point is attached to the document that supports it, checked in code, and a sentence no document supports is dropped.
@@ -88,7 +88,7 @@ Word overlap alone could not separate a real rewording from a different question
 - A document with no access header whose name looks like salary or payroll defaults to founder-only, so a missing label cannot leak it.
 - If the model is unavailable, search falls back to an extractive answer so the screen never goes blank.
 
-### 🐝 ActionSwarm in detail
+### ActionSwarm in detail
 
 - Extracts a summary, decisions, action items, assignees and due dates from the transcript.
 - Every task passes the guard. Low-confidence items (under `0.85`) become `needs_review` and no assignee is guessed.
@@ -96,7 +96,7 @@ Word overlap alone could not separate a real rewording from a different question
 - Posts to Slack through an incoming webhook (and n8n). Set `ACTIONSWARM_NO_SLACK=1` to skip posting in tests.
 - The follow-up email is saved as a draft, and sending it needs approval.
 
-### 🛡️ The guard layer
+### The guard layer
 
 Every agent action goes through `lib/guard.ts`:
 
@@ -109,7 +109,7 @@ We don't claim this solves prompt injection in general. The injection check is p
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
                  ┌────────────────────────────────────────────┐
@@ -167,7 +167,7 @@ Agents: `rfp`, `actionswarm`, `access`, `finance`, `search`, `guard`. Statuses: 
 
 ---
 
-## 🧰 Tech stack
+## Tech stack
 
 | Layer | Choice |
 | --- | --- |
@@ -185,7 +185,7 @@ Agents: `rfp`, `actionswarm`, `access`, `finance`, `search`, `guard`. Statuses: 
 
 ---
 
-## 📁 Project structure
+## Project structure
 
 ```
 plexus/
@@ -246,7 +246,7 @@ plexus/
 
 ---
 
-## 🚀 Getting started
+## Getting started
 
 **You need:** Node 20+, pnpm, Git, Docker Desktop (for n8n), a Gemini API key and a Meko account.
 
@@ -304,7 +304,7 @@ This clears the demo data and the test recordings, and deletes any learned fixes
 
 ---
 
-## 🔌 API
+## API
 
 Every error comes back as `{ "status": "error", "message": "..." }`.
 
@@ -324,7 +324,7 @@ In the demo the role comes from the role selector. A real deployment would take 
 
 ---
 
-## 🎬 The demo (about 3 minutes)
+## The demo (about 3 minutes)
 
 1. **Hook.** Drop in the Meridian Bank questionnaire. Cells fill and some turn red.
 2. **Learning loop.** A human fixes a red cell, then a second questionnaire reuses the fix.
@@ -339,7 +339,7 @@ Finance (receipts and Zombie SaaS) is an optional beat and the first thing cut i
 
 ---
 
-## 📊 What we measured
+## What we measured
 
 | Check | Result |
 | --- | --- |
@@ -354,7 +354,7 @@ We only quote numbers we measured. Timing numbers are not listed here until the 
 
 ---
 
-## ✅ Built vs simulated
+## Built vs simulated
 
 | Area | Status |
 | --- | --- |
@@ -370,14 +370,14 @@ We only quote numbers we measured. Timing numbers are not listed here until the 
 | Slack buttons | **Skipped.** Approvals are on the dashboard |
 | Expenses | **Built on seeded data.** Flags a duplicate cab, an over-limit dinner and a flight date mismatch |
 
-### ⚠️ Known limits
+### Known limits
 
 - **Injection check is pattern-based.** It catches the phrasings we tested, not every possible attack.
 - **Meko free tier.** It caps knowledge searches at 1000 over its lifetime, and each RFP run uses one per question. Re-recording fixtures or running many tests can hit the cap.
 - **Strict scoring.** The answer-key scorer requires specific terms, so it can reject an accurate answer that leaves out a date.
 - **Undated documents** never appear in Catch-Me-Up, because it cannot place them in a window.
 
-### 🚫 Claims we avoid
+### Claims we avoid
 
 - No SOC 2 or DPDP compliance claim. Plexus is *designed for DPDP alignment*, nothing more.
 - No zero-data-retention claim.
@@ -386,7 +386,7 @@ We only quote numbers we measured. Timing numbers are not listed here until the 
 
 ---
 
-## 🗂️ Demo data (all fictional)
+## Demo data (all fictional)
 
 - **Nimbus Labs:** 10 policy docs (SOC 2 summary, security whitepaper, data retention, access control, incident response, encryption, backup and recovery, vendor management, onboarding and offboarding, privacy note)
 - **People:** Riya Sharma (founder), Karan Malhotra (engineering manager), Meera (new hire), Arjun (intern)
@@ -395,7 +395,7 @@ We only quote numbers we measured. Timing numbers are not listed here until the 
 
 ---
 
-## 🛣️ Roadmap
+## Roadmap
 
 - [x] Prove the learning loop end to end (fix written to Meko memory, second sheet uses it)
 - [ ] Hand-review every RFP answer and quote precision
@@ -407,7 +407,7 @@ We only quote numbers we measured. Timing numbers are not listed here until the 
 
 ---
 
-## 👥 Team
+## Team
 
 | | Role |
 | --- | --- |
