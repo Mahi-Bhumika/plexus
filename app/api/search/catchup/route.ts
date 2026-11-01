@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { catchMeUp, parseCatchUp, parseRole, ROLES } from "@/lib/search";
 
-export const runtime = "nodejs";
-
 // POST /api/search/catchup { role, query } or { role, topic, days }
 //   e.g. { role: "founder", query: "Catch me up on Meridian, last 4 days" }
 //   -> { status: "done", briefing, points: [{ text, source }], sources, locked, window, ... }

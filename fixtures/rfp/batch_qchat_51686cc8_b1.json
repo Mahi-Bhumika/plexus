@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "11",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "12",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "13",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "14",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "15",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "16",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "17",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "18",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "19",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    },
+    {
+      "id": "20",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 0,
+      "source_ref": null
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

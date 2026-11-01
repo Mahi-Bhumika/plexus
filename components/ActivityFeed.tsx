@@ -62,7 +62,12 @@ const UNKNOWN_STATUS_CONFIG = {
   icon: HelpCircle,
 };
 
-export function ActivityFeed() {
+interface ActivityFeedProps {
+  embedded?: boolean;
+  onNewEvent?: () => void;
+}
+
+export function ActivityFeed({ embedded, onNewEvent }: ActivityFeedProps) {
   const [events, setEvents] = useState<ActivityEvent[]>([]);
   const [errorText, setErrorText] = useState<string | null>(null);
 
@@ -88,6 +93,8 @@ export function ActivityFeed() {
       try {
         const newEvt: ActivityEvent = JSON.parse(messageEvent.data);
         setEvents((prev) => [newEvt, ...prev.filter((e) => e.id !== newEvt.id)]);
+        // Notify parent panel if a new live event comes in
+        onNewEvent?.();
       } catch (e) {
         console.error("SSE parse error", e);
       }
@@ -100,10 +107,15 @@ export function ActivityFeed() {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [onNewEvent]);
+
+  // If embedded, omit outer border/sizing wrapper since SidePanel provides it
+  const containerClass = embedded
+    ? "flex flex-col h-full w-full text-zinc-100 overflow-hidden"
+    : "flex flex-col h-full bg-[#090D16] border border-slate-800/80 rounded-2xl shadow-xl w-80 lg:w-96 text-zinc-100 flex-shrink-0 overflow-hidden";
 
   return (
-    <div className="flex flex-col h-full bg-[#090D16] border border-slate-800/80 rounded-2xl shadow-xl w-80 lg:w-96 text-zinc-100 flex-shrink-0 overflow-hidden">
+    <div className={containerClass}>
       <div className="p-4 border-b border-slate-800/80 flex items-center justify-between bg-[#070A12]/60">
         <div className="flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
