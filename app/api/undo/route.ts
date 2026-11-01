@@ -7,8 +7,6 @@ import "@/agents/access";
 import "@/agents/expense-approval";
 import "@/agents/saas-cancel";
 
-export const runtime = "nodejs";
-
 // POST /api/undo { eventId }
 //   ok:    { ok: true,  status: "ok",    message }
 //   error: { ok: false, status: "error", error, message }   (both fields, so either UI style works)

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { activityEventSchema, emitEvent } from "@/lib/events";
 
-export const dynamic = "force-dynamic";
-
 export async function POST(request: Request) {
   try {
     const json = await request.json();

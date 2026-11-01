@@ -1,7 +1,5 @@
 import { requestExpenseApproval, ApprovalError } from "@/agents/expense-approval";
 
-export const runtime = "nodejs";
-
 // POST /api/finance/request-approval { claimId }
 // Logs "Needs approval from <approver>" in the feed, DMs the routed approver on Slack with
 // Approve / Reject buttons, and posts a receipt notice in #finance.

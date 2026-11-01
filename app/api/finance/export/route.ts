@@ -1,8 +1,6 @@
 import { getSavedClaims, readCardFeed } from "@/agents/expenses";
 import { createHash } from "node:crypto";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 function escapeCsv(val: unknown): string {
   if (val == null) return "";

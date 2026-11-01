@@ -1,7 +1,5 @@
 import { approveClaim, rejectClaim, listApprovals, ApprovalError, type ApproveMode } from "@/agents/expense-approval";
 
-export const runtime = "nodejs";
-
 // GET  /api/finance/approve -> { approvals: [{ claim_id, approver, amount, mode, approved_at, event_id }] }
 //      Merge with /api/finance/expenses by claim id (the receipt file name) to show "Approved by ...".
 // POST /api/finance/approve  { claimId, approver, mode?: "allowed" | "full", reject?: true }
