@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "11",
+      "answer": "Production data is deleted by dropping the customer's tenant schema and associated storage objects, while encrypted volumes are retired by deleting their encryption keys. Data is deleted from production systems within 30 days after the 90-day export window closes, and backups containing that data expire on their normal 35-day cycle so the last copy is gone no later than 35 days after production deletion.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "47cc9e8a-27a8-42c7-aca2-1623eb29ae66"
+    },
+    {
+      "id": "12",
+      "answer": "For a severity-1 (P1) incident, which means customer data exposed or a full outage, the response time to acknowledge is within 15 minutes.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "18760358-ccc3-4f02-891e-6b4561d3577b"
+    },
+    {
+      "id": "13",
+      "answer": "The founder is the only person who can place or release a legal hold.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "1257a58c-004a-4f52-8ff1-6f5e6764909d"
+    },
+    {
+      "id": "14",
+      "answer": "A company laptop is issued with mobile device management (MDM) installed and disk encryption enforced, but the provided text does not explicitly state whether staff access policyholder data from personal laptops or phones.",
+      "coverage": "partial",
+      "confidence": 0.9,
+      "source_ref": "b81c660f-3b5c-4985-b514-7ce30d5d53e2"
+    },
+    {
+      "id": "15",
+      "answer": "Affected customers are notified within 72 hours when a breach involving customer data is confirmed. Additionally, Nimbus Labs reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "1d314048-320d-4386-afe3-c4e97778a0f9"
+    },
+    {
+      "id": "16",
+      "answer": "Yes, the current sub-processor list, which includes 9 sub-processors such as AWS and an email delivery provider, is shared with customers on request.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "64df7061-280f-4354-9421-12e6e284f25f"
+    },
+    {
+      "id": "17",
+      "answer": "New hires must complete security awareness training within 7 days of joining.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b81c660f-3b5c-4985-b514-7ce30d5d53e2"
+    },
+    {
+      "id": "18",
+      "answer": "The Recovery Point Objective (RPO) is 1 hour, meaning at most one hour of data can be lost. The Recovery Time Objective (RTO) is 4 hours, meaning service is restored within four hours of a declared disaster.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "1c60b872-cb9d-495b-8cc4-8345df5d985f"
+    },
+    {
+      "id": "19",
+      "answer": "Shared secrets that the departing person had access to are rotated within 2 business days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b702e3da-7b0a-411e-a63e-26a9ee7aa0db"
+    },
+    {
+      "id": "20",
+      "answer": "Nimbus Labs holds a SOC 2 Type II report and does not yet hold ISO 27001 certification (planned for 2027), but the provided chunks do not mention ISO 22301 business continuity certification.",
+      "coverage": "partial",
+      "confidence": 0.9,
+      "source_ref": "bfa7cc3c-58d9-40c1-b792-07b1f8c3aded"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

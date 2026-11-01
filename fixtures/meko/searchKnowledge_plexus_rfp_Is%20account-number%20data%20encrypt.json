@@ -2,11 +2,11 @@
   {
     "title": "Knowledge Doc",
     "content": "Section: Nimbus Labs Encryption Standard > Sensitive fields\n\nAccount numbers and UPI identifiers are additionally encrypted at the field level before they are written to the database, so they remain protected even in database exports.",
-    "ref": "a5fa08e9-5804-4275-85f3-defd5b6692e9"
+    "ref": "30102039-ad93-4093-9ca5-f72288100231"
   },
   {
     "title": "Knowledge Doc",
     "content": "Section: Nimbus Labs Encryption Standard > Encryption at rest\n\nAll customer data is encrypted at rest with AES-256. This covers databases, object storage, backups and laptop disks.",
-    "ref": "09447b24-3ef4-4313-9d0b-13a5a5e13232"
+    "ref": "50569052-0b44-4240-b9fb-135db4a04505"
   }
 ]

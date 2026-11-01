@@ -226,16 +226,42 @@ export function dedupeItems(items: Extraction["items"]): Extraction["items"] {
   return out;
 }
 
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const TRIM_JUNK = /^[\s{\[,"']+|[\s}\],"']+$/g;
+
+// The model sometimes returns a whole JSON object (or a cut-off one) as the title string.
+function unwrapLeakedJson(raw: string): {
+  title: string;
+  assignee: string | null;
+  due: string | null;
+} {
+  const leaked = /^\s*[{\[]/.test(raw) || /"title"\s*:/.test(raw);
+  if (!leaked) return { title: raw.trim(), assignee: null, due: null };
+
+  // No closing quote required, so truncated values like "Riya still match.
+  const grab = (key: string): string | null => {
+    const m = raw.match(new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)`));
+    return m ? m[1].replace(/\\"/g, '"').trim() : null;
+  };
+
+  const title = (grab("title") ?? raw).replace(TRIM_JUNK, "").trim();
+  return { title, assignee: grab("assignee"), due: grab("due") };
+}
+
 function normalize(raw: z.infer<typeof extractionSchema>): Extraction {
   const rawItems = (raw.action_items ?? []).filter((i): i is NonNullable<typeof i> => i !== null && Boolean(i.title && i.title.trim()));
-  
+
   // Clean items and infer missing assignees/dues
   const items: Extraction["items"] = [];
   for (const i of rawItems) {
-    const rawTitle = i.title!.trim();
+    const leaked = unwrapLeakedJson(i.title!.trim());
+    const rawTitle = leaked.title;
     const title = cleanTitle(rawTitle);
-    let assignee = canonicalPerson(i.assignee);
-    let due = i.due && /^\d{4}-\d{2}-\d{2}$/.test(i.due.trim()) ? i.due.trim() : null;
+    if (!title) continue;
+
+    let assignee = canonicalPerson(i.assignee) || canonicalPerson(leaked.assignee);
+    const dueCandidates = [i.due?.trim(), leaked.due?.trim()];
+    let due = dueCandidates.find((d): d is string => !!d && ISO_DATE.test(d)) ?? null;
 
     if (!assignee || !due) {
       const inferred = inferAssigneeAndDue(rawTitle);
@@ -329,6 +355,7 @@ function buildPrompt(cleanText: string, meetingDate: string): string {
     "    quote (string or null: the transcript words it came from)",
     "- IMPORTANT: every element of action_items MUST be an object containing all five keys: title, assignee, due, confidence, quote. Use null when unknown, but never leave a key out and never return plain strings.",
     '- Example element (format only): {"title":"Send the revised proposal to the client","assignee":"Karan","due":"2026-11-06","confidence":0.9,"quote":"I will send the revised proposal by Friday 6 November."}',
+    "- Each title must be plain text only, never JSON, never an object, never a quoted field.",
     "- When a speaker says 'I will...' or 'I'll...', that speaker is the assignee. When someone else says a named person will do it, that named person is the assignee.",
     "- Tasks owned by people outside the allowed list: set assignee to null.",
     "- follow_up_email must be a JSON object with keys to, subject and body. body must be plain text, not a string containing JSON. Set 'to' to the client contact who led the meeting if named, otherwise 'client'.",
@@ -401,6 +428,7 @@ export type ActionSwarmResult = {
   }>;
   quarantined: Array<{ line: string; reasons: string[]; eventId: string }>;
   slack: { status: "posted" | "skipped" | "error"; message: string; eventId: string | null };
+  slackText: string;
   emailDraft: {
     id: string;
     to: string;
@@ -428,6 +456,7 @@ export async function runActionSwarm(
     tasks: [],
     quarantined: [],
     slack: { status: "skipped", message: "Not attempted", eventId: null },
+    slackText: "",
     emailDraft: null,
   };
 
@@ -492,6 +521,7 @@ export async function runActionSwarm(
   });
   if (!gen.success) {
     const message = `Gemini extraction failed: ${gen.error.slice(0, 200)}`;
+    console.error("[actionswarm] extraction failed:", gen.error, gen.rawText ?? "");
     emitEvent({
       id: newEventId(),
       timestamp: new Date().toISOString(),
@@ -555,6 +585,7 @@ export async function runActionSwarm(
     label: "Post kickoff summary to #eng-tasks",
     untrustedText: strs(ex.summary, ...ex.decisions),
   });
+  console.warn("[actionswarm] slack_post guard:", gSlack.decision, gSlack.reasons);
   let slack: ActionSwarmResult["slack"] = { status: "skipped", message: "Blocked by guard", eventId: gSlack.eventId };
   if (gSlack.decision === "allow") {
     const posted = await postSlack(slackText);
@@ -582,6 +613,7 @@ export async function runActionSwarm(
       label: `Draft follow-up email to ${ex.email.to}`,
       untrustedText: strs(ex.email.subject, ex.email.body),
     });
+    console.warn("[actionswarm] email_draft guard:", gDraft.decision, gDraft.reasons);
     if (gDraft.decision !== "block") {
       ensureDraftTable();
       const draftId = `draft_${crypto.randomUUID().slice(0, 8)}`;
@@ -669,6 +701,7 @@ export async function runActionSwarm(
     tasks,
     quarantined,
     slack,
+    slackText,
     emailDraft,
   };
 }

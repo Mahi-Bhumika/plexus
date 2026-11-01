@@ -2,6 +2,6 @@
   {
     "title": "Knowledge Doc",
     "content": "Section: Nimbus Labs Security Whitepaper > Vulnerability management\n\nAuthenticated vulnerability scans of production run weekly.Patch deadlines from the date a vulnerability is confirmed: critical within 72 hours, high within 14 days, medium within 60 days.An external penetration test is performed once a year by CertiNova. The most recent test was in March 2026. It found no critical issues and two medium issues, both fixed within 21 days. A summary letter is shared under NDA.",
-    "ref": "6e276c68-f044-41df-a104-651bb4d3f9c1"
+    "ref": "067d0740-6833-4113-98e8-9acd3b0129c7"
   }
 ]

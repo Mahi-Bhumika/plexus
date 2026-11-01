@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "ref": "6bc965ab-7b2e-4e71-b06c-902dc0960c7a"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Onboarding and Offboarding Procedure > Offboarding\n\nThe manager notifies HR on or before the last working day.All access is revoked within 4 hours of the person's exit time.Shared secrets that the person had access to are rotated within 2 business days.The company laptop is returned, and the device is wiped within 3 business days.Offboarding is recorded in the audit log and checked in the next quarterly access review.",
+    "ref": "b702e3da-7b0a-411e-a63e-26a9ee7aa0db"
+  }
+]

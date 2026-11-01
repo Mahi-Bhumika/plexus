@@ -12,7 +12,7 @@ export function getDb(): Database.Database {
   const dbPath = process.env.DATABASE_PATH || "./plexus.db";
   const bundledPath = path.isAbsolute(dbPath)
     ? dbPath
-    : path.resolve(process.cwd(), dbPath);
+    : path.resolve(/*turbopackIgnore: true*/ process.cwd(), dbPath);
 
   let resolvedPath = bundledPath;
 

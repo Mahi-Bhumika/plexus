@@ -38,11 +38,16 @@ export type GenerateJsonOptions = {
   systemInstruction?: string;
   timeoutMs?: number;
   images?: GeminiImage[]; // for receipts and other vision calls
+  maxOutputTokens?: number; // default 4096, stops replies being cut off mid-object
+  temperature?: number; // default 0.2
 };
 
 export type GenerateJsonResult<T> =
   | { success: true; data: T; modelUsed: string }
   | { success: false; flagged: true; error: string; rawText?: string; modelUsed: string };
+
+const DEFAULT_MAX_OUTPUT_TOKENS = 4096;
+const DEFAULT_TEMPERATURE = 0.2;
 
 function getModelName(slot: "FAST" | "SMART" | "FALLBACK" = "FAST"): string {
   if (slot === "SMART" || process.env.USE_SMART === "true") {
@@ -74,6 +79,8 @@ async function callGeminiOnce(
   timeoutMs: number,
   systemInstruction?: string,
   images?: GeminiImage[],
+  maxOutputTokens: number = DEFAULT_MAX_OUTPUT_TOKENS,
+  temperature: number = DEFAULT_TEMPERATURE,
 ): Promise<string> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -102,6 +109,8 @@ async function callGeminiOnce(
         responseMimeType: "application/json",
         responseSchema: jsonSchema as any,
         abortSignal: controller.signal,
+        maxOutputTokens,
+        temperature,
       },
     });
 
@@ -140,6 +149,8 @@ export async function generateJson<T>(
   let currentModelName = getModelName(initialModelSlot);
   const timeoutMs = options.timeoutMs || 25000;
   const images = options.images;
+  const maxOutputTokens = options.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS;
+  const temperature = options.temperature ?? DEFAULT_TEMPERATURE;
 
   const delays = [2000, 4000, 8000];
   let lastError: any = null;
@@ -156,11 +167,17 @@ export async function generateJson<T>(
         timeoutMs,
         options.systemInstruction,
         images,
+        maxOutputTokens,
+        temperature,
       );
       break;
     } catch (err: any) {
       lastError = err;
-      const status = err.status || err.statusCode || (err.message?.includes("503") ? 503 : 0) || (err.message?.includes("429") ? 429 : 0);
+      const status =
+        err.status ||
+        err.statusCode ||
+        (err.message?.includes("503") ? 503 : 0) ||
+        (err.message?.includes("429") ? 429 : 0);
       if (status === 503 || status === 429 || err.name === "AbortError" || attempt < 2) {
         await delay(delays[attempt] || 2000);
       } else {
@@ -183,6 +200,8 @@ export async function generateJson<T>(
           timeoutMs,
           options.systemInstruction,
           images,
+          maxOutputTokens,
+          temperature,
         );
       } catch (err: any) {
         lastError = err;
@@ -215,6 +234,8 @@ export async function generateJson<T>(
         timeoutMs,
         options.systemInstruction,
         images,
+        maxOutputTokens,
+        temperature,
       );
       parsedJson = JSON.parse(rawResponseText);
     } catch (retryErr: any) {
@@ -252,6 +273,8 @@ export async function generateJson<T>(
       timeoutMs,
       options.systemInstruction,
       images,
+      maxOutputTokens,
+      temperature,
     );
     const retryParsed = JSON.parse(rawResponseText);
     const retryValidation = schema.safeParse(retryParsed);

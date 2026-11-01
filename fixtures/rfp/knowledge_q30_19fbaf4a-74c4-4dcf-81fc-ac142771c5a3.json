@@ -1,0 +1,12 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Customer requests\n\nA customer administrator can request early deletion in writing. Nimbus Labs confirms completion by email within 10 business days of the request.",
+    "ref": "1951141f-4fde-40b2-a82a-0c8c63d93bbf"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "ref": "3b3f05aa-b68e-456e-910e-cd6348ac84a6"
+  }
+]

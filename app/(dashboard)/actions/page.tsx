@@ -74,22 +74,10 @@ function adaptDraft(res: Any): Draft | null {
   };
 }
 
-function flatten(v: Any): string {
-  if (v == null) return "";
-  if (typeof v === "string") return v;
-  if (Array.isArray(v)) return v.map(flatten).filter(Boolean).join("\n");
-  if (typeof v === "object") {
-    const direct = pick(v, "text", "message", "body", "content", "summary", "post");
-    if (direct != null) return flatten(direct);
-    if (v.blocks) return flatten(v.blocks);
-    if (v.lines) return flatten(v.lines);
-    return Object.values(v).map(flatten).filter(Boolean).join("\n");
-  }
-  return String(v);
-}
-
+// The agent returns the generated Slack post as plain text in `slackText`.
+// (`slack` is only the post status, so it must not be shown as the message.)
 function adaptSlack(res: Any): string {
-  return flatten(res?.slack).trim();
+  return str(res?.slackText).trim();
 }
 /* -------------------------------------------------------------------------- */
 

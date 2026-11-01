@@ -1,7 +1,12 @@
 [
   {
     "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Access Control Policy > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
-    "ref": "a93ace6c-1790-45f6-beac-1af4a810da7e"
+    "content": "Section: Access Control Policy (Nimbus Labs) > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "ref": "6bc965ab-7b2e-4e71-b06c-902dc0960c7a"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Document: Engineer onboarding guide (Nimbus Labs)\nSection: Engineer onboarding guide > First week\n\nFinish the security awareness training within 7 days. Production access stays closed until you do.Need another tool? Post in . Low-risk apps are approved automatically; others go to your manager.Production access is granted just-in-time, for a few hours at a time, never permanently.Read the reconciliation repo README and the current sprint board.",
+    "ref": "de671578-7ea1-4bfb-8080-70390c2126aa"
   }
 ]

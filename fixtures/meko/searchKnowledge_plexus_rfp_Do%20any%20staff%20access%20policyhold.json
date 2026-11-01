@@ -2,16 +2,11 @@
   {
     "title": "Knowledge Doc",
     "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
-    "ref": "adba155f-0f87-448e-8d59-bbd626735652"
-  },
-  {
-    "title": "Knowledge Doc",
-    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
-    "ref": "5914e523-910a-4177-965a-3947429a9719"
+    "ref": "b69e1418-04b8-4da7-b8ca-7d4a9ce969b7"
   },
   {
     "title": "Knowledge Doc",
     "content": "Section: Nimbus Labs Onboarding and Offboarding Procedure > Onboarding\n\nA company laptop is issued with mobile device management (MDM) installed and disk encryption enforced.Accounts are created from the person's role template; additional access is requested through the access request process.Security awareness training must be completed within 7 days of joining. Access to production systems is not available until it is complete.Everyone signs a confidentiality agreement and the acceptable use policy.Annual refresher training is required for all staff.",
-    "ref": "213ea23f-94b2-4de7-90e0-35b6068042bd"
+    "ref": "b81c660f-3b5c-4985-b514-7ce30d5d53e2"
   }
 ]
