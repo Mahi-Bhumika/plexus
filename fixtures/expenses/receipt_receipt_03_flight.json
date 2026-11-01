@@ -3,10 +3,12 @@
   "data": {
     "merchant": "SKYBHARAT AIRWAYS",
     "date": "2026-10-22",
-    "invoice_number": null,
+    "invoice_number": "K7QX2M",
     "expense_type": "domestic_flight",
     "items": [
-      null
+      1,
+      2,
+      3
     ],
     "subtotal": 5400,
     "gst": 270,
@@ -14,10 +16,10 @@
     "covers": null,
     "meal_type": "unknown",
     "nights": null,
-    "city": "Bengaluru",
+    "city": "Mumbai",
     "travel_class": "Economy",
     "trip_type": "one_way",
-    "confidence": 0.99
+    "confidence": 0.95
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

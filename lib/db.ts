@@ -137,17 +137,7 @@ function initSchema(db: Database.Database) {
     );
     
   `);
-  // 1. Ensure the table exists with your base columns
-db.exec(`
-  CREATE TABLE IF NOT EXISTS rfp_questions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    plan TEXT,
-    reasoning TEXT,
-    created_at TEXT
-  );
-`);
-
-// 2. Safely check for and add any missing columns dynamically
+  // 2. Safely check for and add any missing columns dynamically
 const cols = (
   db.prepare("PRAGMA table_info(rfp_questions)").all() as { name: string }[]
 ).map((c) => c.name);

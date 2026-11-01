@@ -1,32 +1,22 @@
 [
   {
-    "id": "8535a225-d846-4be5-8997-029e8b078965",
-    "text": "RFP_FIX | Can personal (BYOD) devices be used to access customer data? | No. Access is from company-issued, MDM-managed laptops with enforced disk encryption; personal devices are not permitted. | Karan",
-    "score": 0.5506633986194933
+    "id": "f5691250-0468-4a84-8633-7849c64a3b48",
+    "text": "RFP_FIX | Do you report cyber incidents to CERT-In, and within what time? | Nimbus Labs reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident, as required by Indian rules. Affected customers are notified within 72 hours when a breach involving customer data is confirmed. | Riya Sharma",
+    "score": 0.3926788047793195
   },
   {
-    "id": "5718aec4-c9fe-42ca-852a-4ef44f7a9969",
-    "text": "RFP_FIX | Will you provide a certificate of deletion when our data is removed? | Nimbus Labs confirms deletion in writing by email within 10 business days of an early-deletion request; a signed deletion confirmation is available on request. | Karan",
-    "score": 0.5260850122975157
+    "id": "885a536f-c53f-4850-badb-82a18ce1e8d2",
+    "text": "RFP_FIX | Please confirm that all copies of our policyholder data, including disaster recovery replicas, remain inside India. | Customer data is stored in India by default (AWS Mumbai), but disaster recovery copies are held in Singapore. Customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing. | Riya Sharma",
+    "score": 0.36552807706252366
   },
   {
-    "id": "9858e445-a57f-4886-89e7-6d59c7aa9cea",
-    "text": "On October 31, 2026, the user designated Batch 3 to include ten sequential items numbered 31 through 40: 31, 32, 33, 34, 35, 36, 37, 38, 39, 40.",
-    "score": 0.2623404760791359
+    "id": "23cc2194-0b89-42ed-963d-2e67a190f195",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs held a project kickoff meeting to establish a pilot for the Nimbus Ledger Sync tool, aiming to automate UPI settlements reconciliation by November 30, 2026. The teams agreed on scope limitations, security reviews, and scheduled action items for sandbox setup, mapping documentation, and compliance questionnaires. | Decisions: Pilot go-live date is set for Monday 30 November 2026.; Phase one is limited to UPI reconciliation only, excluding NEFT and IMPS.; Data hosting will use primary AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: Understood. I will send you our standard mutual NDA. Once it is signed we can share our SOC 2 Type II report with Vikram's team. (Riya Sharma, 2026-11-04); I will set up the sandbox environment and send API credentials to Vikram's team by Friday 6 November. (Karan, 2026-11-06); I will send those by Tuesday 10 November. (unassigned, 2026-11-10); I will write a mapping document that says which Meridian field feeds which Nimbus field. I can have that to you by Monday 16 November. (Riya Sharma, 2026-11-16); I will send you their names by Friday 13 November. (unassigned, 2026-11-13); Arjun, our intern, is not here today, but he will prepare anonymised sample transaction files from the layout you gave us. Let's say by Thursday 12 November. (Arjun, 2026-11-12); And the NDA will be with Neha by Wednesday 4 November. (Riya Sharma, 2026-11-04)",
+    "score": 0.25607942778117554
   },
   {
-    "id": "67a44ab2-a832-40e7-9c58-5b57ffb9d8dc",
-    "text": "On October 31, 2026, the user designated Batch 0 to include ten items numbered 1-10: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10.",
-    "score": 0.25775689258249423
-  },
-  {
-    "id": "f5963d6b-68ce-477f-bd9b-5aaf5ccefd0f",
-    "text": "On October 31, 2026, the user designated Batch 2 to include ten sequential items numbered 21 through 30: 21, 22, 23, 24, 25, 26, 27, 28, 29, 30.",
-    "score": 0.2559725800707673
-  },
-  {
-    "id": "0d567cc3-455f-42bc-a6fc-da87f387cce4",
-    "text": "ACTIONSWARM | 2026-10-31 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs kicked off their UPI reconciliation pilot with a target go-live date of November 30, 2026. The scope is strictly limited to UPI settlements for phase one, excluding NEFT and IMPS for now. Both teams aligned on immediate next steps including sandbox setup, security questionnaires, and mapping documentation. | Decisions: Pilot go-live date is set for Monday, 30 November 2026.; Phase one scope is limited to UPI reconciliation only; NEFT and IMPS are deferred to phase two.; Data will be hosted primarily in AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: Send the standard mutual NDA to Neha Kapoor (unassigned); Set up the sandbox environment and send API credentials to Vikram's team (unassigned); Provide IP ranges needed allowlisted for the UPI feed (unassigned); Write a mapping document mapping Meridian fields to Nimbus fields (unassigned); Nominate two analysts for user acceptance testing and send their names (unassigned); Prepare anonymised sample transaction files from the layout given (unassigned)",
-    "score": 0.2289669943353274
+    "id": "26fb5e53-56fe-4663-8e1a-4234778d98b1",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs held a project kickoff meeting to establish a pilot for the Nimbus Ledger Sync to automate UPI reconciliation. The team agreed on a go-live date of Monday 30 November 2026, restricted phase one strictly to UPI reconciliation, and established key deliverables regarding sandbox access, security reviews, and data mapping. | Decisions: Pilot go-live date is set for Monday 30 November 2026.; Phase one is limited to UPI reconciliation only, with NEFT and IMPS postponed to phase two.; Data hosting is confirmed for AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: I will send you our standard mutual NDA. (Riya Sharma, 2026-11-04); I will set up the sandbox environment and send API credentials to Vikram's team by Friday 6 November. (Karan, 2026-11-06); I will send those by Tuesday 10 November. (unassigned, 2026-11-10); I will write a mapping document that says which Meridian field feeds which Nimbus field. I can have that to you by Monday 16 November. (Riya Sharma, 2026-11-16); I will send you their names by Friday 13 November. (unassigned, 2026-11-13); Arjun, our intern, is not here today, but he will prepare anonymised sample transaction files from the layout you gave us. Let's say by Thursday 12 November. (Arjun, 2026-11-12); And the NDA will be with Neha by Wednesday 4 November. (Riya Sharma, 2026-11-04)",
+    "score": 0.2527236148550869
   }
 ]

@@ -444,6 +444,38 @@ const MIME: Record<string, string> = {
   ".webp": "image/webp",
 };
 
+export function resolveReceiptsDir(inputDir?: string): string {
+  if (!inputDir || !inputDir.trim()) {
+    return receiptsDir();
+  }
+  let p = inputDir.trim().replace(/\\/g, "/");
+  if (p.toLowerCase().startsWith("projects/plexus/")) {
+    p = p.slice("projects/plexus/".length);
+  } else if (p.toLowerCase().startsWith("/projects/plexus/")) {
+    p = p.slice("/projects/plexus/".length);
+  } else if (p.toLowerCase().startsWith("b:/projects/plexus/")) {
+    p = p.slice("b:/projects/plexus/".length);
+  }
+
+  const candidates = [
+    path.isAbsolute(p) ? p : path.resolve(process.cwd(), p),
+    path.resolve(process.cwd(), p),
+    path.resolve(process.cwd(), "seed", "finance", "receipts"),
+    path.resolve(process.cwd(), "data", "receipts"),
+  ];
+
+  for (const dir of candidates) {
+    if (existsSync(dir) && listReceipts(dir).length > 0) return dir;
+    const sub = path.join(dir, "receipts");
+    if (existsSync(sub) && listReceipts(sub).length > 0) return sub;
+  }
+
+  const direct = path.isAbsolute(p) ? p : path.resolve(process.cwd(), p);
+  if (existsSync(direct)) return direct;
+
+  return receiptsDir();
+}
+
 export function receiptsDir(): string {
   const candidates = [
     process.env.EXPENSE_RECEIPTS_DIR,
@@ -458,10 +490,10 @@ export function receiptsDir(): string {
   );
 }
 
-function listReceipts(dir: string): string[] {
-  return readdirSync(dir)
-    .filter((f) => /^receipt_.*\.(png|jpe?g|webp)$/i.test(f))
-    .sort();
+export function listReceipts(dir: string): string[] {
+  const all = readdirSync(dir).filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).sort();
+  const prefixed = all.filter((f) => /^receipt_/i.test(f));
+  return prefixed.length > 0 ? prefixed : all;
 }
 
 export const EXTRACT_PROMPT = [
@@ -626,7 +658,7 @@ export function buildResult(
 }
 
 export async function runExpenses(opts: { dir?: string } = {}): Promise<ExpenseReport> {
-  const dir = opts.dir ?? receiptsDir();
+  const dir = resolveReceiptsDir(opts.dir);
   const files = listReceipts(dir);
   const asOf = asOfDate();
   const txns = readCardFeed();

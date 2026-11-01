@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ed9fd9c2-597a-4a7a-909e-b77e2e5dbe5a",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners\n\nGo-live: Monday 30 November 2026Scope: phase one is UPI reconciliation only. NEFT and IMPS are phase two.Delivery owner: Karan MalhotraExecutive sponsor: Riya SharmaIntegration lead: Meera IyerMeridian sponsor: Sanjay Desai, Head of Payments OperationsWeekly status call: Thursdays, 4 PMGo/no-go review: Thursday 26 November 2026",
+    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "metadata_filters": {},
+    "distance": 0.5595414646464459,
+    "match_type": "hybrid",
+    "rank": 0.020686409,
+    "rerank_score": 0.9325981197954459
+  },
+  {
+    "id": "38b030ed-6d52-4436-a537-bbb9f3b15083",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners > Key dates\n\nDate: Fri 6 Nov; Milestone: Sandbox credentials (done early), security questionnaire due\nDate: Mon 9 Nov; Milestone: Pilot pricing due to Neha Kapoor\nDate: Tue 10 Nov; Milestone: Meridian IP ranges for allowlist\nDate: Thu 12 Nov; Milestone: Anonymised sample files ready\nDate: Fri 13 Nov; Milestone: UAT analysts confirmed (done early)\nDate: Mon 16 Nov; Milestone: Field mapping document\nDate: Thu 26 Nov; Milestone: Go/no-go review\nDate: Mon 30 Nov; Milestone: Go-live",
+    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "metadata_filters": {},
+    "distance": 0.5460820782798566,
+    "match_type": "hybrid",
+    "rank": 0.018997721,
+    "rerank_score": 0.8242225748987383
+  }
+]

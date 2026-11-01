@@ -26,24 +26,49 @@ const TOP_NAV_ITEMS = [
 
 type Tone = "emerald" | "blue" | "amber" | "gray";
 
-// NOTE: sample events, not real data
-const FEED: {
-  time: string;
-  conf: string;
-  confTone: Tone;
-  tag: string;
-  tagTone: Tone;
-  text: string;
-  tx: string;
-  right: string;
-  rightTone: Tone;
-}[] = [
-  { time: "14:02:44.204", conf: "c:0.99", confTone: "emerald", tag: "UPI-REC", tagTone: "blue", text: "BATCH #8821 matched against Meridian ledger", tx: "tx:89fa-03ea-91", right: "UPI-9904", rightTone: "gray" },
-  { time: "14:02:41.118", conf: "c:0.94", confTone: "emerald", tag: "ACTION", tagTone: "emerald", text: "Auto-routed webhook notification to Nimbus core", tx: "tx:12cb-77ef-02", right: "HTTP 200 OK", rightTone: "emerald" },
-  { time: "14:02:37.892", conf: "c:0.78", confTone: "amber", tag: "ACCESS", tagTone: "amber", text: "Elevated token query from agent_rfp_prod", tx: "tx:aa81-44cd-10", right: "Policy Scrutiny", rightTone: "amber" },
-  { time: "14:02:32.410", conf: "c:0.97", confTone: "emerald", tag: "RFP", tagTone: "blue", text: "Extracted SLA clauses from tender doc bundle", tx: "tx:ff09-22a1-89", right: "SLA-Sec.4", rightTone: "gray" },
-  { time: "14:02:29.004", conf: "c:0.99", confTone: "emerald", tag: "GUARD", tagTone: "gray", text: "Prompt injection scanner passed zero vulnerabilities", tx: "tx:e01c-63b7-4a", right: "Clean Pass", rightTone: "emerald" },
-];
+// Shape returned by GET /api/feed (ActivityEvent from lib/events.ts)
+type FeedEvent = {
+  id: string;
+  timestamp: string;
+  agent: string;
+  action: string;
+  status: string;
+  confidence?: number;
+  sources: { title: string; ref: string }[];
+  traceId: string;
+  undoable: boolean;
+};
+
+const AGENT_TONE: Record<string, Tone> = {
+  rfp: "blue",
+  actionswarm: "emerald",
+  access: "amber",
+  finance: "blue",
+  search: "blue",
+  guard: "gray",
+};
+const STATUS_TONE: Record<string, Tone> = {
+  done: "emerald",
+  flagged: "amber",
+  blocked: "amber",
+  pending_approval: "amber",
+  undone: "gray",
+  error: "amber",
+};
+const STATUS_LABEL: Record<string, string> = {
+  done: "Done",
+  flagged: "Flagged",
+  blocked: "Blocked",
+  pending_approval: "Needs approval",
+  undone: "Undone",
+  error: "Error",
+};
+
+function fmtTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return `${d.toTimeString().slice(0, 8)}.${String(d.getMilliseconds()).padStart(3, "0")}`;
+}
 
 const CONF_CLS: Record<Tone, string> = {
   emerald: "text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800",
@@ -65,6 +90,9 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const [isDark, setIsDark] = useState<boolean>(false);
+  const [events, setEvents] = useState<FeedEvent[]>([]);
+  const [feedOk, setFeedOk] = useState<boolean>(true);
+  const [latency, setLatency] = useState<number | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("plexus-theme");
@@ -79,6 +107,31 @@ export default function DashboardLayout({
       document.documentElement.classList.remove("dark");
       document.documentElement.classList.add("light");
     }
+  }, []);
+
+  // Live activity feed: reads audit_events through GET /api/feed every 4 seconds.
+  useEffect(() => {
+    let stop = false;
+    async function tick() {
+      const t0 = performance.now();
+      try {
+        const res = await fetch("/api/feed?limit=30", { cache: "no-store" });
+        const data = await res.json();
+        if (stop) return;
+        if (!res.ok || data?.status === "error") throw new Error("feed error");
+        setEvents(data.events ?? []);
+        setFeedOk(true);
+        setLatency(Math.round(performance.now() - t0));
+      } catch {
+        if (!stop) setFeedOk(false);
+      }
+    }
+    tick();
+    const timer = setInterval(tick, 4000);
+    return () => {
+      stop = true;
+      clearInterval(timer);
+    };
   }, []);
 
   const toggleDarkMode = () => {
@@ -166,7 +219,7 @@ export default function DashboardLayout({
             <span className="material-symbols-outlined text-[15px] text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300">
               search
             </span>
-            <span className="font-normal text-xs">Search traces, tokens, nodes...</span>
+            <span className="font-normal text-xs">Search documents, or catch me up...</span>
             <kbd className="px-1.5 py-0.5 rounded bg-white dark:bg-[#0F172A] text-gray-500 dark:text-gray-400 text-[10px] font-mono border border-[#E5E7EB] dark:border-[#1E293B] font-medium shadow-2xs">
               ⌘K
             </kbd>
@@ -185,10 +238,19 @@ export default function DashboardLayout({
             </span>
           </button>
 
-          {/* Live latency pill (static sample value) */}
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 shadow-sm text-emerald-700 dark:text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-mono text-[11px] font-medium">142ms</span>
+          {/* Measured feed round-trip time */}
+          <div
+            title="Round-trip time of the last activity feed request"
+            className={`flex items-center gap-1.5 px-2 py-1 rounded-md border shadow-sm ${
+              feedOk
+                ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+                : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
+            }`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${feedOk ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}></span>
+            <span className="font-mono text-[11px] font-medium">
+              {feedOk ? (latency !== null ? `${latency}ms` : "…") : "offline"}
+            </span>
           </div>
 
           {/* User avatar */}
@@ -271,7 +333,7 @@ export default function DashboardLayout({
       <aside className="fixed right-0 top-14 bottom-0 w-84 xl:w-96 bg-white dark:bg-[#0C1222] border-l border-[#E5E7EB] dark:border-[#1E293B] flex flex-col z-30 shadow-[-1px_0_4px_rgba(0,0,0,0.02)] transition-colors duration-200">
         <div className="h-10 px-3.5 border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between bg-[#F9FAFB]/70 dark:bg-[#090D16]/70">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className={`w-1.5 h-1.5 rounded-full ${feedOk ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`}></span>
             <span className="font-mono text-xs font-semibold text-[#111827] dark:text-[#F3F4F6] tracking-tight">
               Shared Activity Feed
             </span>
@@ -285,37 +347,56 @@ export default function DashboardLayout({
           </button>
         </div>
 
-        {/* Feed Events */}
+        {/* Feed Events (live from audit_events) */}
         <div className="flex-1 overflow-y-auto divide-y divide-[#E5E7EB] dark:divide-[#1E293B] font-mono text-xs">
-          {FEED.map((e) => (
-            <div key={e.tx} className="p-3 hover:bg-[#F9FAFB] dark:hover:bg-[#162032]/40 transition-colors">
-              <div className="flex items-center justify-between text-gray-400 dark:text-gray-500 text-[10px]">
-                <span>{e.time}</span>
-                <span className={`px-1 py-0.2 rounded font-medium ${CONF_CLS[e.confTone]}`}>{e.conf}</span>
-              </div>
-              <div className="flex items-center gap-1.5 pt-1">
-                <span className={`px-1 py-0.2 rounded text-[9px] uppercase font-bold ${CONF_CLS[e.tagTone]}`}>
-                  {e.tag}
-                </span>
-                <span className="text-[#111827] dark:text-[#F3F4F6] truncate text-xs font-medium">{e.text}</span>
-              </div>
-              <div className="text-gray-400 dark:text-gray-500 text-[10px] pt-1 flex justify-between">
-                <span>{e.tx}</span>
-                <span className={`font-medium ${RIGHT_CLS[e.rightTone]}`}>{e.right}</span>
-              </div>
+          {events.length === 0 && (
+            <div className="p-4 text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed">
+              {feedOk
+                ? "No activity yet. Run an agent or a catch-up and it will appear here."
+                : "Could not reach /api/feed."}
             </div>
-          ))}
+          )}
+          {events.map((e) => {
+            const tagTone = AGENT_TONE[e.agent] ?? "gray";
+            const rightTone = STATUS_TONE[e.status] ?? "gray";
+            const confTone: Tone = typeof e.confidence === "number" && e.confidence >= 0.9 ? "emerald" : "amber";
+            return (
+              <div key={e.id} className="p-3 hover:bg-[#F9FAFB] dark:hover:bg-[#162032]/40 transition-colors">
+                <div className="flex items-center justify-between text-gray-400 dark:text-gray-500 text-[10px]">
+                  <span>{fmtTime(e.timestamp)}</span>
+                  {typeof e.confidence === "number" && (
+                    <span className={`px-1 py-0.2 rounded font-medium ${CONF_CLS[confTone]}`}>
+                      c:{e.confidence.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 pt-1">
+                  <span className={`px-1 py-0.2 rounded text-[9px] uppercase font-bold ${CONF_CLS[tagTone]}`}>
+                    {e.agent}
+                  </span>
+                  <span className="text-[#111827] dark:text-[#F3F4F6] truncate text-xs font-medium" title={e.action}>
+                    {e.action}
+                  </span>
+                </div>
+                <div className="text-gray-400 dark:text-gray-500 text-[10px] pt-1 flex justify-between">
+                  <span>tx:{e.traceId.replace(/^trc_/, "").slice(0, 13)}</span>
+                  <span className={`font-medium ${RIGHT_CLS[rightTone]}`}>{STATUS_LABEL[e.status] ?? e.status}</span>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Footer */}
         <div className="p-2.5 border-t border-[#E5E7EB] dark:border-[#1E293B] bg-[#F9FAFB]/70 dark:bg-[#090D16]/70 flex items-center justify-between font-mono text-[11px] text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Stream healthy
+            <span className={`w-1.5 h-1.5 rounded-full ${feedOk ? "bg-emerald-500" : "bg-amber-500"}`}></span>
+            {feedOk ? "Feed connected" : "Feed unreachable"}
           </span>
-          <span className="text-[10px] text-gray-400 dark:text-gray-500">buffer: 128 / 5000</span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500">{events.length} events</span>
         </div>
       </aside>
     </div>
   );
 }
+``

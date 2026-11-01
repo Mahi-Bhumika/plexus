@@ -1,0 +1,72 @@
+[
+  {
+    "id": "379d452b-28e2-40ba-ba31-f5d5590edebd",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy > Purpose\n\nThis policy sets how long Nimbus Labs keeps each type of data and how it is removed.",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.26512355596631687,
+    "match_type": "hybrid",
+    "rank": 0.070924826,
+    "rerank_score": 0.9988976566715974
+  },
+  {
+    "id": "66312b2e-8569-4626-862c-d4c2a07d3032",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy > Deletion method\n\nProduction data is deleted by dropping the customer's tenant schema and the associated storage objects. Encrypted volumes are retired by deleting their encryption keys.",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.355392921682953,
+    "match_type": "hybrid",
+    "rank": 0.065858774,
+    "rerank_score": 0.9988727986392663
+  },
+  {
+    "id": "44bc0fe8-d603-431b-b40b-453c570fa3dc",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy > Retention schedule\n\nData type: Customer data (transaction files, reconciliation results); Retention: For the contract term plus 90 days\nData type: Application and system logs; Retention: 400 days\nData type: Database backups; Retention: 35 days\nData type: Support tickets; Retention: 3 years\nData type: Security audit logs; Retention: 7 years\nData type: Employee records; Retention: 7 years after the end of employment",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.31257834671575047,
+    "match_type": "hybrid",
+    "rank": 0.08216832,
+    "rerank_score": 0.9988116401101234
+  },
+  {
+    "id": "5b30de01-e9fe-4807-aebd-8409fd9e0334",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.38851328262223384,
+    "match_type": "hybrid",
+    "rank": 0.06937686,
+    "rerank_score": 0.9985512943126335
+  },
+  {
+    "id": "92078a71-d9c2-43c0-b747-ce482689e1e0",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy > Legal holds\n\nIf a legal hold applies, deletion is paused for the data in scope. The founder is the only person who can place or release a legal hold.",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.38738686574488557,
+    "match_type": "hybrid",
+    "rank": 0.065858774,
+    "rerank_score": 0.9979691694697401
+  },
+  {
+    "id": "e50d6acf-6cbd-4f67-98b8-858264fa060f",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy > Customer requests\n\nA customer administrator can request early deletion in writing. Nimbus Labs confirms completion by email within 10 business days of the request.",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.40301723927402755,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.9972834841580368
+  },
+  {
+    "id": "3455d1b8-8dd7-4267-bb20-caf72f2d7f4c",
+    "chunk_text": "Section: Nimbus Labs Data Retention Policy\n\nDocument owner: Riya Sharma, Founder and CEO · Version: 1.4 · Last reviewed: 15 Jul 2026",
+    "document_id": "9b24cea1-a071-4253-9cc3-618d0dc061b5",
+    "metadata_filters": {},
+    "distance": 0.3449948350203522,
+    "match_type": "hybrid",
+    "rank": 0.06079271,
+    "rerank_score": 0.9948572378370649
+  }
+]

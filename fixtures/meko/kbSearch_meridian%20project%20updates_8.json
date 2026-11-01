@@ -1,0 +1,65 @@
+[
+  {
+    "id": "ed9fd9c2-597a-4a7a-909e-b77e2e5dbe5a",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners\n\nGo-live: Monday 30 November 2026Scope: phase one is UPI reconciliation only. NEFT and IMPS are phase two.Delivery owner: Karan MalhotraExecutive sponsor: Riya SharmaIntegration lead: Meera IyerMeridian sponsor: Sanjay Desai, Head of Payments OperationsWeekly status call: Thursdays, 4 PMGo/no-go review: Thursday 26 November 2026",
+    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "metadata_filters": {},
+    "distance": 0.5108363795468474,
+    "match_type": "semantic",
+    "rerank_score": 0.47351893070443896
+  },
+  {
+    "id": "de1b9a9b-536a-40d8-83e4-20d96aea4661",
+    "chunk_text": "Document: Meridian pilot notes, Thu 29 Oct 2026\nSection: Meridian pilot notes: Thursday 29 October 2026\n\nWritten by: Karan Malhotra\n\nFirst weekly status call held at 4 PM. Neha's team sent the invite, so the open question from Tuesday is closed.Meera found a column in Meridian's sample file that is not in the specification: remitter VPA. Meridian confirmed it is optional. Decision: the field is mapped as optional and will not block ingestion.Meridian legal signed the NDA late in the evening.Riya started preparing the SOC 2 report package for Vikram Rao. Under our process the report goes out within 3 business days of a signed NDA.Questionnaire work: the team is answering from the policy documents and will send it by the due date, Fri 6 Nov.",
+    "document_id": "942da7a1-6daf-4b54-893a-7f040d885580",
+    "metadata_filters": {},
+    "distance": 0.46342159854044307,
+    "match_type": "semantic",
+    "rerank_score": 0.35884145252350425
+  },
+  {
+    "id": "c88a35a4-a801-40b5-9154-5147b548ff6a",
+    "chunk_text": "Document: Meridian pilot notes, Thu 29 Oct 2026\nSection: Meridian pilot notes: Thursday 29 October 2026\n\nWritten by: Karan Malhotra\n\nFirst weekly status call held at 4 PM. Neha's team sent the invite, so the open question from Tuesday is closed.Meera found a column in Meridian's sample file that is not in the specification: remitter VPA. Meridian confirmed it is optional. Decision: the field is mapped as optional and will not block ingestion.Meridian legal signed the NDA late in the evening.Riya started preparing the SOC 2 report package for Vikram Rao. Under our process the report goes out within 3 business days of a signed NDA.Questionnaire work: the team is answering from the policy documents and will send it by the due date, Fri 6 Nov.",
+    "document_id": "942da7a1-6daf-4b54-893a-7f040d885580",
+    "metadata_filters": {},
+    "distance": 0.46342159854044307,
+    "match_type": "semantic",
+    "rerank_score": 0.35884145252350425
+  },
+  {
+    "id": "8a967c02-bdad-4685-b361-9b65fa3522e9",
+    "chunk_text": "Document: Meridian pilot notes, Fri 30 Oct 2026\nSection: Meridian pilot notes: Friday 30 October 2026\n\nWritten by: Karan Malhotra\n\nKaran issued sandbox API credentials to Vikram Rao's team, one week ahead of the 6 Nov date.Riya sent the SOC 2 Type II report to Vikram under the signed NDA.Vikram asked where Meridian's data will be held. Answer: primary in AWS Mumbai, disaster recovery replica in Singapore. He wants this in writing. Riya will include it in the written questionnaire answers.Still waiting on Meridian: IP ranges for the allowlist (due Tue 10 Nov).Next week: questionnaire due Fri 6 Nov, pilot pricing due Mon 9 Nov, Arjun's sample files due Thu 12 Nov, Meera's mapping document due Mon 16 Nov.",
+    "document_id": "3efc4fae-79a2-4aae-a6af-4ea715de0e36",
+    "metadata_filters": {},
+    "distance": 0.4601716258412758,
+    "match_type": "semantic",
+    "rerank_score": 0.3475304740347955
+  },
+  {
+    "id": "f7fe92c0-2452-4d7e-b3b3-7324e7d11ef1",
+    "chunk_text": "Document: Meridian pilot notes, Wed 28 Oct 2026\nSection: Meridian pilot notes: Wednesday 28 October 2026\n\nWritten by: Karan Malhotra\n\nRiya sent the mutual NDA to Neha a week early. Meridian legal is reviewing it.Sanjay Desai named the two UAT analysts: Pooja Menon and Imran Qureshi. This is ahead of the 13 Nov date.Meera's first mapping draft covers 18 of the roughly 40 columns.Arjun's first anonymised sample file failed validation in the sandbox. Cause: dates were written as DD-MM-YYYY, and the sandbox expects ISO format (YYYY-MM-DD). Arjun asked for AWS production access to debug it. Declined, because interns are not eligible. Karan pulled the sandbox logs for him instead and Arjun fixed the date format.Base sandbox environment is up. API credentials not yet issued.",
+    "document_id": "a0f80ac5-e427-4669-bbf8-6a3ad897cc03",
+    "metadata_filters": {},
+    "distance": 0.504550413991474,
+    "match_type": "semantic",
+    "rerank_score": 0.23485896757760732
+  },
+  {
+    "id": "7e9d8be0-93e1-4cb2-8037-907c0dd895db",
+    "chunk_text": "Document: Meridian pilot notes, Tue 27 Oct 2026\nSection: Meridian pilot notes: Tuesday 27 October 2026\n\nWritten by: Karan Malhotra\n\nSandbox work started on AWS Mumbai (ap-south-1). No blockers yet.Meera finished reading the UPI settlement file specification. It has about 40 columns. She has started a draft field mapping.Neha Kapoor's team sent the 50-question security questionnaire. It is due back Fri 6 Nov. Neha also wants pilot pricing by Mon 9 Nov.Arjun asked for GitHub access to read the reconciliation repo before he starts on sample data. Karan approved it as read-only.Open question: who sends the weekly status call invite. Nobody was named at kickoff.",
+    "document_id": "96b40921-a4e1-4f42-8736-c1fa82c23125",
+    "metadata_filters": {},
+    "distance": 0.5205784840883332,
+    "match_type": "semantic",
+    "rerank_score": 0.19914164773091586
+  },
+  {
+    "id": "38b030ed-6d52-4436-a537-bbb9f3b15083",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners > Key dates\n\nDate: Fri 6 Nov; Milestone: Sandbox credentials (done early), security questionnaire due\nDate: Mon 9 Nov; Milestone: Pilot pricing due to Neha Kapoor\nDate: Tue 10 Nov; Milestone: Meridian IP ranges for allowlist\nDate: Thu 12 Nov; Milestone: Anonymised sample files ready\nDate: Fri 13 Nov; Milestone: UAT analysts confirmed (done early)\nDate: Mon 16 Nov; Milestone: Field mapping document\nDate: Thu 26 Nov; Milestone: Go/no-go review\nDate: Mon 30 Nov; Milestone: Go-live",
+    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "metadata_filters": {},
+    "distance": 0.4211537410959376,
+    "match_type": "semantic",
+    "rerank_score": 0.17508920204964137
+  }
+]

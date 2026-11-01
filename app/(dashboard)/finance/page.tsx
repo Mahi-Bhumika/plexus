@@ -1,6 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import type { ExpenseResult, CardTxn, ExpenseReport } from "@/agents/expenses";
+import type { ZombieReport } from "@/lib/zombie";
+import {
+  getSavedReceipts,
+  runReceipts,
+  getCardFeed,
+  getZombie,
+  exportAuditReport,
+} from "@/lib/finance-client";
+
+// ── Helpers: transform API shapes into display shapes ────────────────────
 
 type ClaimItem = {
   id: string;
@@ -20,86 +31,77 @@ type ClaimItem = {
   alertBtn?: string;
 };
 
-const INITIAL_CLAIMS: ClaimItem[] = [
-  {
-    id: "REC-109",
-    category: "Lodging · Mumbai",
-    vendor: "Taj Lands End, Mumbai",
-    amount: 8400,
-    unit: " / night",
-    status: "ok",
-    statusBadge: "OK - Auto Approved",
-    badgeCls: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    details: "Limit ₹9,000 metro",
-    cardName: "Card: Axis Corp #4891",
-    approverText: "Approver: Auto (L4)",
-  },
-  {
-    id: "REC-112",
-    category: "Team Meals",
-    vendor: "Team Dinner at Bombay Canteen",
-    amount: 7200,
-    unit: " (4 covers)",
-    status: "violation",
-    statusBadge: "VIOLATION - Meal Cap",
-    badgeCls: "bg-red-100 text-red-800 border-red-200",
-    details: "Per-head: ₹1,800 (Cap ₹1,500)",
-    cardName: "Card: Axis Corp #4891",
-    approverText: "Approver: Karan",
-    alertMsg:
-      "Dinner bill exceeded the ₹1,500 per person limit by ₹300 per head (Total extra: ₹1,200).",
-    alertSub: "Sent to Karan Malhotra for review.",
-    alertBtn: "Review Details",
-  },
-  {
-    id: "REC-115",
-    category: "Aviation · Domestic",
-    vendor: "Indigo Airlines (DEL ➔ BOM)",
-    amount: 9450,
-    unit: " (Economy)",
-    status: "review",
-    statusBadge: "REVIEW - Flight Cap",
-    badgeCls: "bg-amber-100 text-amber-800 border-amber-200",
-    details: "Limit ₹8,000 (Excess +₹1,450)",
-    subdetails: "Cardholder: Meera Iyer",
-    cardName: "Card: HDFC Corp #1029",
-    approverText: "Approver: Riya Sharma",
-    alertMsg: "Flight ticket cost ₹9,450 (limit is ₹8,000).",
-    alertSub: "Needs approval from Riya.",
-    alertBtn: "Send to Riya",
-  },
-  {
-    id: "REC-118",
-    category: "Client Relations",
-    vendor: "Dinner with Meridian Bank (Sanjay Desai)",
-    amount: 14200,
-    status: "review",
-    statusBadge: "REVIEW - Note Required",
-    badgeCls: "bg-amber-100 text-amber-800 border-amber-200",
-    details: "Attendees: 3 Meridian, 2 Nimbus",
-    cardName: "Card: Axis Corp #4891",
-    approverText: "Approver: Riya Sharma",
-    alertMsg:
-      "Client dinners over ₹10,000 need a brief note explaining the business purpose.",
-    alertSub: "Awaiting quick note from: Riya Sharma",
-    alertBtn: "Add Note",
-  },
-  {
-    id: "REC-121",
-    category: "Ground Transport",
-    vendor: "Uber Premier ride · Airport to BKC",
-    amount: 1680,
-    status: "violation",
-    statusBadge: "VIOLATION - Ride Limit",
-    badgeCls: "bg-red-100 text-red-800 border-red-200",
-    details: "Cap ₹1,500 (Exceeded by ₹180)",
-    cardName: "Card: Personal Reimbursement",
-    approverText: "Payroll Deduction",
-    alertMsg: "Cab cost was ₹180 over the standard ride budget.",
-    alertSub: "Deduct ₹180 difference from upcoming salary, or request waiver.",
-    alertBtn: "Deduct ₹180",
-  },
-];
+function categoryLabel(r: ExpenseResult): string {
+  const typeMap: Record<string, string> = {
+    local_travel: "Ground Transport",
+    auto_rickshaw: "Ground Transport",
+    domestic_flight: "Aviation · Domestic",
+    train: "Rail",
+    hotel: `Lodging${r.extraction?.city ? ` · ${r.extraction.city}` : ""}`,
+    meal: "Meals",
+    team_lunch: "Team Meals",
+    software: "Software",
+    office_supplies: "Office Supplies",
+    client_entertainment: "Client Relations",
+    other: "Other",
+  };
+  return typeMap[r.type ?? "other"] ?? "Other";
+}
+
+function statusBadgeText(r: ExpenseResult): string {
+  if (r.status === "ok") return "OK - Auto Approved";
+  const firstViolation = r.issues.find((i) => i.severity === "violation");
+  if (r.status === "violation" && firstViolation) {
+    const code = firstViolation.code;
+    if (code === "over_limit") return "VIOLATION - Over Limit";
+    if (code === "duplicate_invoice") return "VIOLATION - Duplicate";
+    if (code === "late_claim") return "VIOLATION - Late Claim";
+    if (code === "needs_written_approval") return "VIOLATION - Needs Approval";
+    if (code === "possible_injection") return "VIOLATION - Blocked";
+    if (code === "flight_class") return "VIOLATION - Class Policy";
+    if (code === "no_total") return "VIOLATION - No Total";
+    return "VIOLATION";
+  }
+  const firstWarning = r.issues[0];
+  if (firstWarning?.code === "low_confidence") return "REVIEW - Low Confidence";
+  if (firstWarning?.code === "no_card_match") return "REVIEW - No Card Match";
+  return "REVIEW - Needs Check";
+}
+
+function badgeClasses(status: "ok" | "violation" | "review"): string {
+  if (status === "ok") return "bg-emerald-50 text-emerald-700 border-emerald-200";
+  if (status === "violation") return "bg-red-100 text-red-800 border-red-200";
+  return "bg-amber-100 text-amber-800 border-amber-200";
+}
+
+function toClaim(r: ExpenseResult): ClaimItem {
+  const firstIssue = r.issues.find((i) => i.severity === "violation") ?? r.issues[0];
+  return {
+    id: r.id,
+    category: categoryLabel(r),
+    vendor: r.extraction?.merchant ?? r.file,
+    amount: r.total ?? 0,
+    status: r.status,
+    statusBadge: statusBadgeText(r),
+    badgeCls: badgeClasses(r.status),
+    details:
+      r.allowedAmount != null && r.total != null && r.allowedAmount < r.total
+        ? `Limit ₹${r.allowedAmount.toLocaleString("en-IN")} (Excess +₹${(r.total - r.allowedAmount).toLocaleString("en-IN")})`
+        : r.allowedAmount != null
+          ? `Limit ₹${r.allowedAmount.toLocaleString("en-IN")}`
+          : "",
+    cardName: r.card ? `Card: matched (${r.card.matchedBy})` : "No card match",
+    approverText: r.approver ? `Approver: ${r.approver}` : "Approver: unassigned",
+    alertMsg: firstIssue ? firstIssue.message : undefined,
+    alertSub:
+      firstIssue && r.approver
+        ? `Sent to ${r.approver} for review.`
+        : firstIssue
+          ? "Needs manual review."
+          : undefined,
+    alertBtn: r.status !== "ok" ? "Review Details" : undefined,
+  };
+}
 
 type CardTxnItem = {
   id: string;
@@ -113,93 +115,319 @@ type CardTxnItem = {
   isIncidental?: boolean;
 };
 
-const INITIAL_CARD_FEED: CardTxnItem[] = [
-  {
-    id: "txn-1",
-    date: "29 Oct",
-    vendor: "Taj Hotels Mumbai",
-    cardInfo: "Axis Corp #4891 · Karan Malhotra",
-    amount: 8400,
-    matched: true,
-    statusBadge: "Matched with Receipt ✓",
-  },
-  {
-    id: "txn-2",
-    date: "29 Oct",
-    vendor: "Bombay Canteen",
-    cardInfo: "Axis Corp #4891 · Karan Malhotra",
-    amount: 7200,
-    matched: true,
-    statusBadge: "Matched with Receipt ✓",
-  },
-  {
-    id: "txn-3",
-    date: "28 Oct",
-    vendor: "Indigo Air Domestic",
-    cardInfo: "HDFC Corp #1029 · Meera Iyer",
-    amount: 9450,
-    matched: true,
-    statusBadge: "Matched with Receipt ✓",
-  },
-  {
-    id: "txn-4",
-    date: "27 Oct",
-    vendor: "Amazon India (Office cables)",
-    cardInfo: "Axis Corp #4891 · Karan Malhotra",
-    amount: 3200,
-    matched: false,
-    statusBadge: "Needs receipt · 12 days left",
-  },
-  {
-    id: "txn-5",
-    date: "26 Oct",
-    vendor: "Blue Tokai Coffee",
-    cardInfo: "HDFC Corp #7741 · Arjun Verma",
-    amount: 680,
-    matched: false,
-    statusBadge: "Unmatched · 11d left",
-    isIncidental: true,
-  },
-];
+function toCardItem(
+  txn: CardTxn,
+  matchedIds: Set<string>,
+  daysLeftMap?: Map<string, number>,
+): CardTxnItem {
+  const matched = matchedIds.has(txn.txn_id) || !!txn.receipt_ref;
+  const d = new Date(txn.date);
+  const dateStr = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  const daysLeft = daysLeftMap?.get(txn.txn_id);
+  return {
+    id: txn.txn_id,
+    date: dateStr,
+    vendor: txn.merchant,
+    cardInfo: `${txn.card_holder}`,
+    amount: txn.amount_inr,
+    matched,
+    statusBadge: matched
+      ? "Matched with Receipt ✓"
+      : daysLeft != null
+        ? `Needs receipt · ${daysLeft}d left`
+        : "Unmatched",
+    daysLeft: daysLeft ?? undefined,
+    isIncidental: !matched && txn.amount_inr < 1000,
+  };
+}
+
+// ── Page component ───────────────────────────────────────────────────────
 
 export default function FinancePage() {
-  const [claims] = useState<ClaimItem[]>(INITIAL_CLAIMS);
-  const [feed] = useState<CardTxnItem[]>(INITIAL_CARD_FEED);
+  // Data state
+  const [claims, setClaims] = useState<ClaimItem[]>([]);
+  const [feed, setFeed] = useState<CardTxnItem[]>([]);
+  const [totals, setTotals] = useState<{
+    claimed: number;
+    approved: number;
+    violations: number;
+    needsReview: number;
+    receiptsCount: number;
+    unmatchedCount: number;
+    unmatchedTotal: number;
+  }>({
+    claimed: 0,
+    approved: 0,
+    violations: 0,
+    needsReview: 0,
+    receiptsCount: 0,
+    unmatchedCount: 0,
+    unmatchedTotal: 0,
+  });
+  const [zombieReport, setZombieReport] = useState<ZombieReport | null>(null);
+
+  // UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [toast, setToast] = useState<{ title: string; desc: string; type: string } | null>(
-    null,
-  );
+  const [modalTab, setModalTab] = useState<"folder" | "path">("path");
+  const [toast, setToast] = useState<{ title: string; desc: string; type: string } | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [waiveIncidental, setWaiveIncidental] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Folder selection state
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const [selectedFolderName, setSelectedFolderName] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [customServerDir, setCustomServerDir] = useState<string>("seed/finance/receipts");
 
   const showToast = (title: string, desc: string, type = "secondary") => {
     setToast({ title, desc, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleTriggerReconcile = () => {
+  // Helper to re-map report into state
+  const updateReportData = useCallback(async (report: ExpenseReport) => {
+    const matchedIds = new Set<string>();
+    for (const r of report.receipts) {
+      if (r.card?.txn_id) matchedIds.add(r.card.txn_id);
+    }
+    const daysLeftMap = new Map<string, number>();
+    for (const u of report.unmatchedTransactions) {
+      daysLeftMap.set(u.txn_id, u.daysLeft);
+    }
+    setClaims(report.receipts.map(toClaim));
+
+    const cardRes = await getCardFeed();
+    const cardItems = (cardRes.txns ?? []).map((t) =>
+      toCardItem(t, matchedIds, daysLeftMap),
+    );
+    setFeed(cardItems);
+
+    const unmatched = cardItems.filter((c) => !c.matched);
+    setTotals({
+      claimed: report.totals.claimed,
+      approved: report.totals.approved,
+      violations: report.totals.violations,
+      needsReview: report.totals.needsReview,
+      receiptsCount: report.receipts.length,
+      unmatchedCount: unmatched.length,
+      unmatchedTotal: unmatched.reduce((s, c) => s + c.amount, 0),
+    });
+  }, []);
+
+  // Load saved data on mount
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [receiptsRes, cardRes] = await Promise.all([
+        getSavedReceipts(),
+        getCardFeed(),
+      ]);
+
+      const receipts = receiptsRes.receipts ?? [];
+      const txns = cardRes.txns ?? [];
+
+      const matchedIds = new Set<string>();
+      for (const r of receipts) {
+        if (r.card?.txn_id) matchedIds.add(r.card.txn_id);
+      }
+
+      setClaims(receipts.map(toClaim));
+
+      const cardItems = txns.map((t) => toCardItem(t, matchedIds));
+      setFeed(cardItems);
+
+      const claimed = receipts.reduce((s, r) => s + (r.total ?? 0), 0);
+      const approved = receipts.reduce((s, r) => s + (r.approvedAmount ?? 0), 0);
+      const violations = receipts.filter((r) => r.status === "violation").length;
+      const needsReview = receipts.filter((r) => r.status === "review").length;
+      const unmatched = cardItems.filter((c) => !c.matched);
+      setTotals({
+        claimed,
+        approved,
+        violations,
+        needsReview,
+        receiptsCount: receipts.length,
+        unmatchedCount: unmatched.length,
+        unmatchedTotal: unmatched.reduce((s, c) => s + c.amount, 0),
+      });
+
+      getZombie()
+        .then((z) => setZombieReport(z))
+        .catch(() => {});
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Handle folder chosen via HTML folder picker
+  const handleFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList || fileList.length === 0) return;
+    const allFiles = Array.from(fileList);
+    const imageFiles = allFiles.filter((f) => /\.(png|jpe?g|webp)$/i.test(f.name));
+
+    let folderName = "Selected Folder";
+    if (allFiles[0]?.webkitRelativePath) {
+      const parts = allFiles[0].webkitRelativePath.split("/");
+      if (parts.length > 1) {
+        folderName = parts[0];
+      }
+    }
+
+    setSelectedFolderName(folderName);
+    setSelectedFiles(imageFiles);
+
+    if (imageFiles.length === 0) {
+      showToast(
+        "No Receipt Images",
+        `Folder "${folderName}" contains no supported images (.png, .jpg, .webp).`,
+        "error",
+      );
+    } else {
+      showToast(
+        "Folder Loaded",
+        `Found ${imageFiles.length} receipt image(s) in "${folderName}".`,
+        "primary",
+      );
+    }
+  };
+
+  // 1. Scan a server directory path explicitly
+  const handleScanServerPath = async (dirPath: string) => {
+    try {
+      setIsScanning(true);
+      setIsModalOpen(false);
+      showToast(
+        "Checking Receipts Path",
+        `Scanning receipts from "${dirPath}"...`,
+        "primary",
+      );
+
+      const report = await runReceipts({ dir: dirPath });
+      await updateReportData(report);
+
+      showToast(
+        "Scan Complete",
+        `Processed ${report.receipts.length} receipts: ${report.totals.violations} violations, ${report.totals.needsReview} need review.`,
+        "secondary",
+      );
+    } catch (err) {
+      showToast(
+        "Scan Failed",
+        err instanceof Error ? err.message : String(err),
+        "error",
+      );
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  // 2. Scan uploaded files from chosen computer folder explicitly
+  const handleScanUploadedFolder = async () => {
+    if (selectedFiles.length === 0) {
+      showToast("No Folder Selected", "Please select a folder containing receipt images first.", "error");
+      return;
+    }
+
+    try {
+      setIsScanning(true);
+      setIsModalOpen(false);
+      showToast(
+        "Checking Uploaded Receipts",
+        `Uploading and scanning ${selectedFiles.length} receipt(s) from "${selectedFolderName}"...`,
+        "primary",
+      );
+
+      const report = await runReceipts({ files: selectedFiles });
+      await updateReportData(report);
+
+      setSelectedFiles([]);
+      setSelectedFolderName(null);
+
+      showToast(
+        "Folder Scan Complete",
+        `Processed ${report.receipts.length} receipts: ${report.totals.violations} violations, ${report.totals.needsReview} need review.`,
+        "secondary",
+      );
+    } catch (err) {
+      showToast(
+        "Scan Failed",
+        err instanceof Error ? err.message : String(err),
+        "error",
+      );
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleTriggerReconcile = async () => {
     setIsSyncing(true);
     showToast(
       "Sync In Progress",
-      "Polling Meridian Bank SFTP feed for 15-day settlement logs...",
+      "Re-loading card feed and matching against claims...",
       "primary",
     );
-    setTimeout(() => {
-      setIsSyncing(false);
+    try {
+      await loadData();
       showToast(
         "Reconciliation Complete",
-        "Matched 8 claims against Axis & HDFC statements. 0 slippage.",
+        `Matched ${claims.filter((c) => c.cardName.includes("matched")).length} claims against card statements.`,
         "secondary",
       );
-    }, 1200);
+    } catch {
+      showToast("Reconciliation Failed", "Could not reload data.", "error");
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
-  const handleExportAudit = () => {
-    showToast(
-      "Audit Report Generated",
-      "Nimbus-Meridian-Audit-FY24-Q3.csv exported with SHA-256 hash",
-      "secondary",
-    );
+  // REAL CSV EXPORT FUNCTION: Downloads the financial audit report file
+  const handleExportAudit = async () => {
+    try {
+      setIsExporting(true);
+      showToast(
+        "Generating Financial Audit",
+        "Exporting certified Nimbus-Meridian audit report with SHA-256 hash...",
+        "primary",
+      );
+
+      const { blob, sha256 } = await exportAuditReport();
+      const filename = "Nimbus-Meridian-Audit-FY24-Q3.csv";
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast(
+        "Financial Audit Downloaded",
+        `${filename} saved (SHA-256: ${sha256.slice(0, 16)}...)`,
+        "secondary",
+      );
+    } catch (err) {
+      showToast(
+        "Export Failed",
+        err instanceof Error ? err.message : String(err),
+        "error",
+      );
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const scrollToRules = () => {
@@ -210,6 +438,43 @@ export default function FinancePage() {
       setTimeout(() => el.classList.remove("ring-2", "ring-[#3B5BFD]"), 1200);
     }
   };
+
+  const okCount = claims.filter((c) => c.status === "ok").length;
+  const approvedPct =
+    totals.claimed > 0 ? Math.round((totals.approved / totals.claimed) * 100) : 0;
+  const flaggedTotal = totals.claimed - totals.approved;
+  const flaggedCount = totals.violations + totals.needsReview;
+  const flaggedPct =
+    totals.claimed > 0 ? Math.round((flaggedTotal / totals.claimed) * 100) : 0;
+  const unmatchedPct =
+    feed.length > 0 ? Math.round((totals.unmatchedCount / feed.length) * 100) : 0;
+
+  if (loading) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 py-20 flex flex-col items-center gap-4">
+        <span className="material-symbols-outlined text-[32px] text-[#3B5BFD] animate-spin">
+          sync
+        </span>
+        <p className="text-sm text-gray-500 font-mono">Loading finance data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-[1400px] mx-auto px-6 py-20 flex flex-col items-center gap-4">
+        <span className="material-symbols-outlined text-[32px] text-red-500">error</span>
+        <p className="text-sm text-red-600 font-mono">{error}</p>
+        <button
+          type="button"
+          onClick={loadData}
+          className="px-4 py-2 rounded-lg bg-[#3B5BFD] text-white text-xs font-semibold cursor-pointer"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-6 pb-20 flex flex-col space-y-4">
@@ -244,23 +509,31 @@ export default function FinancePage() {
             </span>
             <span className="text-gray-300">/</span>
             <span>
-              Synced: <strong className="text-[#111827]">Just now</strong>
+              Receipts: <strong className="text-[#111827]">{totals.receiptsCount}</strong>
             </span>
           </div>
         </div>
 
         {/* Global Operations Group */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Check Receipts Folder Button */}
           <button
             type="button"
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 bg-[#3B5BFD] hover:bg-[#2549ED] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer"
+            disabled={isScanning}
+            className="flex items-center gap-1.5 bg-[#3B5BFD] hover:bg-[#2549ED] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm transition-all cursor-pointer disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-[16px]">
-              document_scanner
+            <span
+              className={`material-symbols-outlined text-[16px] ${
+                isScanning ? "animate-spin" : ""
+              }`}
+            >
+              {isScanning ? "sync" : "folder_open"}
             </span>
-            <span>Scan New Receipts</span>
+            <span>{isScanning ? "Scanning Folder..." : "Check Receipts Folder"}</span>
           </button>
+
+          {/* Trigger Auto-Reconcile Button */}
           <button
             type="button"
             onClick={handleTriggerReconcile}
@@ -276,16 +549,25 @@ export default function FinancePage() {
             </span>
             <span>{isSyncing ? "Syncing..." : "Trigger Auto-Reconcile"}</span>
           </button>
+
+          {/* Export Financial Audit Button (REAL CSV DOWNLOAD) */}
           <button
             type="button"
             onClick={handleExportAudit}
-            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 border border-[#E5E7EB] font-mono text-xs px-3 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer"
+            disabled={isExporting}
+            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-gray-700 border border-[#E5E7EB] font-mono text-xs px-3 py-1.5 rounded-lg transition-colors shadow-2xs cursor-pointer disabled:opacity-50"
           >
-            <span className="material-symbols-outlined text-[16px] text-gray-500">
-              download_for_offline
+            <span
+              className={`material-symbols-outlined text-[16px] text-gray-500 ${
+                isExporting ? "animate-spin" : ""
+              }`}
+            >
+              {isExporting ? "sync" : "download_for_offline"}
             </span>
-            <span>Export Financial Audit</span>
+            <span>{isExporting ? "Exporting..." : "Export Financial Audit"}</span>
           </button>
+
+          {/* Policy Rules Sheet Button */}
           <button
             type="button"
             onClick={scrollToRules}
@@ -306,16 +588,15 @@ export default function FinancePage() {
               Total Receipts
             </span>
             <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 border border-gray-200 font-mono text-[10px]">
-              12 uploaded
+              {totals.receiptsCount} uploaded
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-[#111827] font-bold tracking-tight">
-              ₹78,450
+              ₹{totals.claimed.toLocaleString("en-IN")}
             </span>
             <span className="font-mono text-xs text-emerald-600 font-medium flex items-center gap-0.5">
-              <span className="material-symbols-outlined text-[14px]">check</span> All
-              read clearly
+              <span className="material-symbols-outlined text-[14px]">check</span> All read clearly
             </span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
@@ -330,19 +611,19 @@ export default function FinancePage() {
               Ready to Pay
             </span>
             <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[10px]">
-              8 approved
+              {okCount} approved
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-emerald-700 font-bold tracking-tight">
-              ₹52,100
+              ₹{totals.approved.toLocaleString("en-IN")}
             </span>
-            <span className="font-mono text-xs text-gray-500">66% of total</span>
+            <span className="font-mono text-xs text-gray-500">{approvedPct}% of total</span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-emerald-500 rounded-full"
-              style={{ width: "66.4%" }}
+              style={{ width: `${approvedPct}%` }}
             ></div>
           </div>
         </div>
@@ -354,19 +635,19 @@ export default function FinancePage() {
               Needs Your Look
             </span>
             <span className="px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200 font-mono text-[10px] font-medium">
-              4 flagged
+              {flaggedCount} flagged
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-red-600 font-bold tracking-tight">
-              ₹26,350
+              ₹{flaggedTotal.toLocaleString("en-IN")}
             </span>
             <span className="font-mono text-xs text-red-600">On hold</span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-red-500 rounded-full"
-              style={{ width: "33.6%" }}
+              style={{ width: `${flaggedPct}%` }}
             ></div>
           </div>
         </div>
@@ -383,18 +664,61 @@ export default function FinancePage() {
           </div>
           <div className="mt-3 flex items-baseline justify-between">
             <span className="font-mono text-xl text-amber-700 font-bold tracking-tight">
-              3 Card Charges
+              {totals.unmatchedCount} Card Charges
             </span>
-            <span className="font-mono text-xs text-gray-500">₹3,880 total without bill</span>
+            <span className="font-mono text-xs text-gray-500">
+              ₹{totals.unmatchedTotal.toLocaleString("en-IN")} total without bill
+            </span>
           </div>
           <div className="mt-2.5 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-amber-500 rounded-full"
-              style={{ width: "25%" }}
+              style={{ width: `${unmatchedPct}%` }}
             ></div>
           </div>
         </div>
       </section>
+
+      {/* Zombie SaaS Alert (if data available) */}
+      {zombieReport && zombieReport.tools.length > 0 && (
+        <section className="bg-white rounded-xl border border-amber-200 p-4 shadow-xs">
+          <div className="flex items-center justify-between pb-2 border-b border-amber-100">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px] text-amber-600">
+                warning
+              </span>
+              <div>
+                <h3 className="text-xs font-semibold text-[#111827]">Zombie SaaS Detected</h3>
+                <p className="font-mono text-[11px] text-gray-500">
+                  {zombieReport.tools.length} tool{zombieReport.tools.length !== 1 ? "s" : ""} with
+                  no logins in {zombieReport.thresholdDays}+ days — ₹
+                  {zombieReport.monthlyWasteInr.toLocaleString("en-IN")}/mo potential waste (₹
+                  {zombieReport.annualWasteInr.toLocaleString("en-IN")}/yr)
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-3">
+            {zombieReport.tools.slice(0, 6).map((t) => (
+              <div
+                key={t.tool}
+                className="p-2.5 rounded-lg bg-amber-50/50 border border-amber-100 flex items-center justify-between"
+              >
+                <div>
+                  <span className="text-xs font-semibold text-[#111827]">{t.tool}</span>
+                  <p className="font-mono text-[10px] text-gray-500">
+                    {t.days_idle != null ? `${t.days_idle}d idle` : "No logins on record"}
+                    {t.owner ? ` · ${t.owner}` : ""}
+                  </p>
+                </div>
+                <span className="font-mono text-xs font-bold text-amber-700">
+                  ₹{t.monthly_cost_inr.toLocaleString("en-IN")}/mo
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Live Pipeline Split Workstation */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
@@ -422,12 +746,22 @@ export default function FinancePage() {
                 type="button"
                 className="px-2 py-0.5 rounded-md bg-white border border-[#E5E7EB] text-[#111827] font-mono text-xs shadow-2xs font-medium"
               >
-                All (5 Claims)
+                All ({claims.length} Claims)
               </button>
             </div>
           </div>
 
           <div className="p-4 space-y-3 overflow-y-auto max-h-[700px]">
+            {claims.length === 0 && (
+              <div className="text-center py-12">
+                <span className="material-symbols-outlined text-[32px] text-gray-300">
+                  receipt_long
+                </span>
+                <p className="text-sm text-gray-400 mt-2">
+                  No expense claims yet. Click &quot;Check Receipts Folder&quot; to process receipts.
+                </p>
+              </div>
+            )}
             {claims.map((claim) => (
               <article
                 key={claim.id}
@@ -456,9 +790,7 @@ export default function FinancePage() {
                       </span>
                       {claim.statusBadge}
                     </span>
-                    <span className="font-mono text-xs text-gray-500">
-                      {claim.category}
-                    </span>
+                    <span className="font-mono text-xs text-gray-500">{claim.category}</span>
                   </div>
                   <div className="text-right">
                     <span
@@ -486,9 +818,7 @@ export default function FinancePage() {
                     <span className="text-gray-600 bg-white border border-[#E5E7EB] px-1.5 py-0.5 rounded">
                       {claim.cardName}
                     </span>
-                    <span className="text-emerald-700 font-medium">
-                      {claim.approverText}
-                    </span>
+                    <span className="text-emerald-700 font-medium">{claim.approverText}</span>
                   </div>
                 </div>
 
@@ -509,9 +839,7 @@ export default function FinancePage() {
                       <div>
                         <p
                           className={`font-mono text-xs font-medium ${
-                            claim.status === "violation"
-                              ? "text-red-700"
-                              : "text-amber-800"
+                            claim.status === "violation" ? "text-red-700" : "text-amber-800"
                           }`}
                         >
                           {claim.alertMsg}
@@ -535,7 +863,7 @@ export default function FinancePage() {
           </div>
         </div>
 
-        {/* RIGHT WORKBENCH (5 cols): Meridian Pilot Corporate Card Feed */}
+        {/* RIGHT WORKBENCH (5 cols): Corporate Card Feed */}
         <div className="lg:col-span-5 flex flex-col bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
           <div className="p-4 bg-[#F9FAFB] border-b border-[#E5E7EB] flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -558,6 +886,14 @@ export default function FinancePage() {
           </div>
 
           <div className="divide-y divide-gray-100 p-2 space-y-1.5 max-h-[700px] overflow-y-auto">
+            {feed.length === 0 && (
+              <div className="text-center py-12">
+                <span className="material-symbols-outlined text-[32px] text-gray-300">
+                  credit_card_off
+                </span>
+                <p className="text-sm text-gray-400 mt-2">No card transactions loaded.</p>
+              </div>
+            )}
             {feed.map((txn) => (
               <div
                 key={txn.id}
@@ -573,9 +909,7 @@ export default function FinancePage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs text-gray-400">{txn.date}</span>
-                      <span className="text-xs font-semibold text-[#111827]">
-                        {txn.vendor}
-                      </span>
+                      <span className="text-xs font-semibold text-[#111827]">{txn.vendor}</span>
                     </div>
                     <p className="font-mono text-[11px] text-gray-500">{txn.cardInfo}</p>
                   </div>
@@ -596,9 +930,7 @@ export default function FinancePage() {
                         }`}
                       >
                         {txn.matched && (
-                          <span className="material-symbols-outlined text-[12px]">
-                            check
-                          </span>
+                          <span className="material-symbols-outlined text-[12px]">check</span>
                         )}
                         {txn.statusBadge}
                       </span>
@@ -608,18 +940,17 @@ export default function FinancePage() {
 
                 {!txn.matched && !txn.isIncidental && (
                   <div className="mt-2 pt-2 flex items-center justify-between border-t border-amber-100">
-                    <span className="font-mono text-[11px] text-gray-500">
-                      Auto-reminder sent to Karan
-                    </span>
+                    <span className="font-mono text-[11px] text-gray-500">Auto-reminder sent</span>
                     <button
                       type="button"
-                      onClick={() => setIsModalOpen(true)}
+                      onClick={() => {
+                        setModalTab("path");
+                        setIsModalOpen(true);
+                      }}
                       className="px-2 py-0.5 rounded-md bg-[#3B5BFD] text-white font-mono text-[11px] hover:bg-[#2549ED] flex items-center gap-1 shadow-2xs font-medium cursor-pointer"
                     >
-                      <span className="material-symbols-outlined text-[13px]">
-                        upload_file
-                      </span>
-                      <span>Upload Receipt</span>
+                      <span className="material-symbols-outlined text-[13px]">folder_open</span>
+                      <span>Check Receipts Folder</span>
                     </button>
                   </div>
                 )}
@@ -678,9 +1009,7 @@ export default function FinancePage() {
               gavel
             </span>
             <div>
-              <h3 className="text-xs font-semibold text-[#111827]">
-                Company Spending Rules
-              </h3>
+              <h3 className="text-xs font-semibold text-[#111827]">Company Spending Rules</h3>
               <p className="font-mono text-[11px] text-gray-500">
                 Limits used to automatically check every bill
               </p>
@@ -698,13 +1027,9 @@ export default function FinancePage() {
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">
                   Flights
                 </span>
-                <span className="material-symbols-outlined text-[16px] text-[#3B5BFD]">
-                  flight
-                </span>
+                <span className="material-symbols-outlined text-[16px] text-[#3B5BFD]">flight</span>
               </div>
-              <p className="font-mono text-sm text-[#111827] font-bold mt-1">
-                Flights: Up to ₹8,000
-              </p>
+              <p className="font-mono text-sm text-[#111827] font-bold mt-1">Flights: Up to ₹8,000</p>
             </div>
             <p className="font-mono text-[11px] text-gray-500 mt-2">
               Per one-way domestic ticket (Economy class)
@@ -717,9 +1042,7 @@ export default function FinancePage() {
                 <span className="font-mono text-[10px] text-gray-400 uppercase font-semibold">
                   Hotels
                 </span>
-                <span className="material-symbols-outlined text-[16px] text-emerald-600">
-                  hotel
-                </span>
+                <span className="material-symbols-outlined text-[16px] text-emerald-600">hotel</span>
               </div>
               <p className="font-mono text-sm text-[#111827] font-bold mt-1">
                 Hotels: Up to ₹9,000/night
@@ -796,86 +1119,267 @@ export default function FinancePage() {
         </div>
       </section>
 
-      {/* Upload Modal */}
+      {/* Check Receipts Folder Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white max-w-lg w-full rounded-xl shadow-xl border border-[#E5E7EB] p-5 space-y-4 relative">
-            <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px] text-[#3B5BFD]">
-                  document_scanner
-                </span>
+          <div className="bg-white max-w-xl w-full rounded-xl shadow-xl border border-[#E5E7EB] p-5 space-y-4 relative">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E5E7EB]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-[#3B5BFD]">
+                  <span className="material-symbols-outlined text-[20px]">folder_open</span>
+                </div>
                 <div>
-                  <h4 className="text-sm text-[#111827] font-semibold">
-                    Autonomous Receipt Ingestion
-                  </h4>
+                  <h4 className="text-sm text-[#111827] font-semibold">Check Receipts Folder</h4>
                   <p className="font-mono text-[11px] text-gray-500">
-                    OCR parsing + GST verification + Auto-reconciliation
+                    Scan receipts, inspect OCR, check policies, and match card charges
                   </p>
                 </div>
               </div>
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setSelectedFiles([]);
+                  setSelectedFolderName(null);
+                }}
                 className="text-gray-400 hover:text-gray-700 p-1 rounded-md hover:bg-gray-100 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
-            <div
-              onClick={() => {
-                setIsModalOpen(false);
-                showToast(
-                  "Batch Queued",
-                  "3 receipts queued for OCR extraction & rule evaluation",
-                  "primary",
-                );
-              }}
-              className="p-8 rounded-xl bg-[#F9FAFB] hover:bg-gray-100 border-2 border-dashed border-gray-300 text-center cursor-pointer transition-colors space-y-2"
-            >
-              <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 text-[#3B5BFD] mx-auto flex items-center justify-center">
-                <span className="material-symbols-outlined text-[28px]">
-                  cloud_upload
-                </span>
-              </div>
-              <div>
-                <p className="text-xs text-[#111827] font-medium">
-                  Drop receipts or browse files
-                </p>
-                <p className="font-mono text-[11px] text-gray-500 mt-0.5">
-                  Supports PDF, PNG, JPG up to 25MB each
-                </p>
-              </div>
-              <span className="inline-block px-2 py-1 rounded-md bg-white border border-[#E5E7EB] text-gray-600 font-mono text-[10px] shadow-2xs">
-                Auto-detects Meridian corporate cards
-              </span>
+            {/* Mode Switch Tabs */}
+            <div className="flex items-center gap-2 bg-[#F9FAFB] p-1 rounded-lg border border-[#E5E7EB]">
+              <button
+                type="button"
+                onClick={() => setModalTab("path")}
+                className={`flex-1 py-1.5 px-3 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  modalTab === "path"
+                    ? "bg-white text-[#3B5BFD] shadow-xs border border-[#E5E7EB]"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">terminal</span>
+                <span>Server Directory Path</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModalTab("folder")}
+                className={`flex-1 py-1.5 px-3 rounded-md text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  modalTab === "folder"
+                    ? "bg-white text-[#3B5BFD] shadow-xs border border-[#E5E7EB]"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">folder_open</span>
+                <span>Select Folder from Computer</span>
+              </button>
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(false)}
-                className="px-3 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 font-mono text-xs cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  showToast(
-                    "Batch Queued",
-                    "3 receipts queued for OCR extraction & rule evaluation",
-                    "primary",
-                  );
-                }}
-                className="px-4 py-1.5 rounded-lg bg-[#3B5BFD] text-white text-xs hover:bg-[#2549ED] shadow-sm flex items-center gap-1 font-medium cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[16px]">bolt</span>
-                <span>Process with Swarm</span>
-              </button>
-            </div>
+            {/* Hidden Folder Input for browser picker */}
+            <input
+              ref={folderInputRef}
+              type="file"
+              // @ts-expect-error webkitdirectory is standard in browser engines
+              webkitdirectory=""
+              directory=""
+              multiple
+              className="hidden"
+              onChange={handleFolderChange}
+            />
+
+            {/* TAB 1: Server Directory Path */}
+            {modalTab === "path" && (
+              <div className="space-y-3.5 py-1">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-gray-800">
+                    Receipts Folder Path:
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={customServerDir}
+                      onChange={(e) => setCustomServerDir(e.target.value)}
+                      placeholder="e.g. seed/finance/receipts or projects/plexus/seed/finance/receipts"
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 text-xs font-mono text-gray-900 focus:outline-none focus:ring-1 focus:ring-[#3B5BFD] bg-white"
+                    />
+                  </div>
+                  <p className="font-mono text-[11px] text-gray-400">
+                    Accepts relative paths (e.g. <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">seed/finance/receipts</code>, <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">projects/plexus/seed/finance/receipts</code>) or absolute paths.
+                  </p>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="space-y-1.5">
+                  <span className="text-[11px] font-mono text-gray-500 uppercase tracking-wider font-semibold">
+                    Quick Presets:
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCustomServerDir("seed/finance/receipts")}
+                      className={`px-2.5 py-1 rounded-md font-mono text-[11px] border cursor-pointer transition-all ${
+                        customServerDir === "seed/finance/receipts"
+                          ? "bg-blue-50 text-[#3B5BFD] border-blue-200 font-semibold"
+                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      seed/finance/receipts (Default)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCustomServerDir("projects/plexus/seed/finance/receipts")}
+                      className={`px-2.5 py-1 rounded-md font-mono text-[11px] border cursor-pointer transition-all ${
+                        customServerDir === "projects/plexus/seed/finance/receipts"
+                          ? "bg-blue-50 text-[#3B5BFD] border-blue-200 font-semibold"
+                          : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      projects/plexus/seed/finance/receipts
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-100">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-3 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 font-mono text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleScanServerPath(customServerDir)}
+                    disabled={isScanning || !customServerDir.trim()}
+                    className="px-4 py-1.5 rounded-lg bg-[#3B5BFD] text-white text-xs hover:bg-[#2549ED] shadow-sm flex items-center gap-1.5 font-medium cursor-pointer disabled:opacity-50"
+                  >
+                    <span
+                      className={`material-symbols-outlined text-[16px] ${
+                        isScanning ? "animate-spin" : ""
+                      }`}
+                    >
+                      {isScanning ? "sync" : "bolt"}
+                    </span>
+                    <span>{isScanning ? "Scanning..." : "Check This Receipts Path"}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: Select Folder from Computer */}
+            {modalTab === "folder" && (
+              <div className="space-y-3 py-1">
+                <div
+                  onClick={() => folderInputRef.current?.click()}
+                  className={`p-6 rounded-xl border-2 border-dashed transition-all cursor-pointer text-center ${
+                    selectedFiles.length > 0
+                      ? "bg-emerald-50/50 border-emerald-300 hover:bg-emerald-50"
+                      : "bg-[#F9FAFB] hover:bg-gray-100 border-gray-300"
+                  }`}
+                >
+                  {selectedFiles.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center border border-emerald-200">
+                        <span className="material-symbols-outlined text-[26px]">snippet_folder</span>
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-emerald-900">
+                          Folder: {selectedFolderName}
+                        </p>
+                        <p className="font-mono text-xs text-emerald-700 mt-0.5">
+                          {selectedFiles.length} receipt image(s) detected and ready
+                        </p>
+                      </div>
+                      {/* File chips */}
+                      <div className="flex flex-wrap gap-1 justify-center max-h-24 overflow-y-auto pt-1">
+                        {selectedFiles.slice(0, 8).map((f) => (
+                          <span
+                            key={f.name}
+                            className="px-2 py-0.5 rounded bg-white border border-emerald-200 font-mono text-[10px] text-emerald-800"
+                          >
+                            {f.name}
+                          </span>
+                        ))}
+                        {selectedFiles.length > 8 && (
+                          <span className="px-2 py-0.5 rounded bg-white border border-emerald-200 font-mono text-[10px] text-emerald-800">
+                            +{selectedFiles.length - 8} more
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          folderInputRef.current?.click();
+                        }}
+                        className="text-xs text-[#3B5BFD] hover:underline font-mono inline-block pt-1 cursor-pointer"
+                      >
+                        Choose a different folder...
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 text-[#3B5BFD] mx-auto flex items-center justify-center">
+                        <span className="material-symbols-outlined text-[28px]">drive_folder_upload</span>
+                      </div>
+                      <div>
+                        <p className="text-xs text-[#111827] font-semibold">
+                          Click to Select Receipts Folder from Computer
+                        </p>
+                        <p className="font-mono text-[11px] text-gray-500 mt-0.5">
+                          Opens system directory picker to select all receipts inside
+                        </p>
+                      </div>
+                      <span className="inline-block px-2.5 py-1 rounded-md bg-white border border-[#E5E7EB] text-gray-700 font-mono text-[11px] shadow-2xs font-medium">
+                        Browse Folder...
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 flex items-center justify-between border-t border-gray-100">
+                  <span className="font-mono text-[10px] text-gray-400">
+                    Supports PNG, JPG, JPEG, WEBP
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        setSelectedFiles([]);
+                        setSelectedFolderName(null);
+                      }}
+                      className="px-3 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 font-mono text-xs cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleScanUploadedFolder}
+                      disabled={isScanning || selectedFiles.length === 0}
+                      className="px-4 py-1.5 rounded-lg bg-[#3B5BFD] text-white text-xs hover:bg-[#2549ED] shadow-sm flex items-center gap-1.5 font-medium cursor-pointer disabled:opacity-50"
+                    >
+                      <span
+                        className={`material-symbols-outlined text-[16px] ${
+                          isScanning ? "animate-spin" : ""
+                        }`}
+                      >
+                        {isScanning ? "sync" : "bolt"}
+                      </span>
+                      <span>
+                        {isScanning
+                          ? "Uploading & Processing..."
+                          : selectedFiles.length > 0
+                          ? `Scan ${selectedFiles.length} Receipts in ${selectedFolderName}`
+                          : "Select Folder First"}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
