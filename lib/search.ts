@@ -119,6 +119,7 @@ function prepare(raw: KbRow[], role: Role, opts: { topic?: string; minScore?: nu
       restrictedDocs.add(r.document_id);
     }
   }
+
   const seen = new Set<string>();
   const hits: Hit[] = [];
   let hidden = 0;
@@ -184,48 +185,65 @@ export async function browse(role: Role, max = 10) {
 async function gemini(prompt: string): Promise<string> {
   const keys = [process.env.GEMINI_API_KEY, process.env.GEMINI_API_KEY_2].filter(Boolean) as string[];
   if (!keys.length) throw new Error("GEMINI_API_KEY is not set");
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-  let lastErr = new Error("Gemini failed");
-  for (const key of keys) {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: "OBJECT",
-            properties: {
-              points: {
-                type: "ARRAY",
-                items: {
-                  type: "OBJECT",
-                  properties: { text: { type: "STRING" }, source: { type: "INTEGER" } },
-                  required: ["text", "source"],
-                },
-              },
+
+  // Use the models from .env (same ones the other agents use), smartest first for the briefing.
+  const models = [
+    ...new Set([
+      process.env.GEMINI_MODEL_SMART,
+      process.env.GEMINI_MODEL_FAST,
+      process.env.GEMINI_MODEL_FALLBACK,
+      process.env.GEMINI_MODEL, // optional override, not required
+    ]),
+  ].filter(Boolean) as string[];
+  if (!models.length) throw new Error("No Gemini model configured (set GEMINI_MODEL_SMART or GEMINI_MODEL_FAST)");
+
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: "OBJECT",
+        properties: {
+          points: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: { text: { type: "STRING" }, source: { type: "INTEGER" } },
+              required: ["text", "source"],
             },
-            required: ["points"],
           },
         },
-      }),
-      cache: "no-store",
-      signal: AbortSignal.timeout(25_000),
-    }).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))));
-    if (r instanceof Error) {
-      lastErr = r;
-      continue;
+        required: ["points"],
+      },
+    },
+  });
+
+  let lastErr = new Error("Gemini failed");
+  for (const model of models) {
+    for (const key of keys) {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body,
+        cache: "no-store",
+        signal: AbortSignal.timeout(25_000),
+      }).catch((e: unknown) => (e instanceof Error ? e : new Error(String(e))));
+
+      if (r instanceof Error) {
+        lastErr = r;
+        continue; // network error: try the next key
+      }
+      if (r.ok) {
+        const j = await r.json();
+        const text = j?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (typeof text === "string" && text) return text;
+        lastErr = new Error(`Gemini (${model}) returned no text`);
+        break; // empty answer: try the next model
+      }
+      lastErr = new Error(`Gemini (${model}) returned ${r.status}`);
+      if (r.status === 429 || r.status >= 500) continue; // rate limit or server error: try the other key
+      break; // 404, 400 and the like are about this model: move to the next one
     }
-    if (r.ok) {
-      const j = await r.json();
-      const text = j?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (typeof text === "string" && text) return text;
-      lastErr = new Error("Gemini returned no text");
-      continue;
-    }
-    lastErr = new Error(`Gemini returned ${r.status}`);
-    if (r.status !== 429 && r.status < 500) break; // try the second key only for rate limits / server errors
   }
   throw lastErr;
 }

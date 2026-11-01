@@ -88,5 +88,15 @@
     "match_type": "hybrid",
     "rank": 0.030396355,
     "rerank_score": 0.990108672548911
+  },
+  {
+    "id": "8a967c02-bdad-4685-b361-9b65fa3522e9",
+    "chunk_text": "Document: Meridian pilot notes, Fri 30 Oct 2026\nSection: Meridian pilot notes: Friday 30 October 2026\n\nWritten by: Karan Malhotra\n\nKaran issued sandbox API credentials to Vikram Rao's team, one week ahead of the 6 Nov date.Riya sent the SOC 2 Type II report to Vikram under the signed NDA.Vikram asked where Meridian's data will be held. Answer: primary in AWS Mumbai, disaster recovery replica in Singapore. He wants this in writing. Riya will include it in the written questionnaire answers.Still waiting on Meridian: IP ranges for the allowlist (due Tue 10 Nov).Next week: questionnaire due Fri 6 Nov, pilot pricing due Mon 9 Nov, Arjun's sample files due Thu 12 Nov, Meera's mapping document due Mon 16 Nov.",
+    "document_id": "3efc4fae-79a2-4aae-a6af-4ea715de0e36",
+    "metadata_filters": {},
+    "rank": 0.030396355,
+    "distance": 0.9157560277383969,
+    "match_type": "keyword",
+    "rerank_score": 0.9656435729387016
   }
 ]
