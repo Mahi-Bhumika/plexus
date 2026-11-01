@@ -1,8 +1,8 @@
 [
   {
-    "id": "95a4779a-ff54-4555-93bc-5edfef9428f2",
+    "id": "1fac8288-ec57-42e4-b292-3f91f6b3fc52",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan > Response steps\n\nDetect and triage, assign an incident commander.Contain: isolate affected systems and revoke exposed credentials.Investigate and fix.Communicate with affected customers.Review.",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.3346603380810287,
     "match_type": "hybrid",
@@ -10,9 +10,9 @@
     "rerank_score": 0.9993304935434137
   },
   {
-    "id": "febed243-2973-4e10-aa07-d9eb8a3b812e",
+    "id": "d4f101b7-ca3a-472e-8f7e-7dac8686aab2",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan > Postmortems\n\nA written postmortem is completed within 5 business days of closing any P1 or P2 incident. It lists the timeline, root cause and corrective actions with owners and due dates. Customers affected by a P1 receive a summary.",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.5546881891421196,
     "match_type": "hybrid",
@@ -20,9 +20,9 @@
     "rerank_score": 0.9991848181114384
   },
   {
-    "id": "6fd8f6ef-8a0d-4e88-abfa-094ad0249d5f",
+    "id": "e014e9c3-6dd1-4adb-86f3-ec70e4978834",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan > Testing\n\nThe plan is exercised through a tabletop drill twice a year. The latest drill took place on 4 June 2026.",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.5059974019633553,
     "match_type": "hybrid",
@@ -30,9 +30,9 @@
     "rerank_score": 0.9990235589302492
   },
   {
-    "id": "0553c871-ff4b-49ed-91b1-3fd6be055512",
+    "id": "1d314048-320d-4386-afe3-c4e97778a0f9",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan > Customer notification\n\nWhen a breach involving customer data is confirmed, affected customers are notified within 72 hours. Nimbus Labs also reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident, as required by Indian rules.",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.5642444380142467,
     "match_type": "hybrid",
@@ -40,9 +40,9 @@
     "rerank_score": 0.9988392680635076
   },
   {
-    "id": "6949b2fb-b2b3-4372-ab1f-289276f6da44",
+    "id": "18760358-ccc3-4f02-891e-6b4561d3577b",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan > Severity levels\n\nLevel: P1; Meaning: Customer data exposed or full outage; Acknowledge within: 15 minutes\nLevel: P2; Meaning: Major feature down or suspected exposure; Acknowledge within: 1 hour\nLevel: P3; Meaning: Degraded service, workaround exists; Acknowledge within: 1 business day\nLevel: P4; Meaning: Minor issue; Acknowledge within: 3 business days",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.5055758918256761,
     "match_type": "hybrid",
@@ -50,9 +50,9 @@
     "rerank_score": 0.9986509345353686
   },
   {
-    "id": "f248ea93-55f6-4887-a8ca-7feffc56da7c",
+    "id": "7b1d2e17-25c0-4a50-8a11-d0ff2074c378",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan > On-call\n\nA 24x7 on-call rotation covers P1 and P2 incidents. The rotation has four engineers, each on call for one week at a time.",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.47382330812414986,
     "match_type": "hybrid",
@@ -60,13 +60,13 @@
     "rerank_score": 0.9981847501646252
   },
   {
-    "id": "a6b23353-231d-437a-8559-2b82e713efa8",
+    "id": "20ceb138-5a06-4e09-915d-5e7b383e6ede",
     "chunk_text": "Section: Nimbus Labs Incident Response Plan\n\nDocument owner: Karan Malhotra · Version: 2.0 · Last reviewed: 28 Aug 2026",
-    "document_id": "40dfceca-6f77-4520-bf78-31be0770a54b",
+    "document_id": "20fc3822-589c-4286-932e-1e0680a076d3",
     "metadata_filters": {},
     "distance": 0.4091579349400408,
     "match_type": "hybrid",
     "rank": 0.06079271,
-    "rerank_score": 0.9967749522121208
+    "rerank_score": 0.9967749568107065
   }
 ]

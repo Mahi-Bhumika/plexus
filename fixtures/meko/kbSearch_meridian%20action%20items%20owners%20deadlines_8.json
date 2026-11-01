@@ -1,8 +1,8 @@
 [
   {
-    "id": "ed9fd9c2-597a-4a7a-909e-b77e2e5dbe5a",
+    "id": "aeff2beb-5c35-4e67-b2d3-3ce7cdc1182c",
     "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners\n\nGo-live: Monday 30 November 2026Scope: phase one is UPI reconciliation only. NEFT and IMPS are phase two.Delivery owner: Karan MalhotraExecutive sponsor: Riya SharmaIntegration lead: Meera IyerMeridian sponsor: Sanjay Desai, Head of Payments OperationsWeekly status call: Thursdays, 4 PMGo/no-go review: Thursday 26 November 2026",
-    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "document_id": "290cadb1-5c05-478f-ba34-d87e6372c4ea",
     "metadata_filters": {},
     "distance": 0.5595414646464459,
     "match_type": "hybrid",
@@ -10,13 +10,27 @@
     "rerank_score": 0.9325981197954459
   },
   {
-    "id": "38b030ed-6d52-4436-a537-bbb9f3b15083",
+    "id": "b5b6ba55-bb53-4803-9b83-323303c964e7",
     "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners > Key dates\n\nDate: Fri 6 Nov; Milestone: Sandbox credentials (done early), security questionnaire due\nDate: Mon 9 Nov; Milestone: Pilot pricing due to Neha Kapoor\nDate: Tue 10 Nov; Milestone: Meridian IP ranges for allowlist\nDate: Thu 12 Nov; Milestone: Anonymised sample files ready\nDate: Fri 13 Nov; Milestone: UAT analysts confirmed (done early)\nDate: Mon 16 Nov; Milestone: Field mapping document\nDate: Thu 26 Nov; Milestone: Go/no-go review\nDate: Mon 30 Nov; Milestone: Go-live",
-    "document_id": "e2f0f539-df88-47cb-9274-0e1d98a5d33c",
+    "document_id": "290cadb1-5c05-478f-ba34-d87e6372c4ea",
     "metadata_filters": {},
     "distance": 0.5460820782798566,
     "match_type": "hybrid",
     "rank": 0.018997721,
     "rerank_score": 0.8242225748987383
+  },
+  {
+    "id": "91e16460-0554-4b0c-a9b5-0d93c1deb715",
+    "chunk_text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs held a project kickoff meeting to establish a pilot for the Nimbus Ledger Sync tool, aiming to automate UPI settlements reconciliation by November 30, 2026. The teams agreed on scope limitations, security reviews, and scheduled action items for sandbox setup, mapping documentation, and compliance questionnaires. | Decisions: Pilot go-live date is set for Monday 30 November 2026.; Phase one is limited to UPI reconciliation only, excluding NEFT and IMPS.; Data hosting will use primary AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: Understood. I will send you our standard mutual NDA. Once it is signed we can share our SOC 2 Type II report with Vikram's team. (Riya Sharma, 2026-11-04); I will set up the sandbox environment and send API credentials to Vikram's team by Friday 6 November. (Karan, 2026-11-06); I will send those by Tuesday 10 November. (unassigned, 2026-11-10); I will write a mapping document that says which Meridian field feeds which Nimbus field. I can have that to you by Monday 16 November. (Riya Sharma, 2026-11-16); I will send you their names by Friday 13 November. (unassigned, 2026-11-13); Arjun, our intern, is not here today, but he will prepare anonymised sample transaction files from the layout you gave us. Let's say by Thursday 12 November. (Arjun, 2026-11-12); And the NDA will be with Neha by Wednesday 4 November. (Riya Sharma, 2026-11-04)",
+    "document_id": "44966005-1470-4311-817f-f611c2d2a2af",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_actionswarm",
+      "memory_id": "da3a4e5d-f2ed-43dd-b152-44af41431c9d"
+    },
+    "rank": 0.030396355,
+    "distance": 1.0555808848356403,
+    "match_type": "keyword",
+    "rerank_score": 0.7720469389675687
   }
 ]

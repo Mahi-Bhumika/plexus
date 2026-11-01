@@ -18,7 +18,8 @@ export type ZombieReport = {
   asOf: string;
   thresholdDays: number;
   totalToolsChecked: number;
-  tools: ZombieTool[];
+  tools: ZombieTool[]; // zombies only
+  healthy: ZombieTool[]; // used within the threshold
   monthlyWasteInr: number;
   annualWasteInr: number;
 };
@@ -46,6 +47,7 @@ export function findZombieSaas(opts: { thresholdDays?: number; asOf?: Date } = {
 
   const seen = new Set<string>();
   const tools: ZombieTool[] = [];
+  const healthy: ZombieTool[] = [];
   let checked = 0;
 
   for (const r of rows) {
@@ -61,19 +63,26 @@ export function findZombieSaas(opts: { thresholdDays?: number; asOf?: Date } = {
         continue;
       }
       daysIdle = Math.floor((asOf.getTime() - t) / DAY_MS);
-      if (daysIdle < thresholdDays) continue; // someone used it recently
     }
-    tools.push({
+
+    const entry: ZombieTool = {
       tool: r.tool,
       owner: r.owner,
       seats: r.seats,
       monthly_cost_inr: r.monthly_cost_inr,
       last_login: r.last_login,
       days_idle: daysIdle,
-    });
+    };
+
+    if (daysIdle != null && daysIdle < thresholdDays) {
+      healthy.push(entry); // someone used it recently
+    } else {
+      tools.push(entry);
+    }
   }
 
   tools.sort((a, b) => b.monthly_cost_inr - a.monthly_cost_inr);
+  healthy.sort((a, b) => b.monthly_cost_inr - a.monthly_cost_inr);
   const monthlyWasteInr = tools.reduce((sum, t) => sum + t.monthly_cost_inr, 0);
 
   return {
@@ -81,6 +90,7 @@ export function findZombieSaas(opts: { thresholdDays?: number; asOf?: Date } = {
     thresholdDays,
     totalToolsChecked: checked,
     tools,
+    healthy,
     monthlyWasteInr,
     annualWasteInr: monthlyWasteInr * 12,
   };

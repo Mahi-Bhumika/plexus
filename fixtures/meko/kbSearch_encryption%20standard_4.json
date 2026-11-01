@@ -1,8 +1,8 @@
 [
   {
-    "id": "09447b24-3ef4-4313-9d0b-13a5a5e13232",
+    "id": "50569052-0b44-4240-b9fb-135db4a04505",
     "chunk_text": "Section: Nimbus Labs Encryption Standard > Encryption at rest\n\nAll customer data is encrypted at rest with AES-256. This covers databases, object storage, backups and laptop disks.",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.35934873721976945,
     "match_type": "hybrid",
@@ -10,9 +10,9 @@
     "rerank_score": 0.9988986580292527
   },
   {
-    "id": "b9111fea-8c14-43d3-b167-54ed936aae7a",
+    "id": "a1f7af92-e565-4a75-a3fb-f4817e5616b7",
     "chunk_text": "Section: Nimbus Labs Encryption Standard > Encryption in transit\n\nAll connections to Nimbus Ledger Sync use TLS 1.2 or higher; TLS 1.3 is preferred and negotiated whenever the client supports it. Older protocol versions are disabled. Internal service-to-service traffic is also encrypted.",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.5251767142337558,
     "match_type": "hybrid",
@@ -20,9 +20,9 @@
     "rerank_score": 0.9983877325617169
   },
   {
-    "id": "a5fa08e9-5804-4275-85f3-defd5b6692e9",
+    "id": "30102039-ad93-4093-9ca5-f72288100231",
     "chunk_text": "Section: Nimbus Labs Encryption Standard > Sensitive fields\n\nAccount numbers and UPI identifiers are additionally encrypted at the field level before they are written to the database, so they remain protected even in database exports.",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.5280789749759167,
     "match_type": "hybrid",
@@ -30,9 +30,9 @@
     "rerank_score": 0.9974454779911065
   },
   {
-    "id": "cc074e66-9623-4098-aa02-84ac43439745",
+    "id": "960c3e47-8264-4605-884a-dbd1ebd94162",
     "chunk_text": "Section: Nimbus Labs Encryption Standard > Certificates\n\nTLS certificates are issued by a public certificate authority and renewed automatically 30 days before they expire.",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.676448661329166,
     "match_type": "hybrid",
@@ -40,9 +40,9 @@
     "rerank_score": 0.9954145822884751
   },
   {
-    "id": "25b73e64-05ba-46f4-b527-238f2cafbd18",
+    "id": "8121e637-72da-46f9-a608-d832253f40df",
     "chunk_text": "Section: Nimbus Labs Encryption Standard\n\nDocument owner: Karan Malhotra · Version: 1.6 · Last reviewed: 10 Sep 2026",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.39243577211947955,
     "match_type": "hybrid",
@@ -50,9 +50,9 @@
     "rerank_score": 0.9912027144971618
   },
   {
-    "id": "4796b3e5-bc8e-43d0-ac0c-f753481f04f9",
+    "id": "9054b08c-10db-4691-95d8-e0e20d8a7dc0",
     "chunk_text": "Section: Nimbus Labs Encryption Standard > Key management\n\nEncryption keys are created and stored in AWS KMS.Keys are rotated every 365 days.Access to key administration is limited to two named engineers and is logged.Nimbus Labs does not operate its own hardware security module (HSM); it relies on the AWS KMS service.",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.6048432466334581,
     "match_type": "hybrid",
@@ -60,9 +60,9 @@
     "rerank_score": 0.989023503383976
   },
   {
-    "id": "10ed925e-c001-4858-b0c3-7a38ec36855d",
+    "id": "dfe68a56-5b66-4162-9e40-45c8054f12fc",
     "chunk_text": "Section: Nimbus Labs Encryption Standard > Customer-managed keys\n\nCustomer-managed keys (bring-your-own-key) are not supported in the current product. All keys are managed by Nimbus Labs through AWS KMS. This capability is not on the committed roadmap.",
-    "document_id": "7c8ba62f-4d95-4651-a1fa-9a44726560a7",
+    "document_id": "c926c712-78ed-48f3-9bce-fc910375cf29",
     "metadata_filters": {},
     "distance": 0.6495421242765971,
     "match_type": "hybrid",

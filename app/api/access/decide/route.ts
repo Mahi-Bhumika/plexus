@@ -1,7 +1,5 @@
 import { decideAccessRequest, AccessError } from "@/agents/access";
 
-export const runtime = "nodejs";
-
 // POST /api/access/decide
 // Body: { id: string, decision: 'granted' | 'denied', approverName: string }
 // Only the policy approver (or the founder) can decide, and never the requester.

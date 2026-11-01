@@ -1,41 +1,48 @@
-import { approveCancel, rejectCancel, requestCancel, listCancellations, CancelError } from "@/agents/saas-cancel";
+import { NextResponse } from "next/server";
+import { approveCancel, CancelError, listCancellations, rejectCancel, requestCancel } from "@/agents/saas-cancel";
+import { undoAction } from "@/lib/guard";
 
-export const runtime = "nodejs";
-
-// GET  /api/finance/saas -> { cancellations, monthlySaved, yearlySaved }
-// POST /api/finance/saas { tool, action: "request" | "approve" | "reject", approver? }
-//   request -> { ok, cancellation, eventId, slack }   (event is pending_approval; a Slack card goes to the approver)
-//   approve -> { ok, cancellation, eventId }          (eventId goes to POST /api/undo)
-//   reject  -> { ok, eventId }
-//   errors  -> { ok: false, error } with 403 (wrong approver), 404, 409 or 422
-export async function GET() {
-  return Response.json(listCancellations());
+function fail(err: unknown) {
+  if (err instanceof CancelError) return NextResponse.json({ ok: false, error: err.message }, { status: err.status });
+  return NextResponse.json({ ok: false, error: err instanceof Error ? err.message : String(err) }, { status: 500 });
 }
 
-export async function POST(request: Request) {
+// GET -> { ok, cancellations, monthlySaved, yearlySaved }
+export async function GET() {
   try {
-    const body = (await request.json()) as { tool?: string; action?: string; approver?: string };
-    if (!body.tool) return Response.json({ ok: false, error: "tool is required" }, { status: 400 });
-    const action = body.action ?? "request";
+    return NextResponse.json({ ok: true, ...listCancellations() });
+  } catch (err) {
+    return fail(err);
+  }
+}
 
-    if (action === "request") {
-      const r = await requestCancel(body.tool);
-      return Response.json({ ok: true, ...r });
+// POST { tool, action: "request" | "approve" | "reject" | "undo", approver?, eventId? }
+export async function POST(req: Request) {
+  try {
+    const b = (await req.json().catch(() => null)) as {
+      tool?: string;
+      action?: string;
+      approver?: string;
+      eventId?: string;
+    } | null;
+    if (!b?.tool || !b.action) throw new CancelError("tool and action are required", 400);
+
+    if (b.action === "request") {
+      const r = await requestCancel(b.tool, { slack: false });
+      return NextResponse.json({ ok: true, ...r });
     }
-    if (!body.approver) return Response.json({ ok: false, error: "approver is required" }, { status: 400 });
-    if (action === "approve") {
-      const r = await approveCancel(body.tool, body.approver);
-      return Response.json({ ok: true, ...r });
+    if (b.action === "approve" || b.action === "reject") {
+      if (!b.approver) throw new CancelError("approver is required", 400);
+      const r = b.action === "approve" ? await approveCancel(b.tool, b.approver) : await rejectCancel(b.tool, b.approver);
+      return NextResponse.json({ ok: true, ...r });
     }
-    if (action === "reject") {
-      const r = await rejectCancel(body.tool, body.approver);
-      return Response.json({ ok: true, ...r });
+    if (b.action === "undo") {
+      if (!b.eventId) throw new CancelError("eventId is required", 400);
+      const r = await undoAction(b.eventId);
+      return NextResponse.json(r.ok ? { ok: true, message: r.message } : { ok: false, error: r.error }, { status: r.ok ? 200 : 409 });
     }
-    return Response.json({ ok: false, error: `Unknown action ${action}` }, { status: 400 });
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (err instanceof CancelError) return Response.json({ ok: false, error: message }, { status: err.status });
-    console.error("Error in /api/finance/saas:", message);
-    return Response.json({ ok: false, error: message }, { status: 500 });
+    throw new CancelError(`Unknown action ${b.action}`, 400);
+  } catch (err) {
+    return fail(err);
   }
 }

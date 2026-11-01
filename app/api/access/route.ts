@@ -3,7 +3,6 @@ import { createAccessRequest, AccessError } from "@/agents/access";
 
 export type { AccessRequestRow } from "@/agents/access";
 
-export const runtime = "nodejs";
 
 // GET /api/access -> returns list of requests and audit rows
 export async function GET() {

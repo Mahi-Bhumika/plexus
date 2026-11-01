@@ -1,98 +1,88 @@
 [
   {
-    "id": "7a3c9333-01b3-41dc-85be-89d36bc46a33",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Principles\n\nAccess is granted on a least-privilege basis and tied to a person's role. Every grant has a named approver and is recorded in the audit log.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
+    "id": "f9b99938-2671-4630-8bce-a394fc6f1ba2",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Purpose and scope\n\nThis policy defines how Nimbus Labs grants, reviews and removes access to internal systems, customer data and third-party tools. It covers all employees, interns and contractors.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
     "metadata_filters": {},
-    "distance": 0.29326974489742674,
+    "distance": 0.29782827665823475,
     "match_type": "hybrid",
-    "rank": 0.065858774,
-    "rerank_score": 0.9991530813245236
+    "rank": 0.070924826,
+    "rerank_score": 0.999904256057745
   },
   {
-    "id": "49aebfe6-19d1-456f-a7ed-cabf7bfd9e00",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Role-based access\n\nAccess to internal tools is defined by role: Founder, Engineering Manager, Engineer, Intern. A role template lists which applications each role may have and at what risk level.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
+    "id": "8d536581-2213-42f5-b9a9-69799ebab88b",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Principle of least privilege\n\nEveryone has access only to the systems they need for their current work. Default access on day one is restricted to email, company chat and the documentation wiki.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
     "metadata_filters": {},
-    "distance": 0.37195066629421514,
-    "match_type": "hybrid",
-    "rank": 0.068110354,
-    "rerank_score": 0.9987546680949054
-  },
-  {
-    "id": "cd69df84-7a43-488e-beaf-a1114f6414f5",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Access reviews\n\nAccess reviews run every quarter. Managers confirm or remove each person's access, and the Engineering Manager signs off the review.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
-    "metadata_filters": {},
-    "distance": 0.39528581876872915,
-    "match_type": "hybrid",
-    "rank": 0.06937686,
-    "rerank_score": 0.9985702062650775
-  },
-  {
-    "id": "167a7d4a-b2e8-462d-829d-c37931b909cc",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Risk levels and approvals\n\nLow risk applications (for example design and note-taking tools) are approved automatically if the requester's role allows them.Medium risk applications need approval from the person's manager.High risk applications, including AWS production, need approval from the Engineering Manager.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
-    "metadata_filters": {},
-    "distance": 0.4547069781081834,
-    "match_type": "hybrid",
-    "rank": 0.06079271,
-    "rerank_score": 0.9984168079723578
-  },
-  {
-    "id": "a93ace6c-1790-45f6-beac-1af4a810da7e",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
-    "metadata_filters": {},
-    "distance": 0.4227354988806348,
+    "distance": 0.3629595380984044,
     "match_type": "hybrid",
     "rank": 0.068110354,
-    "rerank_score": 0.9979827973515369
+    "rerank_score": 0.9999022839427606
   },
   {
-    "id": "21b0c71e-5407-4dd5-aa35-312895df8f6b",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Production access\n\nProduction access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Interns are not eligible for production access.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
+    "id": "6bc965ab-7b2e-4e71-b06c-902dc0960c7a",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
     "metadata_filters": {},
-    "distance": 0.5017197633562223,
+    "distance": 0.39240706758249877,
+    "match_type": "hybrid",
+    "rank": 0.068110354,
+    "rerank_score": 0.9995968298767267
+  },
+  {
+    "id": "a7031ad2-abd0-4b54-84ec-b1ff3c91f150",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Access reviews\n\nAccess reviews run every quarter. Managers confirm or remove each person's access, and the Engineering Manager signs off the review.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
+    "metadata_filters": {},
+    "distance": 0.36534867268876037,
     "match_type": "hybrid",
     "rank": 0.06937686,
-    "rerank_score": 0.9968871422600667
+    "rerank_score": 0.9995730911244911
   },
   {
-    "id": "2160d5e4-701f-4cb5-ac3f-30dd49e6d5d1",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy\n\nDocument owner: Karan Malhotra · Version: 2.2 · Last reviewed: 1 Oct 2026",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
+    "id": "83dc2586-3616-41b8-88f7-edf7ae45f866",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Risk levels and approvals\n\nLow risk applications (for example design and note-taking tools) are approved automatically if the requester's role allows them.Medium risk applications need approval from the person's manager.High risk applications, including AWS production, need approval from the Engineering Manager.If the Engineering Manager is the requester, approval escalates to the Founder. No one may approve their own request.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
     "metadata_filters": {},
-    "distance": 0.3636485321402809,
+    "distance": 0.4519269259838091,
     "match_type": "hybrid",
     "rank": 0.06079271,
-    "rerank_score": 0.9960469853827666
+    "rerank_score": 0.9994915307324724
   },
   {
-    "id": "c679f90f-b290-45c4-a2bf-9b24ee5f7340",
-    "chunk_text": "Section: Nimbus Labs Access Control Policy > Authentication standards\n\nPasswords must be at least 14 characters.Administrator accounts must use hardware security keys in addition to passwords.Shared accounts are not permitted.",
-    "document_id": "037a2e04-bd63-4e8a-8bf5-ae1d4889004b",
+    "id": "ac2da1a4-90e1-438c-90b0-da63b68795cc",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Production access\n\nProduction access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Interns are not eligible for production access.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
     "metadata_filters": {},
-    "distance": 0.5189778188771039,
+    "distance": 0.4762304107273304,
+    "match_type": "hybrid",
+    "rank": 0.06937686,
+    "rerank_score": 0.9994120990653504
+  },
+  {
+    "id": "c8ed41d1-8a1d-42b1-95fa-9dad1f97b447",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs)\n\nDocument owner: Karan Malhotra, Engineering Manager · Version: 2.1 · Last reviewed: 22 Aug 2026",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
+    "metadata_filters": {},
+    "distance": 0.3356998725535697,
     "match_type": "hybrid",
     "rank": 0.06079271,
-    "rerank_score": 0.9956908804549627
+    "rerank_score": 0.9992968402077179
   },
   {
-    "id": "5914e523-910a-4177-965a-3947429a9719",
-    "chunk_text": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
-    "document_id": "8fa5bdc9-733b-4cc3-925f-6aaace921790",
+    "id": "47621bbc-072b-4cef-a879-dd1ccf60b217",
+    "chunk_text": "Section: Access Control Policy (Nimbus Labs) > Authentication standards\n\nPasswords must be at least 14 characters.Administrator accounts must use hardware security keys in addition to passwords.Shared accounts are not permitted.",
+    "document_id": "631ace5d-f014-41cb-911c-ff9876d6a01b",
     "metadata_filters": {},
+    "distance": 0.4615625666304157,
+    "match_type": "hybrid",
     "rank": 0.06079271,
-    "distance": 0.7515545780773472,
-    "match_type": "keyword",
-    "rerank_score": 0.9585170373217478
+    "rerank_score": 0.9992120168454736
   },
   {
-    "id": "adba155f-0f87-448e-8d59-bbd626735652",
+    "id": "b69e1418-04b8-4da7-b8ca-7d4a9ce969b7",
     "chunk_text": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
-    "document_id": "8fa5bdc9-733b-4cc3-925f-6aaace921790",
+    "document_id": "eb80c57c-cd00-4c69-9afd-75f2989e0af8",
     "metadata_filters": {},
     "rank": 0.06079271,
     "distance": 0.7515545780773472,

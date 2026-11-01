@@ -2,14 +2,10 @@
   "success": true,
   "data": {
     "merchant": "LOTUS GROVE INN",
-    "date": "2026-10-26",
+    "date": "2026-10-25",
     "invoice_number": "55120",
     "expense_type": "hotel",
-    "items": [
-      "description\": \"Room charge\", \"amount\": 6500.00",
-      "description\": \"CGST @ 6%\", \"amount\": 390.00",
-      "description\": \"SGST @ 6%\", \"amount\": 390.00"
-    ],
+    "items": [],
     "subtotal": null,
     "gst": 780,
     "total": 7280,
@@ -19,7 +15,7 @@
     "city": "Mumbai",
     "travel_class": null,
     "trip_type": "unknown",
-    "confidence": 1
+    "confidence": 0.95
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

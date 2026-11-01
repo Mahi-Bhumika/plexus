@@ -6,9 +6,7 @@
     "invoice_number": "K7QX2M",
     "expense_type": "domestic_flight",
     "items": [
-      1,
-      2,
-      3
+      null
     ],
     "subtotal": 5400,
     "gst": 270,
@@ -16,7 +14,7 @@
     "covers": null,
     "meal_type": "unknown",
     "nights": null,
-    "city": "Mumbai",
+    "city": "Bengaluru",
     "travel_class": "Economy",
     "trip_type": "one_way",
     "confidence": 0.95
