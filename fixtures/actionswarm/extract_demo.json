@@ -1,20 +1,33 @@
 {
   "success": true,
   "data": {
-    "summary": "Meridian Bank and Nimbus Labs held a kickoff meeting to start a pilot for the Nimbus Ledger Sync tool to automate UPI reconciliation. The team agreed on a scope limited strictly to UPI and set a target go-live date of Monday 30 November 2026.",
+    "summary": "Meridian Bank and Nimbus Labs kicked off the Nimbus Ledger Sync pilot to automate UPI reconciliation by November 30. The meeting established project scope, security compliance steps, and initial deliverables.",
     "decisions": [
-      "Pilot go-live date is Monday 30 November 2026",
-      "Phase one is limited to UPI reconciliation only"
+      "Pilot go-live date is set for Monday 30 November 2026",
+      "Phase one is limited to UPI reconciliation only",
+      "Primary hosting is AWS Mumbai with a disaster recovery replica in Singapore"
     ],
     "action_items": [
       {
-        "title": "title"
+        "title": "Send standard mutual NDA to Neha"
+      },
+      {
+        "title": "Set up sandbox environment and send API credentials to Vikram's team"
+      },
+      {
+        "title": "Write mapping document for Meridian and Nimbus fields"
+      },
+      {
+        "title": "Prepare anonymised sample transaction files"
+      },
+      {
+        "title": "Set up laptop access and accounts for Meera"
       }
     ],
     "follow_up_email": {
       "to": "client",
       "subject": "Follow-up: Kickoff decisions and next steps",
-      "body": "to"
+      "body": "Follow-up email generation is not implemented in this prompt."
     }
   },
   "modelUsed": "gemini-3.5-flash-lite"
