@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Retention schedule\n\nData type: Customer data (transaction files, reconciliation results); Retention: For the contract term plus 90 days\nData type: Application and system logs; Retention: 400 days\nData type: Database backups; Retention: 35 days\nData type: Support tickets; Retention: 3 years\nData type: Security audit logs; Retention: 7 years\nData type: Employee records; Retention: 7 years after the end of employment",
+    "ref": "af753972-59be-4400-b095-cf0706c1dcd3"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Next examination\n\nThe next Type II audit period begins 1 July 2026 and runs for 12 months.",
+    "ref": "858e0e5f-f6c7-4171-b17e-4d660a102cf6"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
+    "ref": "85a01cf5-4c3d-4775-bd15-b1294e27a376"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Overview\n\nNimbus Labs completed a SOC 2 Type II examination covering the Nimbus Ledger Sync platform. The audit period ran from 1 January 2026 to 30 June 2026. The final report was issued on 14 August 2026 by the independent auditor Harlow & Pike LLP.",
+    "ref": "d3934e4a-bc31-4567-99cb-efeeb6190f26"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Onboarding and Offboarding Procedure > Offboarding\n\nThe manager notifies HR on or before the last working day.All access is revoked within 4 hours of the person's exit time.Shared secrets that the person had access to are rotated within 2 business days.The company laptop is returned, and the device is wiped within 3 business days.Offboarding is recorded in the audit log and checked in the next quarterly access review.",
+    "ref": "b702e3da-7b0a-411e-a63e-26a9ee7aa0db"
+  }
+]

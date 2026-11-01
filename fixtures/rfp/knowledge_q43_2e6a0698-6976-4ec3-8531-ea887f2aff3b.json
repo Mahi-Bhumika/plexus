@@ -1,0 +1,17 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "ref": "3b3f05aa-b68e-456e-910e-cd6348ac84a6"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion method\n\nProduction data is deleted by dropping the customer's tenant schema and the associated storage objects. Encrypted volumes are retired by deleting their encryption keys.",
+    "ref": "47cc9e8a-27a8-42c7-aca2-1623eb29ae66"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Legal holds\n\nIf a legal hold applies, deletion is paused for the data in scope. The founder is the only person who can place or release a legal hold.",
+    "ref": "1257a58c-004a-4f52-8ff1-6f5e6764909d"
+  }
+]

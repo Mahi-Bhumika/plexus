@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "31",
+      "answer": "Restores are tested every quarter, and the most recent test was on 12 September 2026. It was completed in 2 hours 40 minutes, which was within the 4-hour RTO, and the results were reviewed by the Engineering Manager and filed in the evidence folder.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "871068f1-dd17-434a-8fca-d9d486ccc520"
+    },
+    {
+      "id": "32",
+      "answer": "Nimbus Labs uses 9 sub-processors that may process customer data, including AWS and an email delivery provider. The current list is shared with customers on request, and customers receive 30 days' advance notice before a new sub-processor is added, during which they may object in writing.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "64df7061-280f-4354-9421-12e6e284f25f"
+    },
+    {
+      "id": "33",
+      "answer": "Tier 1 vendors are reviewed once a year, and Tier 2 vendors are reviewed every two years. Additionally, any vendor that suffers a security incident is reviewed immediately.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "d9d50441-f415-4564-8648-fdca42495aff"
+    },
+    {
+      "id": "34",
+      "answer": "A background check covering identity, employment history, and education is completed before the start date for every employee, intern, and contractor.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "53bca873-6a17-423f-8c38-23d260aa92b0"
+    },
+    {
+      "id": "35",
+      "answer": "All access is revoked within 4 hours of the person's exit time after the manager notifies HR on or before the last working day. Shared secrets are rotated within 2 business days, and the company laptop is returned and wiped within 3 business days, with the offboarding recorded in the audit log and checked in the next quarterly access review.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b702e3da-7b0a-411e-a63e-26a9ee7aa0db"
+    },
+    {
+      "id": "36",
+      "answer": "Customer data is stored in India by default in AWS Mumbai (ap-south-1), but disaster recovery copies are held in a cross-region replica in Singapore (ap-southeast-1). Customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "3f27499a-91bc-4275-a037-3620cc31dd24"
+    },
+    {
+      "id": "37",
+      "answer": "When a breach involving customer data is confirmed, affected customers are notified within 72 hours. Nimbus Labs also reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident, but the provided chunks contain no notification commitment for a suspected, not yet confirmed, security incident.",
+      "coverage": "partial",
+      "confidence": 0.9,
+      "source_ref": "1d314048-320d-4386-afe3-c4e97778a0f9"
+    },
+    {
+      "id": "38",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "39",
+      "answer": "Support hours and the formal SLA are set in the contract.",
+      "coverage": "partial",
+      "confidence": 0.8,
+      "source_ref": "caa9ea3c-54cd-480e-bfd4-2398173d286d"
+    },
+    {
+      "id": "40",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

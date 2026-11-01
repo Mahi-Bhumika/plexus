@@ -1,33 +1,33 @@
 {
   "success": true,
   "data": {
-    "summary": "Meridian Bank and Nimbus Labs kicked off the Nimbus Ledger Sync pilot to automate UPI reconciliation by November 30. The meeting established project scope, security compliance steps, and initial deliverables.",
+    "summary": "Meridian Bank and Nimbus Labs held a project kickoff meeting to establish a pilot for the Nimbus Ledger Sync tool to automate UPI reconciliation. The team agreed on a scoped go-live date of November 30, 2026, and outlined technical deliverables including sandbox access, mapping documents, and security requirements.",
     "decisions": [
-      "Pilot go-live date is set for Monday 30 November 2026",
-      "Phase one is limited to UPI reconciliation only",
-      "Primary hosting is AWS Mumbai with a disaster recovery replica in Singapore"
+      "The pilot go-live date is set for Monday 30 November 2026.",
+      "Phase one is limited to UPI reconciliation only, excluding NEFT and IMPS.",
+      "Data will be hosted primarily in AWS Mumbai with a disaster recovery replica in Singapore."
     ],
     "action_items": [
       {
-        "title": "Send standard mutual NDA to Neha"
+        "title": "Send the standard mutual NDA to Neha"
       },
       {
-        "title": "Set up sandbox environment and send API credentials to Vikram's team"
+        "title": "Set up the sandbox environment and send API credentials to Vikram's team"
       },
       {
-        "title": "Write mapping document for Meridian and Nimbus fields"
+        "title": "Write a mapping document mapping Meridian fields to Nimbus fields"
       },
       {
         "title": "Prepare anonymised sample transaction files"
       },
       {
-        "title": "Set up laptop access and accounts for Meera"
+        "title": "Set up accounts for Meera"
       }
     ],
     "follow_up_email": {
       "to": "client",
       "subject": "Follow-up: Kickoff decisions and next steps",
-      "body": "Follow-up email generation is not implemented in this prompt."
+      "body": "Neha Kapoor"
     }
   },
   "modelUsed": "gemini-3.5-flash-lite"

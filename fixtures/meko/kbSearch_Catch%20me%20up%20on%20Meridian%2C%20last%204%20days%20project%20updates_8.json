@@ -1,0 +1,44 @@
+[
+  {
+    "id": "a14a55bb-6def-48ab-beb2-ce2db20437aa",
+    "chunk_text": "On October 31, 2026, the user used an '[intern]' command tag to request a time-bounded status catch-up on the project 'Meridian' covering the prior four days (October 27–30, 2026), signaling a preference for concise, date-bounded operational updates.",
+    "document_id": "4a21da03-f648-46eb-8caf-13636d2e533d",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_search",
+      "memory_id": "8ac06b88-eae3-43d4-a22b-55ac721e5de6"
+    },
+    "rank": 0.06079271,
+    "distance": 0.9974597332889968,
+    "match_type": "keyword",
+    "rerank_score": 0.9987937205603069
+  },
+  {
+    "id": "bf030817-cef0-4c5d-a1de-04dce848c652",
+    "chunk_text": "On November 1, 2026, the user, acting in their founder role, requested a catch-up on the 'Meridian' project covering the prior four days (October 28–31, 2026) using a '[founder]' command, reinforcing their preference for concise, date-bounded operational status summaries.",
+    "document_id": "4a21da03-f648-46eb-8caf-13636d2e533d",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_search",
+      "memory_id": "cb8c44bf-6b6a-4a3c-9509-6c52a867f9db"
+    },
+    "rank": 0.045594532,
+    "distance": 1.0031154501150084,
+    "match_type": "keyword",
+    "rerank_score": 0.9986792758007771
+  },
+  {
+    "id": "17ea8113-8e06-4b50-97ad-cc85f42a5c4e",
+    "chunk_text": "On October 31, 2026, the user identified as a founder and requested a catch-up on “Meridian” covering the previous four days (October 27–30, 2026), asking for a time-bounded status summary for that period.",
+    "document_id": "4a21da03-f648-46eb-8caf-13636d2e533d",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_search",
+      "memory_id": "d257936b-bed9-4c8a-8284-2c1b0b207fc4"
+    },
+    "rank": 0.030396355,
+    "distance": 0.9873286914964234,
+    "match_type": "keyword",
+    "rerank_score": 0.9925135822675866
+  }
+]

@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan > Customer notification\n\nWhen a breach involving customer data is confirmed, affected customers are notified within 72 hours. Nimbus Labs also reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident, as required by Indian rules.",
+    "ref": "1d314048-320d-4386-afe3-c4e97778a0f9"
+  }
+]

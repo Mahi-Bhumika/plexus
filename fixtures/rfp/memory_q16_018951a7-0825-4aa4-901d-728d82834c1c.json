@@ -1,0 +1,52 @@
+[
+  {
+    "id": "592d597d-0f2a-45e2-9222-5643d9f1bed7",
+    "text": "RFP_FIX | What are your patching timelines for critical and high vulnerabilities? | the approved answer | Riya Sharma",
+    "score": 0.512273332841938
+  },
+  {
+    "id": "488b85e1-6388-4c4c-9ee0-aa48caad1c49",
+    "text": "RFP_FIX | What are your patching timelines for critical and high vulnerabilities? | the approaved answer | Riya Sharma",
+    "score": 0.5059981658490896
+  },
+  {
+    "id": "627d546e-0e3f-49f1-8daf-e76510b80a39",
+    "text": "RFP_FIX | Do you encrypt data while it is in use (for example, confidential computing)? | another answer! | Riya Sharma",
+    "score": 0.4827589297965178
+  },
+  {
+    "id": "22efa24f-7355-4da4-870e-d1e2f004e298",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs held a kickoff meeting to start a pilot of the Nimbus Ledger Sync for UPI reconciliation, setting a go-live date of November 30, 2026. The teams agreed on scope limitations, discussed technical architecture, and assigned various action items regarding security questionnaires, sandboxes, and file mappings. | Decisions: The pilot go-live date is set for Monday 30 November 2026.; Phase one is limited to UPI reconciliation only, leaving NEFT and IMPS for phase two.; Customer-managed encryption keys are not supported and keys will be managed in AWS KMS. | Tasks: Send our standard mutual NDA (Riya Sharma, 2026-11-04); Riya Sharma (unassigned); 2026-11-04 (unassigned); Set up the sandbox environment and send API credentials to Vikram's (Karan, 2026-11-06); Karan (unassigned); 2026-11-06 (unassigned); Give you the IP ranges we need allowlisted for the UPI feed (unassigned, 2026-11-10); 2026-11-10 (unassigned); Write a mapping document that says which Meridian field feeds which (Meera, 2026-11-16); Meera (unassigned); 2026-11-16 (unassigned); Write a mapping document that says which Meridian field feeds which (Riya Sharma, 2026-11-16); Nominate two analysts from my team for user acceptance testing and (unassigned, 2026-11-13); 2026-11-13 (unassigned); Prepare anonymised sample transaction files from the layout given (Arjun, 2026-11-12); Arjun (Arjun, 2026-11-12); 2026-11-12 (unassigned)",
+    "score": 0.24530375791635295
+  },
+  {
+    "id": "ce5d2b69-f154-40fd-b2f8-fb99b278b63a",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs held a project kickoff to establish a pilot for UPI reconciliation using Nimbus Ledger Sync, targeting a go-live date of Monday 30 November 2026. The meeting aligned stakeholders on scope limitations, security compliance requirements, and concrete next steps including sandbox provisioning and data mapping. | Decisions: Keep the pilot go-live date as Monday 30 November 2026.; Limit phase one to UPI reconciliation only, deferring NEFT and IMPS to phase two. | Tasks: {\"title\":\"Send standard mutual NDA\",\"assignee\":\"Riya (Riya Sharma, 2026-11-04); {\"title\":\"Set up sandbox environment and send API (Karan, 2026-11-06); {\"title\":\"Send IP ranges for allowlisting\",\"assignee\":null,\"due\":\"2026 (unassigned, 2026-11-10); {\"title\":\"Write mapping document for Meridian and Nimbus (Riya Sharma, 2026-11-16); {\"title\":\"Send names of analysts for user acceptance (unassigned, 2026-11-13); {\"title\":\"Prepare anonymised sample transaction (Arjun, 2026-11-12)",
+    "score": 0.24085287061143723
+  },
+  {
+    "id": "80dc6243-e4f2-43b9-9918-deeea55a7dbe",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs agreed to launch a pilot of Nimbus Ledger Sync for UPI reconciliation by Monday 30 November 2026. The meeting established project scope, security compliance requirements, and key deliverables including sandboxes, API credentials, and data mapping. | Decisions: Pilot go-live date is Monday 30 November 2026.; Phase one is limited to UPI reconciliation only.; Customer-managed encryption keys are not supported. | Tasks: Send our standard mutual NDA (Riya Sharma, 2026-11-04); Riya Sharma (unassigned); 2026-11-04 (unassigned); Set up the sandbox environment and send API credentials to Vikram's (Karan, 2026-11-06); Karan (unassigned); 2026-11-06 (unassigned); Give the IP ranges we need allowlisted for the UPI feed (unassigned, 2026-11-10); 2026-11-10 (unassigned); Write a mapping document that says which Meridian field feeds which (Meera, 2026-11-16); Meera (unassigned); 2026-11-16 (unassigned); Write a mapping document that says which Meridian field feeds which (Riya Sharma, 2026-11-16); Nominate two analysts from my team for user acceptance testing and (unassigned, 2026-11-13); 2026-11-13 (unassigned); Prepare anonymised sample transaction files from the layout given (Arjun, 2026-11-12); Arjun (Arjun, 2026-11-12); 2026-11-12 (unassigned); Get my accounts set up by the end of today (Karan, 2026-10-26); Karan (unassigned); 2026-10-26 (unassigned); Meera Iyer: I just need laptop access, and Riya said I would get my (Karan, 2026-10-26)",
+    "score": 0.23797306783169048
+  },
+  {
+    "id": "a5da0d44-53bf-4e2c-8312-c526f41314ca",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs held a project kickoff meeting to establish a pilot for the Nimbus Ledger Sync tool to automate UPI reconciliation. The team agreed on a scoped go-live date of November 30, 2026, and outlined technical deliverables including sandbox access, mapping documents, and security requirements. | Decisions: The pilot go-live date is set for Monday 30 November 2026.; Phase one is limited to UPI reconciliation only, excluding NEFT and IMPS.; Data will be hosted primarily in AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: Send the standard mutual NDA to Neha (Riya Sharma, 2026-11-04); Set up the sandbox environment and send API credentials to Vikram's (Karan, 2026-11-06); Write a mapping document mapping Meridian fields to Nimbus fields (Meera, 2026-11-16); Prepare anonymised sample transaction files (Arjun, 2026-11-12); Set up accounts for Meera (unassigned)",
+    "score": 0.22759610571758604
+  },
+  {
+    "id": "ea67b21d-0d0a-42dd-a027-dfe8307e847b",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs kicked off the pilot for Nimbus Ledger Sync to automate Meridian's UPI settlement reconciliation. The teams decided to limit the phase one pilot scope to UPI reconciliation only, targeting a go-live date of November 30, 2026. Action items for NDA delivery, sandbox setup, sample data preparation, and field mapping were established leading up to testing. | Decisions: Limit phase one scope exclusively to UPI reconciliation, deferring NEFT and IMPS to phase two.; Maintain Monday 30 November 2026 as the target go-live date for the pilot. | Tasks: Send mutual NDA to Neha Kapoor (Riya Sharma, 2026-11-04); Set up sandbox environment and send API credentials to Vikram's team (Karan, 2026-11-06); Send IP ranges needed for allowlisting for the UPI feed (unassigned, 2026-11-10); Write a mapping document for Meridian and Nimbus fields (Meera, 2026-11-16); Prepare anonymised sample transaction files (Arjun, 2026-11-12); Nominate two analysts for user acceptance testing (unassigned, 2026-11-13); Set up Meera's laptop access and accounts (Karan, 2026-10-26)",
+    "score": 0.2208927895984687
+  },
+  {
+    "id": "92382ee6-adef-4844-8768-eb6ce1674570",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs agreed to launch a pilot of Nimbus Ledger Sync for UPI reconciliation by Monday 30 November 2026. The meeting established project scope, security compliance requirements, and timelines for sandboxing and data integration. | Decisions: Pilot go-live date is Monday 30 November 2026; Phase one is limited to UPI reconciliation only, with NEFT and IMPS deferred to phase two | Tasks: { \"title\": \"Send the standard mutual NDA to Neha\", \"assignee\": \"Riya (Riya Sharma, 2026-11-04); { \"title\": \"Set up the sandbox environment and send API credentials (Karan, 2026-11-06); { \"title\": \"Provide IP ranges needed allowlisted for the UPI feed\", (unassigned, 2026-11-10); { \"title\": \"Write a mapping document for Meridian and Nimbus fields\", (Riya Sharma, 2026-11-16); { \"title\": \"Send names of two analysts for user acceptance testing\", (unassigned, 2026-11-13); { \"title\": \"Prepare anonymised sample transaction files\", \"assignee\": (Arjun, 2026-11-12); { \"title\": \"Set up accounts for Meera\", \"assignee\": \"Karan\", \"due\": (unassigned)",
+    "score": 0.21930152855356155
+  },
+  {
+    "id": "107389e3-4293-400e-834e-0a322d2ac1fc",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs agreed to launch a pilot of the Nimbus Ledger Sync for UPI reconciliation by November 30, 2026. The meeting established project scope, compliance requirements, and key deliverables including sandbox environments and sample data mappings. | Decisions: Go-live date for the pilot is set for Monday 30 November 2026.; Phase one is limited to UPI reconciliation only, with NEFT and IMPS deferred to phase two.; Data hosting uses primary AWS Mumbai with a disaster recovery replica in Singapore. | Tasks: Send the standard mutual NDA to Neha Kapoor (Riya Sharma, 2026-11-04); Set up the sandbox environment and send API credentials to Vikram's (Karan, 2026-11-06); Send the IP ranges needed allowlisted for the UPI feed (unassigned, 2026-11-10); Prepare anonymised sample transaction files (Arjun, 2026-11-12); Send the names of two analysts for user acceptance testing (unassigned, 2026-11-13); Write a mapping document for Meridian and Nimbus fields (Riya Sharma, 2026-11-16)",
+    "score": 0.21928498834960153
+  }
+]

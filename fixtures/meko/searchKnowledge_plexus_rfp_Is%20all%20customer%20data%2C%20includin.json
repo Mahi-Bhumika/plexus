@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Data location\n\nCustomer data is stored in India by default (AWS Mumbai). Disaster recovery copies are held in Singapore, as described in the backup plan.",
+    "ref": "3f27499a-91bc-4275-a037-3620cc31dd24"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Note on data location\n\nBecause the disaster recovery replica is in Singapore, customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing.",
+    "ref": "9a6ae5f3-72c0-4328-9ffc-cd9964719ec2"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Disaster recovery site\n\nProduction runs in AWS Mumbai (ap-south-1). A cross-region replica is maintained in Singapore (ap-southeast-1) and can be promoted to primary during a regional failure.",
+    "ref": "26a0c0f6-62e0-4a51-910b-f42d5944ed41"
+  }
+]

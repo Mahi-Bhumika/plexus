@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Production access\n\nProduction access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Interns are not eligible for production access.",
+    "ref": "ac2da1a4-90e1-438c-90b0-da63b68795cc"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
+    "ref": "b69e1418-04b8-4da7-b8ca-7d4a9ce969b7"
+  }
+]

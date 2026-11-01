@@ -22,7 +22,7 @@
     "city": "Mumbai",
     "travel_class": null,
     "trip_type": "unknown",
-    "confidence": 0.95
+    "confidence": 0.99
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

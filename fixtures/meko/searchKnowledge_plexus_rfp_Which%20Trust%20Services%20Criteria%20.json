@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Trust Services Criteria in scope\n\nThree criteria were examined:\n\nSecurity (common criteria)AvailabilityConfidentiality\n\nThe Processing Integrity and Privacy criteria were not part of this examination.",
+    "ref": "396551fc-351e-469d-8020-3e3327d05169"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Scope boundaries\n\nThe report covers the production platform hosted on AWS (Mumbai primary, Singapore disaster recovery), the corporate identity provider and the ticketing system. It does not cover customer-operated systems.",
+    "ref": "acaab216-b8ed-418f-9796-bcd566c902ff"
+  }
+]

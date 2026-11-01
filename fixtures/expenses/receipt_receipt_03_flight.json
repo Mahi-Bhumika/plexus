@@ -6,9 +6,10 @@
     "invoice_number": "K7QX2M",
     "expense_type": "domestic_flight",
     "items": [
-      null
+      "description\": \"Base fare",
+      "amount\": 5400.00}, {"
     ],
-    "subtotal": 5400,
+    "subtotal": null,
     "gst": 270,
     "total": 6000,
     "covers": null,

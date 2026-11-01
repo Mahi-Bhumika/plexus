@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "41",
+      "answer": "Production access is just-in-time and a grant lasts a maximum of 8 hours before expiring automatically. Interns are not eligible for production access. Staff access is limited to support and operations needs under the access control policy.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "ref:ac2da1a4-90e1-438c-90b0-da63b68795cc"
+    },
+    {
+      "id": "42",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "43",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "44",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "45",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "46",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "47",
+      "answer": "On-premise deployment is not on the committed roadmap.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "ref:2727d51c-6337-4909-b3df-8de58148fcc0"
+    },
+    {
+      "id": "48",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "49",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "50",
+      "answer": null,
+      "coverage": "partial",
+      "confidence": 1,
+      "source_ref": "ref:bfa7cc3c-58d9-40c1-b792-07b1f8c3aded"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

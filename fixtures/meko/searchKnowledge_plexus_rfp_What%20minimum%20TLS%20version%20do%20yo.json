@@ -1,1 +1,7 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard > Encryption in transit\n\nAll connections to Nimbus Ledger Sync use TLS 1.2 or higher; TLS 1.3 is preferred and negotiated whenever the client supports it. Older protocol versions are disabled. Internal service-to-service traffic is also encrypted.",
+    "ref": "a1f7af92-e565-4a75-a3fb-f4817e5616b7"
+  }
+]

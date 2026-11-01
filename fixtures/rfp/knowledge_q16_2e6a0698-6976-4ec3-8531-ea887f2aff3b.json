@@ -1,0 +1,27 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Backups\n\nAutomated daily snapshots of the production database.Snapshots are retained for 35 days.Continuous transaction-log shipping supports the one-hour RPO.All backups are encrypted with AES-256.",
+    "ref": "20db1e4b-cc1b-4fb4-8db4-f5710e491a39"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Retention schedule\n\nData type: Customer data (transaction files, reconciliation results); Retention: For the contract term plus 90 days\nData type: Application and system logs; Retention: 400 days\nData type: Database backups; Retention: 35 days\nData type: Support tickets; Retention: 3 years\nData type: Security audit logs; Retention: 7 years\nData type: Employee records; Retention: 7 years after the end of employment",
+    "ref": "af753972-59be-4400-b095-cf0706c1dcd3"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "ref": "3b3f05aa-b68e-456e-910e-cd6348ac84a6"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
+    "ref": "85a01cf5-4c3d-4775-bd15-b1294e27a376"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Recovery objectives\n\nRecovery Point Objective (RPO): 1 hour. At most one hour of data can be lost.Recovery Time Objective (RTO): 4 hours. Service is restored within four hours of a declared disaster.",
+    "ref": "1c60b872-cb9d-495b-8cc4-8345df5d985f"
+  }
+]

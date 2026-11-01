@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "21",
+      "answer": "The company laptop is returned, and the device is wiped within 3 business days of the person's exit time.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b702e3da-7b0a-411e-a63e-26a9ee7aa0db"
+    },
+    {
+      "id": "22",
+      "answer": "All access is revoked within 4 hours of the person's exit time.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b702e3da-7b0a-411e-a63e-26a9ee7aa0db"
+    },
+    {
+      "id": "23",
+      "answer": "Yes, a web application firewall filters all inbound traffic.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "d8fd9d26-b207-4134-8e46-39e0964ef8c7"
+    },
+    {
+      "id": "24",
+      "answer": "When a bank forwards a request from an individual for access, correction, or erasure, Nimbus Labs responds to the bank within 15 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "81c00e9d-4fc5-414a-a49a-878e104262a4"
+    },
+    {
+      "id": "25",
+      "answer": "Riya Sharma is the named privacy lead.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "cb31cc47-9456-4407-b641-a45ae121d60d"
+    },
+    {
+      "id": "26",
+      "answer": "Nimbus Labs designs Nimbus Ledger Sync for alignment with India's Digital Personal Data Protection (DPDP) Act, 2023, but this is a design goal and not a certification or compliance statement.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "4c0e750d-82b3-422a-8398-140257f74c30"
+    },
+    {
+      "id": "27",
+      "answer": null,
+      "coverage": "none",
+      "confidence": 1,
+      "source_ref": null
+    },
+    {
+      "id": "28",
+      "answer": "Passwords must be at least 14 characters. Administrator accounts must use hardware security keys in addition to passwords, and shared accounts are not permitted.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "47621bbc-072b-4cef-a879-dd1ccf60b217"
+    },
+    {
+      "id": "29",
+      "answer": "The incident response plan is exercised through a tabletop drill twice a year, and the latest drill took place on 4 June 2026.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "e014e9c3-6dd1-4adb-86f3-ec70e4978834"
+    },
+    {
+      "id": "30",
+      "answer": "A customer administrator can request early deletion in writing, and Nimbus Labs confirms completion by email within 10 business days of the request.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "1951141f-4fde-40b2-a82a-0c8c63d93bbf"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

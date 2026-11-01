@@ -1,0 +1,7 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Authentication standards\n\nPasswords must be at least 14 characters.Administrator accounts must use hardware security keys in addition to passwords.Shared accounts are not permitted.",
+    "ref": "47621bbc-072b-4cef-a879-dd1ccf60b217"
+  }
+]

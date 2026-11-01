@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Overview\n\nNimbus Labs completed a SOC 2 Type II examination covering the Nimbus Ledger Sync platform. The audit period ran from 1 January 2026 to 30 June 2026. The final report was issued on 14 August 2026 by the independent auditor Harlow & Pike LLP.",
+    "ref": "d3934e4a-bc31-4567-99cb-efeeb6190f26"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Sharing the report\n\nThe full report is available to customers and prospects under a signed NDA. Requests go to security@nimbuslabs.example and are answered within 3 business days. A bridge letter covering the period from 1 July 2026 to the date of request can be issued on demand.",
+    "ref": "da806968-ffcf-4a4e-8936-3f96f044e2ef"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
+    "ref": "85a01cf5-4c3d-4775-bd15-b1294e27a376"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Certifications\n\nNimbus Labs holds a SOC 2 Type II report. It does not yet hold ISO 27001 certification; certification is planned for 2027.",
+    "ref": "bfa7cc3c-58d9-40c1-b792-07b1f8c3aded"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Next examination\n\nThe next Type II audit period begins 1 July 2026 and runs for 12 months.",
+    "ref": "858e0e5f-f6c7-4171-b17e-4d660a102cf6"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Scope boundaries\n\nThe report covers the production platform hosted on AWS (Mumbai primary, Singapore disaster recovery), the corporate identity provider and the ticketing system. It does not cover customer-operated systems.",
+    "ref": "acaab216-b8ed-418f-9796-bcd566c902ff"
+  }
+]

@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Access reviews\n\nAccess reviews run every quarter. Managers confirm or remove each person's access, and the Engineering Manager signs off the review.",
+    "ref": "a7031ad2-abd0-4b54-84ec-b1ff3c91f150"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs SOC 2 Type II Summary > Results\n\nThe auditor noted two exceptions during the period:\n\nOne quarterly access review was completed 6 days after the due date in Q1 2026.One terminated contractor retained read-only access to a staging tool for 2 days after their contract ended.\n\nBoth exceptions were remediated and closed before the report was issued. No exceptions related to encryption, backups or incident response.",
+    "ref": "85a01cf5-4c3d-4775-bd15-b1294e27a376"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Ongoing review\n\nTier 1 vendors are reviewed once a year. Tier 2 vendors are reviewed every two years. Any vendor that suffers a security incident is reviewed immediately.",
+    "ref": "d9d50441-f415-4564-8648-fdca42495aff"
+  }
+]

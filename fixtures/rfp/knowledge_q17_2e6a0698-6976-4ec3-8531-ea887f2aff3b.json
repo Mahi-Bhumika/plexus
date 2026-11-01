@@ -1,0 +1,7 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Retention schedule\n\nData type: Customer data (transaction files, reconciliation results); Retention: For the contract term plus 90 days\nData type: Application and system logs; Retention: 400 days\nData type: Database backups; Retention: 35 days\nData type: Support tickets; Retention: 3 years\nData type: Security audit logs; Retention: 7 years\nData type: Employee records; Retention: 7 years after the end of employment",
+    "ref": "af753972-59be-4400-b095-cf0706c1dcd3"
+  }
+]

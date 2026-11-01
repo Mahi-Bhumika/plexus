@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Production access\n\nProduction access is just-in-time. A grant lasts a maximum of 8 hours and then expires automatically. Interns are not eligible for production access.",
+    "ref": "ac2da1a4-90e1-438c-90b0-da63b68795cc"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Document: Engineer onboarding guide (Nimbus Labs)\nSection: Engineer onboarding guide > First week\n\nFinish the security awareness training within 7 days. Production access stays closed until you do.Need another tool? Post in . Low-risk apps are approved automatically; others go to your manager.Production access is granted just-in-time, for a few hours at a time, never permanently.Read the reconciliation repo README and the current sprint board.",
+    "ref": "de671578-7ea1-4bfb-8080-70390c2126aa"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "ref": "6bc965ab-7b2e-4e71-b06c-902dc0960c7a"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Risk levels and approvals\n\nLow risk applications (for example design and note-taking tools) are approved automatically if the requester's role allows them.Medium risk applications need approval from the person's manager.High risk applications, including AWS production, need approval from the Engineering Manager.If the Engineering Manager is the requester, approval escalates to the Founder. No one may approve their own request.",
+    "ref": "83dc2586-3616-41b8-88f7-edf7ae45f866"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Purpose and scope\n\nThis policy defines how Nimbus Labs grants, reviews and removes access to internal systems, customer data and third-party tools. It covers all employees, interns and contractors.",
+    "ref": "f9b99938-2671-4630-8bce-a394fc6f1ba2"
+  }
+]

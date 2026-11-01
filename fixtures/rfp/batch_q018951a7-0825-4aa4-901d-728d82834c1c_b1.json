@@ -1,0 +1,69 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "12",
+      "answer": "Nimbus Labs does not sell customer data, and customer data is not used to train machine learning models. Access by Nimbus Labs staff is limited to support and operations needs under the access control policy.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "b69e1418-04b8-4da7-b8ca-7d4a9ce969b7"
+    },
+    {
+      "id": "13",
+      "answer": "Engineers complete secure coding training once a year. Secrets are stored in AWS Secrets Manager and are never committed to source control, as a secrets scanner blocks any commit containing a secret.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "f3e8648f-31e9-4ec9-ad1f-c313d2e99d1c"
+    },
+    {
+      "id": "14",
+      "answer": "After a contract ends, customer data stays available for export for 90 days. Once that window closes, data is deleted from production systems within 30 days, and backups containing that data expire on their normal 35-day cycle so the last copy is gone no later than 35 days after production deletion.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "3b3f05aa-b68e-456e-910e-cd6348ac84a6"
+    },
+    {
+      "id": "15",
+      "answer": "Application and system logs are retained for 400 days.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "af753972-59be-4400-b095-cf0706c1dcd3"
+    },
+    {
+      "id": "16",
+      "answer": "Database backups are retained for 35 days through automated daily snapshots of the production database.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "20db1e4b-cc1b-4fb4-8db4-f5710e491a39"
+    },
+    {
+      "id": "17",
+      "answer": "Security audit logs are retained for 7 years.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "af753972-59be-4400-b095-cf0706c1dcd3"
+    },
+    {
+      "id": "18",
+      "answer": "Access reviews run every quarter, where managers confirm or remove each person's access and the Engineering Manager signs off the review.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "a7031ad2-abd0-4b54-84ec-b1ff3c91f150"
+    },
+    {
+      "id": "19",
+      "answer": "Passwords must be at least 14 characters. Administrator accounts must use hardware security keys in addition to passwords, and shared accounts are not permitted.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "47621bbc-072b-4cef-a879-dd1ccf60b217"
+    },
+    {
+      "id": "20",
+      "answer": "Production access is granted just-in-time, for a few hours at a time, never permanently, with a grant lasting a maximum of 8 hours before expiring automatically. Interns are not eligible for production access, and high-risk applications like AWS production need approval from the Engineering Manager.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "ac2da1a4-90e1-438c-90b0-da63b68795cc"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

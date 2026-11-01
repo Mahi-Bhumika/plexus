@@ -1,0 +1,147 @@
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Authentication standards\n\nPasswords must be at least 14 characters.Administrator accounts must use hardware security keys in addition to passwords.Shared accounts are not permitted.",
+    "ref": "47621bbc-072b-4cef-a879-dd1ccf60b217"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Principle of least privilege\n\nEveryone has access only to the systems they need for their current work. Default access on day one is restricted to email, company chat and the documentation wiki.",
+    "ref": "8d536581-2213-42f5-b9a9-69799ebab88b"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan > Customer notification\n\nWhen a breach involving customer data is confirmed, affected customers are notified within 72 hours. Nimbus Labs also reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident, as required by Indian rules.",
+    "ref": "1d314048-320d-4386-afe3-c4e97778a0f9"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Purpose and scope\n\nThis policy defines how Nimbus Labs grants, reviews and removes access to internal systems, customer data and third-party tools. It covers all employees, interns and contractors.",
+    "ref": "f9b99938-2671-4630-8bce-a394fc6f1ba2"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Ongoing review\n\nTier 1 vendors are reviewed once a year. Tier 2 vendors are reviewed every two years. Any vendor that suffers a security incident is reviewed immediately.",
+    "ref": "d9d50441-f415-4564-8648-fdca42495aff"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs)\n\nDocument owner: Karan Malhotra, Engineering Manager · Version: 2.1 · Last reviewed: 22 Aug 2026",
+    "ref": "c8ed41d1-8a1d-42b1-95fa-9dad1f97b447"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Risk levels and approvals\n\nLow risk applications (for example design and note-taking tools) are approved automatically if the requester's role allows them.Medium risk applications need approval from the person's manager.High risk applications, including AWS production, need approval from the Engineering Manager.If the Engineering Manager is the requester, approval escalates to the Founder. No one may approve their own request.",
+    "ref": "83dc2586-3616-41b8-88f7-edf7ae45f866"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Access Control Policy (Nimbus Labs) > Emergency access\n\nIn an incident, the on-call engineer may take emergency production access for up to 2 hours without prior approval. The Engineering Manager must approve it retrospectively within 24 hours.",
+    "ref": "6bc965ab-7b2e-4e71-b06c-902dc0960c7a"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan > Severity levels\n\nLevel: P1; Meaning: Customer data exposed or full outage; Acknowledge within: 15 minutes\nLevel: P2; Meaning: Major feature down or suspected exposure; Acknowledge within: 1 hour\nLevel: P3; Meaning: Degraded service, workaround exists; Acknowledge within: 1 business day\nLevel: P4; Meaning: Minor issue; Acknowledge within: 3 business days",
+    "ref": "18760358-ccc3-4f02-891e-6b4561d3577b"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Vendor tiers\n\nVendors are placed in three tiers:\n\nTier 1: handles customer data or is critical to running the platform.Tier 2: handles internal business data only.Tier 3: no access to company or customer data.\n\nNimbus Labs currently has 14 Tier 1 vendors.",
+    "ref": "3bc04803-1815-4b04-a40b-80d2e7085f69"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Purpose\n\nThis policy sets how long Nimbus Labs keeps each type of data and how it is removed.",
+    "ref": "07b06fea-3e09-47b4-b7d4-c9dbf03c50d2"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > Authentication\n\nEmployees sign in through our identity provider using SAML 2.0 single sign-on. Multi-factor authentication is mandatory for every employee account with no exceptions. Customer administrators can connect their own SAML 2.0 identity provider to Nimbus Ledger Sync.",
+    "ref": "26ddc880-1d24-4b09-8e93-8ad4c735389a"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Onboarding and Offboarding Procedure > Onboarding\n\nA company laptop is issued with mobile device management (MDM) installed and disk encryption enforced.Accounts are created from the person's role template; additional access is requested through the access request process.Security awareness training must be completed within 7 days of joining. Access to production systems is not available until it is complete.Everyone signs a confidentiality agreement and the acceptable use policy.Annual refresher training is required for all staff.",
+    "ref": "b81c660f-3b5c-4985-b514-7ce30d5d53e2"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > Vulnerability management\n\nAuthenticated vulnerability scans of production run weekly.Patch deadlines from the date a vulnerability is confirmed: critical within 72 hours, high within 14 days, medium within 60 days.An external penetration test is performed once a year by CertiNova. The most recent test was in March 2026. It found no critical issues and two medium issues, both fixed within 21 days. A summary letter is shared under NDA.",
+    "ref": "067d0740-6833-4113-98e8-9acd3b0129c7"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Data Retention Policy > Deletion after contract end\n\nAfter a contract ends, customer data stays available for export for 90 days. Once that window closes, the data is deleted from production systems within 30 days. Backups containing that data expire on their normal 35-day cycle, so the last copy is gone no later than 35 days after production deletion.",
+    "ref": "3b3f05aa-b68e-456e-910e-cd6348ac84a6"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Recovery objectives\n\nRecovery Point Objective (RPO): 1 hour. At most one hour of data can be lost.Recovery Time Objective (RTO): 4 hours. Service is restored within four hours of a declared disaster.",
+    "ref": "1c60b872-cb9d-495b-8cc4-8345df5d985f"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note\n\nDocument owner: Riya Sharma · Version: 1.2 · Last reviewed: 5 Oct 2026",
+    "ref": "1e3ac1e8-0d03-4394-b893-2f823f9ad874"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan > Response steps\n\nDetect and triage, assign an incident commander.Contain: isolate affected systems and revoke exposed credentials.Investigate and fix.Communicate with affected customers.Review.",
+    "ref": "1fac8288-ec57-42e4-b292-3f91f6b3fc52"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Sub-processors\n\nNimbus Labs uses 9 sub-processors that may process customer data, including AWS and an email delivery provider. The current list is shared with customers on request.",
+    "ref": "64df7061-280f-4354-9421-12e6e284f25f"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Use of data\n\nNimbus Labs does not sell customer data.Customer data is not used to train machine learning models.Access by Nimbus Labs staff is limited to support and operations needs, under the access control policy.",
+    "ref": "b69e1418-04b8-4da7-b8ca-7d4a9ce969b7"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard > Sensitive fields\n\nAccount numbers and UPI identifiers are additionally encrypted at the field level before they are written to the database, so they remain protected even in database exports.",
+    "ref": "30102039-ad93-4093-9ca5-f72288100231"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Incident Response Plan\n\nDocument owner: Karan Malhotra · Version: 2.0 · Last reviewed: 28 Aug 2026",
+    "ref": "20ceb138-5a06-4e09-915d-5e7b383e6ede"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Encryption Standard > Key management\n\nEncryption keys are created and stored in AWS KMS.Keys are rotated every 365 days.Access to key administration is limited to two named engineers and is logged.Nimbus Labs does not operate its own hardware security module (HSM); it relies on the AWS KMS service.",
+    "ref": "9054b08c-10db-4691-95d8-e0e20d8a7dc0"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper\n\nDocument owner: Karan Malhotra · Version: 3.0 · Last reviewed: 2 Sep 2026",
+    "ref": "71b8ccfe-9b18-4d70-830a-39c61c9f5d7a"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Document: Engineer onboarding guide (Nimbus Labs)\nSection: Engineer onboarding guide > Day 1\n\nCollect your company laptop. It comes with device management installed and disk encryption on.Accounts are created from your role template. Engineers start with Slack, Google Workspace, GitHub, Figma and Jira.Join the Slack channels: , ,  and .Sign the confidentiality agreement and the acceptable use policy.",
+    "ref": "8939dd88-7df5-4e0f-8d05-4774fcacade7"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan > Note on data location\n\nBecause the disaster recovery replica is in Singapore, customers who need all copies of their data kept in India should discuss this with Nimbus Labs before signing.",
+    "ref": "9a6ae5f3-72c0-4328-9ffc-cd9964719ec2"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Privacy Note > Data location\n\nCustomer data is stored in India by default (AWS Mumbai). Disaster recovery copies are held in Singapore, as described in the backup plan.",
+    "ref": "3f27499a-91bc-4275-a037-3620cc31dd24"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Backup and Disaster Recovery Plan\n\nDocument owner: Karan Malhotra · Version: 1.8 · Last reviewed: 15 Sep 2026",
+    "ref": "aee84d59-700e-450d-8f75-74c92149b72e"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Security Whitepaper > Network and application security\n\nProduction runs in private subnets; only the load balancer is internet-facing.A web application firewall filters all inbound traffic.Every code change is peer-reviewed by at least one other engineer before it can be merged.Static code analysis and dependency scanning run on every pull request.",
+    "ref": "d8fd9d26-b207-4134-8e46-39e0964ef8c7"
+  }
+]

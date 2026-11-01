@@ -1,0 +1,64 @@
+[
+  {
+    "id": "bf030817-cef0-4c5d-a1de-04dce848c652",
+    "chunk_text": "On November 1, 2026, the user, acting in their founder role, requested a catch-up on the 'Meridian' project covering the prior four days (October 28–31, 2026) using a '[founder]' command, reinforcing their preference for concise, date-bounded operational status summaries.",
+    "document_id": "4a21da03-f648-46eb-8caf-13636d2e533d",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_search",
+      "memory_id": "cb8c44bf-6b6a-4a3c-9509-6c52a867f9db"
+    },
+    "rank": 0.036475625,
+    "distance": 1.0170590833737065,
+    "match_type": "keyword",
+    "rerank_score": 0.9944305347182014
+  },
+  {
+    "id": "17ea8113-8e06-4b50-97ad-cc85f42a5c4e",
+    "chunk_text": "On October 31, 2026, the user identified as a founder and requested a catch-up on “Meridian” covering the previous four days (October 27–30, 2026), asking for a time-bounded status summary for that period.",
+    "document_id": "4a21da03-f648-46eb-8caf-13636d2e533d",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_search",
+      "memory_id": "d257936b-bed9-4c8a-8284-2c1b0b207fc4"
+    },
+    "rank": 0.024317084,
+    "distance": 1.0042920531525763,
+    "match_type": "keyword",
+    "rerank_score": 0.9918897615120078
+  },
+  {
+    "id": "aeff2beb-5c35-4e67-b2d3-3ce7cdc1182c",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners\n\nGo-live: Monday 30 November 2026Scope: phase one is UPI reconciliation only. NEFT and IMPS are phase two.Delivery owner: Karan MalhotraExecutive sponsor: Riya SharmaIntegration lead: Meera IyerMeridian sponsor: Sanjay Desai, Head of Payments OperationsWeekly status call: Thursdays, 4 PMGo/no-go review: Thursday 26 November 2026",
+    "document_id": "290cadb1-5c05-478f-ba34-d87e6372c4ea",
+    "metadata_filters": {},
+    "distance": 0.432079789130715,
+    "match_type": "hybrid",
+    "rank": 0.04694548,
+    "rerank_score": 0.9778545221746828
+  },
+  {
+    "id": "a14a55bb-6def-48ab-beb2-ce2db20437aa",
+    "chunk_text": "On October 31, 2026, the user used an '[intern]' command tag to request a time-bounded status catch-up on the project 'Meridian' covering the prior four days (October 27–30, 2026), signaling a preference for concise, date-bounded operational updates.",
+    "document_id": "4a21da03-f648-46eb-8caf-13636d2e533d",
+    "metadata_filters": {
+      "source": "memory",
+      "agent_id": "plexus_search",
+      "memory_id": "8ac06b88-eae3-43d4-a22b-55ac721e5de6"
+    },
+    "rank": 0.036475625,
+    "distance": 1.0082880940744998,
+    "match_type": "keyword",
+    "rerank_score": 0.9345071871677372
+  },
+  {
+    "id": "b5b6ba55-bb53-4803-9b83-323303c964e7",
+    "chunk_text": "Document: Meridian pilot launch date and owners\nSection: Meridian pilot: launch date and owners > Key dates\n\nDate: Fri 6 Nov; Milestone: Sandbox credentials (done early), security questionnaire due\nDate: Mon 9 Nov; Milestone: Pilot pricing due to Neha Kapoor\nDate: Tue 10 Nov; Milestone: Meridian IP ranges for allowlist\nDate: Thu 12 Nov; Milestone: Anonymised sample files ready\nDate: Fri 13 Nov; Milestone: UAT analysts confirmed (done early)\nDate: Mon 16 Nov; Milestone: Field mapping document\nDate: Thu 26 Nov; Milestone: Go/no-go review\nDate: Mon 30 Nov; Milestone: Go-live",
+    "document_id": "290cadb1-5c05-478f-ba34-d87e6372c4ea",
+    "metadata_filters": {},
+    "distance": 0.3478117947812772,
+    "match_type": "hybrid",
+    "rank": 0.049339756,
+    "rerank_score": 0.9058299869427914
+  }
+]

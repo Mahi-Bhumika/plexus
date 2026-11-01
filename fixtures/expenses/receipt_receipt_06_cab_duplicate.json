@@ -5,9 +5,7 @@
     "date": "2026-10-25",
     "invoice_number": "ZC-2610-48213",
     "expense_type": "local_travel",
-    "items": [
-      null
-    ],
+    "items": [],
     "subtotal": null,
     "gst": 40,
     "total": 840,
@@ -17,7 +15,7 @@
     "city": "Mumbai",
     "travel_class": null,
     "trip_type": "unknown",
-    "confidence": 0.95
+    "confidence": 0.98
   },
   "modelUsed": "gemini-3.5-flash-lite"
 }

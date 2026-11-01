@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Sub-processors\n\nNimbus Labs uses 9 sub-processors that may process customer data, including AWS and an email delivery provider. The current list is shared with customers on request.",
+    "ref": "64df7061-280f-4354-9421-12e6e284f25f"
+  },
+  {
+    "title": "Knowledge Doc",
+    "content": "Section: Nimbus Labs Vendor Management Policy > Change notice\n\nCustomers receive 30 days' advance notice before a new sub-processor is added. A customer may object in writing within that period.",
+    "ref": "45abb0b0-e25c-4f83-94d1-ec6f63337d45"
+  }
+]

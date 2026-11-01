@@ -1,0 +1,22 @@
+[
+  {
+    "id": "627d546e-0e3f-49f1-8daf-e76510b80a39",
+    "text": "RFP_FIX | Do you encrypt data while it is in use (for example, confidential computing)? | another answer! | Riya Sharma",
+    "score": 0.5525496583883287
+  },
+  {
+    "id": "592d597d-0f2a-45e2-9222-5643d9f1bed7",
+    "text": "RFP_FIX | What are your patching timelines for critical and high vulnerabilities? | the approved answer | Riya Sharma",
+    "score": 0.4605012976300348
+  },
+  {
+    "id": "488b85e1-6388-4c4c-9ee0-aa48caad1c49",
+    "text": "RFP_FIX | What are your patching timelines for critical and high vulnerabilities? | the approaved answer | Riya Sharma",
+    "score": 0.4592017231937702
+  },
+  {
+    "id": "80dc6243-e4f2-43b9-9918-deeea55a7dbe",
+    "text": "ACTIONSWARM | 2026-10-26 | Nimbus Labs x Meridian Bank kickoff | Summary: Meridian Bank and Nimbus Labs agreed to launch a pilot of Nimbus Ledger Sync for UPI reconciliation by Monday 30 November 2026. The meeting established project scope, security compliance requirements, and key deliverables including sandboxes, API credentials, and data mapping. | Decisions: Pilot go-live date is Monday 30 November 2026.; Phase one is limited to UPI reconciliation only.; Customer-managed encryption keys are not supported. | Tasks: Send our standard mutual NDA (Riya Sharma, 2026-11-04); Riya Sharma (unassigned); 2026-11-04 (unassigned); Set up the sandbox environment and send API credentials to Vikram's (Karan, 2026-11-06); Karan (unassigned); 2026-11-06 (unassigned); Give the IP ranges we need allowlisted for the UPI feed (unassigned, 2026-11-10); 2026-11-10 (unassigned); Write a mapping document that says which Meridian field feeds which (Meera, 2026-11-16); Meera (unassigned); 2026-11-16 (unassigned); Write a mapping document that says which Meridian field feeds which (Riya Sharma, 2026-11-16); Nominate two analysts from my team for user acceptance testing and (unassigned, 2026-11-13); 2026-11-13 (unassigned); Prepare anonymised sample transaction files from the layout given (Arjun, 2026-11-12); Arjun (Arjun, 2026-11-12); 2026-11-12 (unassigned); Get my accounts set up by the end of today (Karan, 2026-10-26); Karan (unassigned); 2026-10-26 (unassigned); Meera Iyer: I just need laptop access, and Riya said I would get my (Karan, 2026-10-26)",
+    "score": 0.21147256492369604
+  }
+]

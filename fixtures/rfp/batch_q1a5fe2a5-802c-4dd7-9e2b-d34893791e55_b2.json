@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "21",
+      "answer": "Administrator accounts must use hardware security keys in addition to passwords.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "47621bbc-072b-4cef-a879-dd1ccf60b217"
+    },
+    {
+      "id": "22",
+      "answer": "A severity 1 incident is acknowledged within 15 minutes.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "18760358-ccc3-4f02-891e-6b4561d3577b"
+    },
+    {
+      "id": "23",
+      "answer": "Affected customers are notified within 72 hours when a breach involving customer data is confirmed. Nimbus Labs also reports to CERT-In within 6 hours of becoming aware of a reportable cyber incident, as required by Indian rules.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "1d314048-320d-4386-afe3-c4e97778a0f9"
+    },
+    {
+      "id": "24",
+      "answer": "A written postmortem is completed within 5 business days of closing any P1 or P2 incident. Customers affected by a P1 receive a summary.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "d4f101b7-ca3a-472e-8f7e-7dac8686aab2"
+    },
+    {
+      "id": "25",
+      "answer": "The plan is exercised through a tabletop drill twice a year. The latest drill took place on 4 June 2026.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "e014e9c3-6dd1-4adb-86f3-ec70e4978834"
+    },
+    {
+      "id": "26",
+      "answer": "All customer data is encrypted at rest with AES-256, covering databases, object storage, backups, and laptop disks.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "50569052-0b44-4240-b9fb-135db4a04505"
+    },
+    {
+      "id": "27",
+      "answer": "All connections to Nimbus Ledger Sync use TLS 1.2 or higher, with TLS 1.3 preferred and negotiated whenever the client supports it.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "a1f7af92-e565-4a75-a3fb-f4817e5616b7"
+    },
+    {
+      "id": "28",
+      "answer": "Encryption keys are created and stored in AWS KMS and are rotated every 365 days. Access to key administration is limited to two named engineers and is logged, and Nimbus Labs relies on the AWS KMS service instead of operating its own hardware security module.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "9054b08c-10db-4691-95d8-e0e20d8a7dc0"
+    },
+    {
+      "id": "29",
+      "answer": "The Recovery Point Objective (RPO) is 1 hour, meaning at most one hour of data can be lost. The Recovery Time Objective (RTO) is 4 hours, meaning service is restored within four hours of a declared disaster.",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "1c60b872-cb9d-495b-8cc4-8345df5d985f"
+    },
+    {
+      "id": "30",
+      "answer": "Production runs in AWS Mumbai (ap-south-1) with a cross-region disaster recovery replica maintained in Singapore (ap-southeast-1).",
+      "coverage": "full",
+      "confidence": 1,
+      "source_ref": "26a0c0f6-62e0-4a51-910b-f42d5944ed41"
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}

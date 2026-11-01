@@ -1,0 +1,46 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": "31",
+      "fix_index": null
+    },
+    {
+      "id": "32",
+      "fix_index": null
+    },
+    {
+      "id": "33",
+      "fix_index": null
+    },
+    {
+      "id": "34",
+      "fix_index": null
+    },
+    {
+      "id": "35",
+      "fix_index": null
+    },
+    {
+      "id": "36",
+      "fix_index": null
+    },
+    {
+      "id": "37",
+      "fix_index": null
+    },
+    {
+      "id": "38",
+      "fix_index": 2
+    },
+    {
+      "id": "39",
+      "fix_index": null
+    },
+    {
+      "id": "40",
+      "fix_index": null
+    }
+  ],
+  "modelUsed": "gemini-3.5-flash-lite"
+}
