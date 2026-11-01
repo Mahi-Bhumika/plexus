@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import CommandPalette from "@/components/command-palette";
+import SidePanel from "@/components/SidePanel";
 
 const NAV_ITEMS = [
   { name: "Finance Agent", href: "/finance", icon: "payments" },
@@ -262,7 +263,7 @@ export default function DashboardLayout({
         </main>
       </div>
 
-      {/* ACTIVITY FEED ASIDE */}
+      {/* ACTIVITY FEED + CHAT ASIDE */}
       <aside className="fixed right-0 top-14 bottom-0 w-84 xl:w-96 bg-white dark:bg-[#0C1222] border-l border-[#E5E7EB] dark:border-[#1E293B] flex flex-col z-30 shadow-[-1px_0_4px_rgba(0,0,0,0.02)] transition-colors duration-200">
         <div className="h-10 px-3.5 border-b border-[#E5E7EB] dark:border-[#1E293B] flex items-center justify-between bg-[#F9FAFB]/70 dark:bg-[#090D16]/70">
           <div className="flex items-center gap-2">
@@ -328,7 +329,9 @@ export default function DashboardLayout({
           </span>
           <span className="text-[10px] text-gray-400 dark:text-gray-500">{events.length} events</span>
         </div>
+        <SidePanel />
       </aside>
+
     </div>
   );
 }

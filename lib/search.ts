@@ -20,9 +20,37 @@ export type Hit = {
 };
 export type Point = { text: string; source: number };
 
+// Legacy response shapes. They do NOT match what catchMeUp() returns today (it returns status "ok",
+// `results`, `hidden`, etc.). Kept only so existing imports keep compiling; delete if unused.
+export type SourceRef = { id: string; title: string; date: string | null; snippet: string };
+export type LockedRef = { id: string; title: string; reason: string };
+
+export type SearchResponse = {
+  status: "done";
+  role: Role;
+  query: string;
+  answer: string | null;
+  sources: SourceRef[];
+  locked: LockedRef[];
+  fallback: boolean; // true when the answer is extractive because Gemini was unavailable
+};
+
+export type CatchUpResponse = {
+  status: "done";
+  role: Role;
+  topic: string;
+  window: { from: string; to: string; days: number };
+  briefing: string | null;
+  points: Array<{ text: string; source: SourceRef }>;
+  sources: SourceRef[];
+  locked: LockedRef[];
+  undatedSkipped: number;
+  fallback: boolean;
+};
+
 // Role scoping runs in OUR code, not in Meko. This is a demo-level filter, not real authentication.
 const RESTRICTED = /salary|compensation|payroll|founder[- ]only/i;
-const TITLE_RESTRICTED = /salary|compensation|payroll|founder[- ]only/i;
+const TITLE_RESTRICTED = RESTRICTED;
 const INJECTION = /ignore (all |any )?(previous|prior|above) instructions|note to the ai|you are now|system prompt|disregard (the )?(above|previous)/i;
 
 export function parseRole(v: unknown): Role | null {
